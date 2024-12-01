@@ -4,7 +4,7 @@ import { Script, Link } from 'honox/server'
 
 export default jsxRenderer(({ children, title }) => {
   return (
-    <html lang="en">
+    <html lang="ja" class="h-full bg-gray-50">
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,7 +14,7 @@ export default jsxRenderer(({ children, title }) => {
         <Style />
         <Link href="/app/global.css" rel="stylesheet" />
       </head>
-      <body>{children}</body>
+      <body class="h-full">{children}</body>
     </html>
   )
 })
