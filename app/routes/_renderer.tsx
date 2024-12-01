@@ -1,6 +1,6 @@
 import { Style } from 'hono/css'
 import { jsxRenderer } from 'hono/jsx-renderer'
-import { Script } from 'honox/server'
+import { Script, Link } from 'honox/server'
 
 export default jsxRenderer(({ children, title }) => {
   return (
@@ -12,6 +12,7 @@ export default jsxRenderer(({ children, title }) => {
         <link rel="icon" href="/favicon.ico" />
         <Script src="/app/client.ts" async />
         <Style />
+        <Link href="/app/global.css" rel="stylesheet" />
       </head>
       <body>{children}</body>
     </html>
