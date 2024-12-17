@@ -1,8 +1,9 @@
-import { useState, JSX } from 'hono/jsx'
-
+import { useState } from 'hono/jsx'
 interface MenuItem {
   name: string;
   href: string;
+  // honox JSX.Element 型はエラーになるので無視
+  // @ts-ignore
   icon: JSX.Element;
   current?: boolean;
 }
@@ -23,38 +24,9 @@ interface SidebarProps {
 export function Sidebar({ children }: SidebarProps) {
   const [isOpen, setOpen] = useState(false);
 
-  const renderSection = (section: MenuSection) => {
-    const baseClasses = "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold";
-    
-    return (
-      <li>
-        {section.header && (
-          <div class="text-xs/6 font-semibold text-gray-400">
-            {section.header.name}
-          </div>
-        )}
-        <ul role="list" class="-mx-2 space-y-1">
-          {section.children.map((menuItem) => {
-            const activeClasses = menuItem.current
-              ? "bg-gray-50 text-indigo-600"
-              : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600";
-
-          return (
-            <li key={menuItem.name}>
-              <a href={menuItem.href} class={`${baseClasses} ${activeClasses}`}>
-                {menuItem.icon}
-                {menuItem.name}
-              </a>
-            </li>
-          );
-        })}
-        </ul>
-      </li>
-    )
-  }
-
   return (
     <>
+      {isOpen ? "open" : "closed"}
       {isOpen && <NarrowSidebar isOpen={isOpen} setOpen={setOpen} />}
 
       <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
@@ -75,7 +47,7 @@ export function Sidebar({ children }: SidebarProps) {
       </div>
 
       <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-        <button type="button" onClick={() => setOpen(true)} class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
+        <button type="button" onClick={() => {console.log("clicked"); setOpen(!isOpen); }} class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
           <span class="sr-only">Open sidebar</span>
           <svg
             class="size-6"
@@ -93,21 +65,41 @@ export function Sidebar({ children }: SidebarProps) {
             />
           </svg>
         </button>
-        <div class="flex-1 text-sm/6 font-semibold text-gray-900">
-          Dashboard
-        </div>
-        <a href="#">
-          <span class="sr-only">Your profile</span>
-          <img
-            class="size-8 rounded-full bg-gray-50"
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            alt=""
-          />
-        </a>
       </div>
     </>
   );
 }
+
+const renderSection = (section: MenuSection) => {
+  const baseClasses = "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold";
+  
+  return (
+    <li>
+      {section.header && (
+        <div class="text-xs/6 font-semibold text-gray-400">
+          {section.header.name}
+        </div>
+      )}
+      <ul role="list" class="-mx-2 space-y-1">
+        {section.children.map((menuItem) => {
+          const activeClasses = menuItem.current
+            ? "bg-gray-50 text-indigo-600"
+            : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600";
+
+        return (
+          <li key={menuItem.name}>
+            <a href={menuItem.href} class={`${baseClasses} ${activeClasses}`}>
+              {menuItem.icon}
+              {menuItem.name}
+            </a>
+          </li>
+        );
+      })}
+      </ul>
+    </li>
+  )
+}
+
 
 interface NarrowSidebarProps {
   isOpen: boolean;

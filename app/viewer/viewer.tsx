@@ -1,6 +1,6 @@
 import Counter from "../islands/counter";
 import { Sidebar } from "../global/$sidebar";
-import { DashboardIcon } from "../global/icons";
+import { DashboardIcon } from "../global/$icons";
 interface ViewerProps {
   name: string;
 }
