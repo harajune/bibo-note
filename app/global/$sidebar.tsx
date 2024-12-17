@@ -107,6 +107,7 @@ interface NarrowSidebarProps {
 }
 
 function NarrowScreenSidebar({ isOpen, setOpen, children }: NarrowSidebarProps) {
+  //FIXME: Animation is not working
   return (
     <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true">
     <div class={"fixed inset-0 bg-gray-900/80 transition-opacity ease-linear duration-300 " + (isOpen ? "opacity-100" : "opacity-0")} aria-hidden="true"></div>
