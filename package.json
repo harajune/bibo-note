@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "vite build --mode client && vite build",
     "preview": "wrangler pages dev",
-    "deploy": "yarn run build && wrangler pages deploy"
+    "deploy": "yarn run build && wrangler pages deploy",
+    "test": "vitest"
   },
   "private": true,
   "dependencies": {
@@ -20,6 +21,7 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "vite": "^5.2.12",
+    "vitest": "^2.1.8",
     "wrangler": "^3.57.2"
   }
 }
