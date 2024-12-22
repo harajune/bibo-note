@@ -1,13 +1,13 @@
 import { Sidebar } from "../../global/$sidebar";
 import { DashboardIcon } from "../../global/$icons";
-import { WikiModel } from "../models/wiki_model";
 import { SyntaxParser } from "../../libs/syntax_parser/syntax_parser";
+import { WikiData } from "../models/wiki_data";
 
 interface ViewerProps {
-  uuid: string;
+  wikiData: WikiData;
 }
 
-export function Viewer({ uuid: uuid }: ViewerProps) {
+export function Viewer({ wikiData }: ViewerProps) {
   const menuSections = [
     {
       children: [{
@@ -30,8 +30,6 @@ export function Viewer({ uuid: uuid }: ViewerProps) {
     }
   ];
 
-  const wikiModel = new WikiModel();
-  const wikiData = wikiModel.load(uuid);
   const title = wikiData.title;
 
   const syntaxParser = new SyntaxParser();
