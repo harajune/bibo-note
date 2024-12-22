@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#wiki-content {
+  font-family: "Helvetica Neue", "Helvetica", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Arial", "Yu Gothic", "Meiryo", sans-serif;
+
+  h1 {
+    @apply mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl;
+  }
+
+  h2 {
+    @apply mt-16 text-pretty text-3xl font-semibold tracking-tight text-gray-900;
+  }
+
+  p {
+    @apply mt-10 text-xl/8 max-w-2xl text-gray-900
+  }
+
+  ul {
+    @apply pl-10 list-disc mt-8 max-w-xl space-y-2 text-gray-800
+  }
+
+  ol {
+    @apply pl-10 list-decimal mt-8 max-w-xl space-y-2 text-gray-800
+  }
+
+  li {
+    @apply list-item gap-x-3
+  }
+
+  strong {
+    @apply font-semibold text-gray-900
+  }
+
+}
