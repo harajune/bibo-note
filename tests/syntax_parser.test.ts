@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { SyntaxParser } from "../libs/syntax_parser/syntax_parser";
+import { SyntaxParser } from "../app/libs/syntax_parser/syntax_parser";
 
 const parser = new SyntaxParser();
 
