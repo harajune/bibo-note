@@ -1,6 +1,6 @@
 import { css } from "hono/css";
 import { createRoute } from "honox/factory";
-import { Viewer } from "../viewer/viewer";
+import { Viewer } from "../wiki/screens/viewer";
 
 const className = css`
   font-family: sans-serif;
@@ -9,7 +9,7 @@ const className = css`
 export default createRoute((c) => {
   const name = c.req.query("name") ?? "Hono";
   return c.render(
-    <Viewer name={name} />,
+    <Viewer uuid={name} />,
     { title: name }
   );
 });
