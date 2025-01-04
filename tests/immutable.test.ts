@@ -111,4 +111,64 @@ describe('Immutable', () => {
       (immutable as any).string = 'modified';
     }).toThrow();
   });
+});
+
+describe('createImmutable', () => {
+  describe('copyWith for Array', () => {
+    it('should update specific indices in the array', () => {
+      const original = createImmutable([1, 2, 3, 4]);
+      const updated = original.copyWith({ 1: 20, 3: 40 });
+      
+      expect(updated).toEqual([1, 20, 3, 40]);
+      expect(original).toEqual([1, 2, 3, 4]); // original array should remain unchanged
+      expect(Object.isFrozen(updated)).toBe(true);
+    });
+
+    it('should create a copy with empty updates', () => {
+      const original = createImmutable([1, 2, 3]);
+      const copied = original.copyWith({});
+      
+      expect(copied).toEqual([1, 2, 3]);
+      expect(copied).not.toBe(original);
+      expect(Object.isFrozen(copied)).toBe(true);
+    });
+  });
+
+  describe('copyWith for Map', () => {
+    it('should update and add key-value pairs in the map', () => {
+      const original = createImmutable(new Map([
+        ['a', 1],
+        ['b', 2],
+        ['c', 3]
+      ]));
+      const updated = original.copyWith({
+        'b': 20,
+        'd': 40
+      });
+      
+      expect(updated instanceof Map).toBe(true);
+      expect(Array.from(updated.entries())).toEqual([
+        ['a', 1],
+        ['b', 20],
+        ['c', 3],
+        ['d', 40]
+      ]);
+      expect(Array.from(original.entries())).toEqual([
+        ['a', 1],
+        ['b', 2],
+        ['c', 3]
+      ]); // original map should remain unchanged
+      expect(Object.isFrozen(updated)).toBe(true);
+    });
+
+    it('should create a copy with empty updates', () => {
+      const original = createImmutable(new Map([['a', 1]]));
+      const copied = original.copyWith({});
+      
+      expect(copied instanceof Map).toBe(true);
+      expect(Array.from(copied.entries())).toEqual([['a', 1]]);
+      expect(copied).not.toBe(original);
+      expect(Object.isFrozen(copied)).toBe(true);
+    });
+  });
 }); 

@@ -10,42 +10,68 @@ export type Immutable<T> =
     copyWith(updates: Partial<T>): Immutable<T>;
   };
 
-export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableArray<T> = ReadonlyArray<Immutable<T>> & {
+  copy(): ImmutableArray<T>;
+  copyWith(updates: { [index: number]: T }): ImmutableArray<T>;
+};
+
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>> & {
+  copy(): ImmutableMap<K, V>;
+  copyWith(updates: { [key: string]: V }): ImmutableMap<K, V>;
+};
+
 export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 export function createImmutable<T extends object>(obj: T): Immutable<T> {
+  // 既にfreezeされているオブジェクトは処理をスキップ
+  if (Object.isFrozen(obj)) {
+    return obj as Immutable<T>;
+  }
+
   // オブジェクトの各プロパティを再帰的に処理
-  const handler: ProxyHandler<T> = {
-    get(target: T, prop: string | symbol) {
-      const value = target[prop as keyof T];
-      
-      // copy と copyWith メソッドの実装
-      if (prop === 'copy') {
-        return () => createImmutable({...target});
-      }
-      if (prop === 'copyWith') {
-        return (updates: Partial<T>) => 
-          createImmutable({...target, ...updates});
-      }
-
-      // ネストされたオブジェクトや配列も不変にする
-      if (value && typeof value === 'object') {
-        return createImmutable(value);
-      }
-      
-      return value;
-    },
-
-    set() {
-      throw new Error('Cannot modify immutable object');
-    },
-
-    deleteProperty() {
-      throw new Error('Cannot delete property from immutable object');
+  for (const key of Object.keys(obj)) {
+    const value = obj[key as keyof T];
+    if (value && typeof value === 'object') {
+      obj[key as keyof T] = createImmutable(value) as T[keyof T];
     }
-  };
+  }
 
-  return new Proxy(obj, handler) as Immutable<T>;
+  // copy と copyWith メソッドの追加
+  Object.defineProperties(obj, {
+    copy: {
+      value: function() {
+        return createImmutable({...this});
+      },
+      enumerable: false
+    },
+    copyWith: {
+      value: function(updates: Partial<T>) {
+        if (Array.isArray(this)) {
+          const newArray = [...this];
+          if (typeof updates === 'object') {
+            Object.entries(updates).forEach(([index, value]) => {
+              newArray[Number(index)] = value;
+            });
+          }
+          return createImmutable(newArray);
+        }
+        
+        if (this instanceof Map) {
+          const newMap = new Map(this);
+          if (typeof updates === 'object') {
+            Object.entries(updates).forEach(([key, value]) => {
+              newMap.set(key, value);
+            });
+          }
+          return createImmutable(newMap);
+        }
+        
+        return createImmutable({...this, ...updates});
+      },
+      enumerable: false
+    }
+  });
+
+  return Object.freeze(obj) as Immutable<T>;
 }
