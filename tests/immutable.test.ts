@@ -171,4 +171,78 @@ describe('createImmutable', () => {
       expect(Object.isFrozen(copied)).toBe(true);
     });
   });
+});
+
+describe('equals method', () => {
+  it('should compare primitive values correctly', () => {
+    const obj1 = createImmutable({ value: 42, text: 'hello' });
+    const obj2 = createImmutable({ value: 42, text: 'hello' });
+    const obj3 = createImmutable({ value: 43, text: 'hello' });
+
+    expect(obj1.equals(obj2)).toBe(true);
+    expect(obj1.equals(obj3)).toBe(false);
+  });
+
+  it('should compare nested objects correctly', () => {
+    const obj1 = createImmutable({
+      user: { name: 'test', age: 25 },
+      settings: { theme: 'dark' }
+    });
+    const obj2 = createImmutable({
+      user: { name: 'test', age: 25 },
+      settings: { theme: 'dark' }
+    });
+    const obj3 = createImmutable({
+      user: { name: 'test', age: 26 },
+      settings: { theme: 'dark' }
+    });
+
+    expect(obj1.equals(obj2)).toBe(true);
+    expect(obj1.equals(obj3)).toBe(false);
+  });
+
+  it('should compare arrays correctly', () => {
+    const arr1 = createImmutable([1, 2, { id: 3 }]);
+    const arr2 = createImmutable([1, 2, { id: 3 }]);
+    const arr3 = createImmutable([1, 2, { id: 4 }]);
+
+    expect(arr1.equals(arr2)).toBe(true);
+    expect(arr1.equals(arr3)).toBe(false);
+  });
+
+  it('should compare Maps correctly', () => {
+    const map1 = createImmutable(new Map<string, number | { value: number }>([
+      ['a', 1], 
+      ['b', { value: 2 }]
+    ]));
+    const map2 = createImmutable(new Map<string, number | { value: number }>([
+      ['a', 1], 
+      ['b', { value: 2 }]
+    ]));
+    const map3 = createImmutable(new Map<string, number | { value: number }>([
+      ['a', 1], 
+      ['b', { value: 3 }]
+    ]));
+
+    expect(map1.equals(map2)).toBe(true);
+    expect(map1.equals(map3)).toBe(false);
+  });
+
+  it('should compare Sets correctly', () => {
+    const set1 = createImmutable(new Set([1, 2, { id: 3 }]));
+    const set2 = createImmutable(new Set([1, 2, { id: 3 }]));
+    const set3 = createImmutable(new Set([1, 2, { id: 4 }]));
+
+    expect(set1.equals(set2)).toBe(true);
+    expect(set1.equals(set3)).toBe(false);
+  });
+
+  it('should handle null and undefined values', () => {
+    const obj1 = createImmutable({ a: null, b: undefined });
+    const obj2 = createImmutable({ a: null, b: undefined });
+    const obj3 = createImmutable({ a: null, b: null });
+
+    expect(obj1.equals(obj2)).toBe(true);
+    expect(obj1.equals(obj3)).toBe(false);
+  });
 }); 
