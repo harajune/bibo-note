@@ -35,3 +35,6 @@ lerna-debug.log*
 
 # test data folder
 data/
+
+# coverage
+coverage/
