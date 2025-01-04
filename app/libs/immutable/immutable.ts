@@ -45,6 +45,7 @@ export function createImmutable<T extends object>(obj: T): Immutable<T> {
         immutableSet.add(value);
       }
     }
+    
     addImmutableMethods(immutableSet);
     // little hack to avoid ambiguous type error
     return Object.freeze(immutableSet) as unknown as Immutable<T>;
@@ -79,7 +80,7 @@ export function createImmutable<T extends object>(obj: T): Immutable<T> {
   return Object.freeze(obj) as Immutable<T>;
 }
 
-function addImmutableMethods(obj: any) {
+function addImmutableMethods<T>(obj: T) {
   // copy と copyWith メソッドの追加
   Object.defineProperties(obj, {
     copy: {
