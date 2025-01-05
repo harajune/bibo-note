@@ -36,7 +36,7 @@ export function Editor({ wikiData }: EditorProps) {
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8">
 
-      <form action="#" class="relative">
+      <form action={`/e/${wikiData.uuid}`} class="relative" method="post">
         <div class="rounded-lg bg-white outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
           <label for="title" class="sr-only">
             Title
@@ -54,8 +54,8 @@ export function Editor({ wikiData }: EditorProps) {
           </label>
           <textarea
             rows={30}
-            name="description"
-            id="description"
+            name="content"
+            id="content"
             class="block w-full resize-none px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
             placeholder="Write a description..."
           >{wikiData.content}</textarea>

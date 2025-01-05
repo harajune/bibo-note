@@ -19,4 +19,9 @@ export class WikiModel {
   public list(): UUID[] {
     return this.repository.list();
   }
+
+  public isExists(uuid: UUID): boolean {
+    return this.repository.isExists(uuid);
+  }
+
 }

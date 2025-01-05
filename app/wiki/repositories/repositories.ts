@@ -7,6 +7,7 @@ export interface Repository {
   save(data: WikiData): void;
   load(uuid: UUID): WikiData;
   list(): UUID[];
+  isExists(uuid: UUID): boolean;
 }
 
 export class FileRepository implements Repository {
@@ -17,7 +18,7 @@ export class FileRepository implements Repository {
   }
 
   public save(data: WikiData): void {
-    const filename = path.join(this.filePath, `${data.uuid}.toml`);
+    const filename = this.getFilePath(data.uuid);
 
     const tomlData = {
       header: {
@@ -37,7 +38,7 @@ export class FileRepository implements Repository {
   }
 
   public load(uuid: UUID): WikiData {
-    const filename = path.join(this.filePath, `${uuid}.toml`);
+    const filename = this.getFilePath(uuid);
     const tomlString = fs.readFileSync(filename, 'utf-8');
     const tomlData = TOML.parse(tomlString) as {
       content: { title: string; content: string };
@@ -49,5 +50,13 @@ export class FileRepository implements Repository {
 
   public list(): UUID[] {
     return [];
+  }
+
+  public isExists(uuid: UUID): boolean {
+    return fs.existsSync(this.getFilePath(uuid));
+  }
+
+  private getFilePath(uuid: UUID): string {
+    return path.join(this.filePath, `${uuid}.toml`);
   }
 }
