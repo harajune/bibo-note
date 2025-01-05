@@ -14,7 +14,8 @@
       "@cloudflare/workers-types/2023-07-01"
     ],
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "sourceMap": true,
   },
   "include": [
     "**/*.ts",
