@@ -4,35 +4,22 @@ import { WikiData } from "../../wiki/models/wiki_data";
 import { WikiModel } from "../../wiki/models/wiki_model";
 
 export default createRoute((c) => {
-  // Use a placeholder or empty values for a 'new' article
-  const wikiData = new WikiData(
-    "", // no uuid yet
-    "",
-    "",
-    new Date(),
-    new Date()
-  );
-  
-  return c.render(
-    <Editor wikiData={wikiData} />
-  );
+  // Handle both /e and /e/ paths
+  const newData = new WikiData("", "", "", new Date(), new Date());
+  return c.render(<Editor wikiData={newData} />, { title: "Create New Article" });
 });
 
 export const POST = createRoute(async (c) => {
   const uuid = crypto.randomUUID();
   const now = new Date();
-
   const form = await c.req.formData();
   const title = (form.get("title") as string) || "Untitled";
   const content = (form.get("content") as string) || "";
 
   // Create new WikiData
   const newData = new WikiData(uuid, title, content, now, now);
-
-  // Save using WikiModel
   const wikiModel = new WikiModel();
   wikiModel.save(newData);
 
-  // Redirect to the viewer
   return c.redirect(`/v/${uuid}`);
 });

@@ -47,7 +47,7 @@ export function Editor({ wikiData }: EditorProps) {
             id="title"
             class="block w-full px-3 pt-2.5 text-3xl font-medium text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0"
             placeholder="Title"
-            value={wikiData.title}
+            value={wikiData.title || ""}
           />
           <label for="description" class="sr-only">
             Description
@@ -58,7 +58,7 @@ export function Editor({ wikiData }: EditorProps) {
             id="content"
             class="block w-full resize-none px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
             placeholder="Write a description..."
-          >{wikiData.content}</textarea>
+          >{wikiData.content || ""}</textarea>
 
         </div>
 
