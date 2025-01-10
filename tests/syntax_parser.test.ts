@@ -1,6 +1,17 @@
 import { expect, test } from "vitest";
 import { SyntaxParser } from "../app/libs/syntax_parser/syntax_parser";
 
+/**
+ * Test suite for the SyntaxParser class which handles custom wiki syntax.
+ * 
+ * Supported syntax:
+ * - Headers: # (h2), ## (h3), ### (h4)
+ * - Text formatting: **bold**, *italic*
+ * - Lists: 
+ *   - Unordered: Lines starting with "-"
+ *   - Ordered: Lines starting with "+"
+ * - Paragraphs: Separated by blank lines
+ */
 const parser = new SyntaxParser();
 
 test("heading parsing", () => {
@@ -56,4 +67,4 @@ This is a **bold** and *italic* text.
 `;
 
   expect(parser.parse(input)).toBe(expected);
-}); 
+});   
