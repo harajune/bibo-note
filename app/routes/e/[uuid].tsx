@@ -8,8 +8,8 @@ export default createRoute((c) => {
   const uuid = c.req.param("uuid");
   const wikiModel = new WikiModel();
 
-  // Handle /e/ route (empty UUID)
-  if (!uuid || uuid === "") {
+  // Handle new article creation
+  if (!uuid || uuid === "" || uuid === "new") {
     const newData = new WikiData("", "", "", new Date(), new Date());
     return c.render(<Editor wikiData={newData} />, { title: "Create New Article" });
   }
@@ -24,7 +24,7 @@ export default createRoute((c) => {
 });
 
 export const POST = createRoute(async (c) => {
-  let uuid = c.req.param("uuid") || "";
+  let uuid = c.req.param("uuid");
   const wikiModel = new WikiModel();
   const form = await c.req.formData();
   const title = (form.get("title") as string) || "Untitled";
@@ -32,8 +32,8 @@ export const POST = createRoute(async (c) => {
   const now = new Date();
 
   try {
-    if (uuid === "") {
-      // Create new article
+    // Handle new article creation
+    if (!uuid || uuid === "" || uuid === "new") {
       uuid = crypto.randomUUID();
       const newData = new WikiData(uuid, title, content, now, now);
       wikiModel.save(newData);
