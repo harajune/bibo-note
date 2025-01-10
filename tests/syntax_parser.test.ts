@@ -1,3 +1,13 @@
+/**
+ * Test suite for the SyntaxParser class
+ * Verifies the parsing functionality for various markdown-like syntax elements:
+ * - Headings (h2-h4)
+ * - Paragraphs
+ * - Text decorations (bold, italic)
+ * - Unordered lists
+ * - Ordered lists
+ * - Complex document structures
+ */
 import { expect, test } from "vitest";
 import { SyntaxParser } from "../app/libs/syntax_parser/syntax_parser";
 
@@ -56,4 +66,4 @@ This is a **bold** and *italic* text.
 `;
 
   expect(parser.parse(input)).toBe(expected);
-}); 
+});   
