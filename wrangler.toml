@@ -6,6 +6,9 @@ pages_build_output_dir = "./dist"
 [vars]
 MODE = "production"
 
+[dev]
+debug = true
+
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

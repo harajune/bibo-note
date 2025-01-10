@@ -25,7 +25,8 @@ export const POST = createRoute(async (c) => {
     await wikiModel.save(updatedWikiData);
     return c.redirect(`/v/${uuid}`);
   } catch (e) {
-    return c.notFound();
+    console.error('Error saving wiki data:', e);
+    return c.json({ error: e.message }, 500);
   }
 
 });
