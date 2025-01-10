@@ -6,6 +6,9 @@ import { WikiData } from "../../wiki/models/wiki_data";
 
 export default createRoute((c) => {
   const uuid = c.req.param("uuid");
+  console.log('Route accessed:', c.req.path);
+  console.log('UUID parameter:', uuid);
+  console.log('Request URL:', c.req.url);
   const wikiModel = new WikiModel();
 
   // Handle new article creation
