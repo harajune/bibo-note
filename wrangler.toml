@@ -3,16 +3,16 @@ compatibility_date = "2024-09-23"
 compatibility_flags = [ "nodejs_compat" ]
 pages_build_output_dir = "./dist"
 
-# [vars]
-# MY_VAR = "my-variable"
+[vars]
+MODE = "production"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "bibo-bucket"
 
 # [[d1_databases]]
 # binding = "DB"

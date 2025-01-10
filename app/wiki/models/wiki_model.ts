@@ -1,27 +1,37 @@
 import { WikiData, UUID } from "./wiki_data";
-import { Repository, FileRepository } from "../repositories/repositories";
+import { Repository, FileRepository, R2Repository } from "../repositories/repositories";
+import type { R2Bucket } from '@cloudflare/workers-types';
 
 export class WikiModel {
   private readonly repository: Repository;
 
-  constructor() {
-    this.repository = new FileRepository("./data");
+  constructor(env?: { MY_BUCKET?: R2Bucket }) {
+    const mode = process.env.MODE || import.meta.env?.MODE || 'development';
+    
+    if (mode === 'production') {
+      if (!env?.MY_BUCKET) {
+        throw new Error('R2 bucket is required in production mode');
+      }
+      this.repository = new R2Repository(env.MY_BUCKET);
+    } else {
+      this.repository = new FileRepository("./data");
+    }
   }
 
-  public save(wikiData: WikiData) {
-    this.repository.save(wikiData);
+  public async save(wikiData: WikiData): Promise<void> {
+    await this.repository.save(wikiData);
   }
 
-  public load(uuid: string): WikiData {
-    return this.repository.load(uuid);
+  public async load(uuid: string): Promise<WikiData> {
+    return await this.repository.load(uuid);
   }
 
-  public list(): UUID[] {
-    return this.repository.list();
+  public async list(): Promise<UUID[]> {
+    return await this.repository.list();
   }
 
-  public isExists(uuid: UUID): boolean {
-    return this.repository.isExists(uuid);
+  public async isExists(uuid: UUID): Promise<boolean> {
+    return await this.repository.isExists(uuid);
   }
 
 }
