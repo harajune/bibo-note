@@ -36,7 +36,7 @@ export function Editor({ wikiData }: EditorProps) {
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8">
 
-      <form action={`/e/${wikiData.uuid}`} class="relative" method="post">
+      <form action={wikiData.uuid ? `/e/${wikiData.uuid}` : '/e'} class="relative" method="post">
         <div class="rounded-lg bg-white outline outline-1 -outline-offset-1 outline-gray-300 focus-within:outline focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
           <label for="title" class="sr-only">
             Title
