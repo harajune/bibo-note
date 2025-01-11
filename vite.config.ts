@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => {
         },
         devServer: { adapter } 
     }), 
-    build()]
+    build()],
+    define: {
+      'process.env.MODE': JSON.stringify(mode),
+      'import.meta.env.PROD': mode === 'production',
+      'import.meta.env.DEV': mode !== 'production'
+    }
   }
 })

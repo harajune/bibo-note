@@ -1,17 +1,18 @@
 import { WikiData, UUID } from "./wiki_data";
 import { Repository, FileRepository, R2Repository } from "../repositories/repositories";
+import type { R2Bucket } from '@cloudflare/workers-types';
 
 export class WikiModel {
   private readonly repository: Repository;
 
-  constructor({bucket}: {bucket?: R2Bucket}) {
-    const mode = process.env.MODE || import.meta.env?.MODE || 'development';
+  constructor(env?: { MY_BUCKET?: R2Bucket }) {
+    const mode = import.meta.env?.PROD ? 'production' : 'development';
     
     if (mode === 'production') {
-      if (!bucket) {
+      if (!env?.MY_BUCKET) {
         throw new Error('R2 bucket is required in production mode');
       }
-      this.repository = new R2Repository(bucket);
+      this.repository = new R2Repository(env.MY_BUCKET);
     } else {
       this.repository = new FileRepository("./data");
     }
