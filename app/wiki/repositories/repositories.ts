@@ -83,8 +83,7 @@ export class R2Repository implements Repository {
     };
 
     const tomlString = TOML.stringify(tomlData);
-    console.log(tomlString);
-    console.log(await this.bucket.put(`${data.uuid}.toml`, tomlString));
+    await this.bucket.put(`${data.uuid}.toml`, tomlString);
   }
 
   public async load(uuid: UUID): Promise<WikiData> {

@@ -46,7 +46,7 @@ export function Sidebar({ children }: SidebarProps) {
       </div>
 
       <div class="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-        <button type="button" onClick={() => {console.log("clicked"); setOpen(true); }} class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
+        <button type="button" onClick={() => { setOpen(true); }} class="-m-2.5 p-2.5 text-gray-700 lg:hidden">
           <span class="sr-only">Open sidebar</span>
           <svg
             class="size-6"
