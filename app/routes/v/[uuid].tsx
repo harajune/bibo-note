@@ -4,7 +4,7 @@ import { WikiModel } from "../../wiki/models/wiki_model";
 
 export default createRoute(async (c) => {
   const uuid = c.req.param("uuid");
-  const wikiModel = new WikiModel();
+  const wikiModel = new WikiModel({bucket: c.env.MY_BUCKET});
   const wikiData = await wikiModel.load(uuid);
   
   return c.render(

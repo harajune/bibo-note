@@ -19,7 +19,7 @@ export default createRoute((c) => {
 });
 
 export const POST = createRoute(async (c) => {
-  const wikiModel = new WikiModel();
+  const wikiModel = new WikiModel({bucket: c.env.MY_BUCKET});
 
   try {
     const data = await c.req.formData();
@@ -32,7 +32,7 @@ export const POST = createRoute(async (c) => {
       new Date()
     ));
     
-    wikiModel.save(newArticle);
+    await wikiModel.save(newArticle);
     return c.redirect(`/v/${newUuid}`);
   } catch (e) {
     return c.notFound();
