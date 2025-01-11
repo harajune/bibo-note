@@ -7,7 +7,9 @@ type Head = {
 declare module 'hono' {
   interface Env {
     Variables: {}
-    Bindings: {}
+    Bindings: {
+      MY_BUCKET: R2Bucket
+    }
   }
   interface ContextRenderer {
     (content: string | Promise<string>, head?: Head): Response | Promise<Response>

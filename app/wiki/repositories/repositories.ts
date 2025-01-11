@@ -2,7 +2,6 @@ import { WikiData, UUID } from "../models/wiki_data";
 import * as TOML from 'smol-toml';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { R2Bucket, R2Object } from '@cloudflare/workers-types';
 
 export interface Repository {
   save(data: WikiData): void | Promise<void>;
@@ -84,7 +83,8 @@ export class R2Repository implements Repository {
     };
 
     const tomlString = TOML.stringify(tomlData);
-    await this.bucket.put(`${data.uuid}.toml`, tomlString);
+    console.log(tomlString);
+    console.log(await this.bucket.put(`${data.uuid}.toml`, tomlString));
   }
 
   public async load(uuid: UUID): Promise<WikiData> {
