@@ -4,8 +4,19 @@ import { WikiModel } from "../wiki/models/wiki_model";
 import { createImmutable } from "../libs/immutable/immutable";
 import { v7 as uuidv7 } from "uuid";
 import { WikiData } from "../wiki/models/wiki_data";
+import type { R2Bucket } from '@cloudflare/workers-types';
+import type { Context } from 'hono';
 
-export default createRoute((c) => {
+type Env = {
+  Bindings: {
+    MY_BUCKET: R2Bucket;
+  };
+};
+
+export default createRoute(async (c: Context<Env>) => {
+  const wikiModel = new WikiModel({
+    MY_BUCKET: c.env.MY_BUCKET
+  });
   const blankWikiData = new WikiData(
     "",  // uuid
     "",  // title
@@ -18,8 +29,10 @@ export default createRoute((c) => {
      { title: "New Article" });
 });
 
-export const POST = createRoute(async (c) => {
-  const wikiModel = new WikiModel();
+export const POST = createRoute(async (c: Context<Env>) => {
+  const wikiModel = new WikiModel({
+    MY_BUCKET: c.env.MY_BUCKET
+  });
 
   try {
     const data = await c.req.formData();
@@ -32,9 +45,10 @@ export const POST = createRoute(async (c) => {
       new Date()
     ));
     
-    wikiModel.save(newArticle);
+    await wikiModel.save(newArticle);
     return c.redirect(`/v/${newUuid}`);
   } catch (e) {
-    return c.notFound();
+    console.error('Error saving wiki data:', e);
+    return c.json({ error: (e as Error).message }, 500);
   }
 });
