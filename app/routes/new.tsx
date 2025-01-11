@@ -7,10 +7,12 @@ import { WikiData } from "../wiki/models/wiki_data";
 import type { R2Bucket } from '@cloudflare/workers-types';
 import type { Context } from 'hono';
 
+type Bindings = {
+  MY_BUCKET?: R2Bucket;
+};
+
 type Env = {
-  Bindings: {
-    MY_BUCKET: R2Bucket;
-  };
+  Bindings: Bindings;
 };
 
 export default createRoute(async (c: Context<Env>) => {

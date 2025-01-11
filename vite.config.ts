@@ -10,7 +10,14 @@ export default defineConfig(({ mode }) => {
         client: {
           input: ['/app/global.css']
         },
-        devServer: { adapter } 
+        devServer: { 
+          adapter: {
+            ...adapter,
+            env: {
+              MY_BUCKET: null
+            }
+          }
+        } 
     }), 
     build()],
     define: {
