@@ -1,0 +1,9 @@
+{
+  "name": "bibo-note-lambda-edge",
+  "version": "1.0.0",
+  "description": "Lambda@Edge function for handling TOML files",
+  "main": "index.js",
+  "dependencies": {
+    "smol-toml": "^1.1.3"
+  }
+}
