@@ -82,6 +82,9 @@ export class CloudFrontEdgeStack extends cdk.Stack {
           minTtl: cdk.Duration.seconds(0),
           maxTtl: cdk.Duration.seconds(0),
         }),
+        originRequestPolicy: new cloudfront.OriginRequestPolicy(this, 'OriginRequestPolicy', {
+          headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList('Host'),
+        }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       domainNames: ['bibo-note.jp', '*.bibo-note.jp'],

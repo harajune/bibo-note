@@ -1,6 +1,6 @@
-
 import { createRoute } from "honox/factory";
 
 export default createRoute((c) => {
-  return c.text("pong");
+  const host = c.req.header('x-forwarded-host') || c.req.header('host');
+  return c.text(`${host} pong`);
 });
