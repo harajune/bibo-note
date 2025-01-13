@@ -8,14 +8,27 @@ import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as path from 'path';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as targets from 'aws-cdk-lib/aws-route53-targets';
 
-export class CdkStack extends cdk.Stack {
+//TODO: upload static files to s3 and refer from /static/ endpoint
+
+export class CloudFrontEdgeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, {
-      ...props,
-      env: {
-        region: 'us-east-1'
-      },
+    super(scope, id, props);
+
+    // 既存のRoute 53ホストゾーンを参照
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+      zoneName: 'bibo-note.jp',
+      hostedZoneId: 'Z08641051STVZTDK95QAW'
+    });
+
+    // ACM証明書の作成
+    const certificate = new acm.Certificate(this, 'Certificate', {
+      domainName: 'bibo-note.jp',
+      subjectAlternativeNames: ['*.bibo-note.jp'],
+      validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
     // CloudWatch Logsのロググループを作成
@@ -50,7 +63,7 @@ export class CdkStack extends cdk.Stack {
     const edgeFunction = new cloudfront.experimental.EdgeFunction(this, 'EdgeFunction', {
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'worker.handler',
-      code: lambda.Code.fromAsset('./dist'),
+      code: lambda.Code.fromAsset('./dist/worker'),
       memorySize: 128,
     });
 
@@ -71,9 +84,24 @@ export class CdkStack extends cdk.Stack {
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
+      domainNames: ['bibo-note.jp', '*.bibo-note.jp'],
+      certificate,
       enableLogging: true,
       logFilePrefix: 'cloudfront-logs/',
       logIncludesCookies: true,
+    });
+
+    // Route 53 レコードの作成
+    new route53.ARecord(this, 'AliasRecord', {
+      zone: hostedZone,
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+    });
+
+    // ワイルドカードサブドメイン用のレコード
+    new route53.ARecord(this, 'WildcardAliasRecord', {
+      zone: hostedZone,
+      recordName: '*',
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
     });
 
     // S3へのデプロイ
