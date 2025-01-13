@@ -1,17 +1,23 @@
-import build from '@hono/vite-build/cloudflare-pages'
+import build from '@hono/vite-build/lambda-edge'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 
 export default defineConfig(({ mode }) => {
   return {
+    build: {
+      copyPublicDir: false
+    },
     plugins: [
       honox({
         client: {
-          input: ['/app/global.css']
+          input: ['/app/global.css'],
         },
         devServer: { adapter } 
-    }), 
-    build()]
+      }), 
+      build({
+        outputDir: 'dist/worker',
+      })
+    ]
   }
 })

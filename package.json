@@ -1,5 +1,5 @@
 {
-  "name": "basic",
+  "name": "bibo-note",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,10 +19,13 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240529.0",
-    "@hono/vite-build": "^1.0.0",
+    "@hono/vite-build": "../vite-plugins/packages/build",
     "@hono/vite-dev-server": "^0.16.0",
     "@vitest/coverage-v8": "^2.1.8",
     "autoprefixer": "^10.4.20",
+    "aws-cdk": "^2.175.1",
+    "aws-cdk-lib": "^2.175.1",
+    "constructs": "^10.4.2",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "vite": "^5.2.12",
