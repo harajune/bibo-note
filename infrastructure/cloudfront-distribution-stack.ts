@@ -4,7 +4,6 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as path from 'path';
@@ -24,10 +23,10 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     const certificate = acm.Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArnReader.getParameterValue());
 
     // Lambda関数 (./dist/worker/worker.ts) を作成
-    const workerFunction = new lambdaNodejs.NodejsFunction(this, 'WorkerFunction', {
+    const workerFunction = new lambda.Function(this, 'WorkerFunction', {
       runtime: lambda.Runtime.NODEJS_22_X,
-      entry: './dist/worker/worker.mjs',
-      handler: 'handler',
+      code: lambda.Code.fromAsset('./dist/worker'),
+      handler: 'worker.handler',
     });
 
     // Lambda Function URLを作成（認証なし）
