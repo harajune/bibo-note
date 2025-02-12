@@ -8,6 +8,8 @@ import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as path from 'path';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import { SsmParameterReader } from './ssm-parameter-reader';
 
 export class CloudFrontDistributionStack extends cdk.Stack {
@@ -73,6 +75,19 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // CloudFrontのディストリビューションのドメイン名を出力
     new cdk.CfnOutput(this, 'DistributionDomainName', {
       value: distribution.distributionDomainName,
+    });
+
+    // Create Route53 A records for both the apex and wildcard domains
+    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: 'bibo-note.jp' });
+    new route53.ARecord(this, 'AliasRecordApex', {
+      zone: hostedZone,
+      recordName: 'bibo-note.jp',
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+    });
+    new route53.ARecord(this, 'AliasRecordWildcard', {
+      zone: hostedZone,
+      recordName: '*.bibo-note.jp',
+      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
     });
   }
 } 

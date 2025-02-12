@@ -2,5 +2,9 @@
   "hosted-zone:account=557690619781:domainName=bibo-note.jp:region=us-east-1": {
     "Id": "/hostedzone/Z08641051STVZTDK95QAW",
     "Name": "bibo-note.jp."
+  },
+  "hosted-zone:account=557690619781:domainName=bibo-note.jp:region=ap-northeast-1": {
+    "Id": "/hostedzone/Z08641051STVZTDK95QAW",
+    "Name": "bibo-note.jp."
   }
 }
