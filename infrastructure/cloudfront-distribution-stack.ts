@@ -23,6 +23,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
 
     // Lambda関数 (./dist/worker/worker.ts) を作成
     const workerFunction = new lambda.Function(this, 'WorkerFunction', {
+      functionName: 'application-worker',
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset('./dist/worker'),
       handler: 'worker.handler',

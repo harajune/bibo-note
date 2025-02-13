@@ -1,4 +1,4 @@
-import build from '@hono/vite-build/lambda-edge'
+import build from '@hono/vite-build/aws-lambda'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
