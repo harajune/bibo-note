@@ -46,6 +46,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     new s3deploy.BucketDeployment(this, 'StaticDeployment', {
       sources: [s3deploy.Source.asset('./dist/static')],
       destinationBucket: staticBucket,
+      destinationKeyPrefix: 'static/',
     });
 
     // CloudFrontのオリジン作成
