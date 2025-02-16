@@ -52,12 +52,36 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // CloudFrontのオリジン作成
     const s3Origin = origins.S3BucketOrigin.withOriginAccessControl(staticBucket);
     const lambdaOrigin = new origins.FunctionUrlOrigin(workerFunctionUrl);
+    // 追加: x-forwarded-host を付与する CloudFront Function の作成
+    const addXForwardedHostFunction = new cloudfront.Function(this, 'AddXForwardedHostFunction', {
+      functionName: 'add-x-forwarded-host',
+      code: cloudfront.FunctionCode.fromInline(`
+        function handler(event) {
+          var request = event.request;
+          if (request.headers['host']) {
+            request.headers['x-forwarded-host'] = { value: request.headers['host'].value };
+          }
+          return request;
+        }
+      `)
+    });
+
+    // 追加: オリジンリクエストポリシーを定義し、'x-forwarded-host'ヘッダーを転送
+    const customOriginRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'AllowXForwardedHostPolicy', {
+      originRequestPolicyName: 'AllowXForwardedHostPolicy',
+      headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList('x-forwarded-host')
+    });
 
     // CloudFrontディストリビューションを作成
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
         origin: lambdaOrigin,
+        functionAssociations: [{
+          function: addXForwardedHostFunction,
+          eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+        }],
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED, // デバッグ用にキャッシュを無効化
+        originRequestPolicy: customOriginRequestPolicy,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       additionalBehaviors: {
