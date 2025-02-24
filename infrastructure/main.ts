@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { CertificateStack } from './certificate-stack';
 import { CloudFrontDistributionStack } from './cloudfront-distribution-stack';
+import { LambdaEdgeStack } from './lambda-edge-stack';
 
 const app = new cdk.App();
 const account = process.env.CDK_DEFAULT_ACCOUNT;
@@ -10,9 +11,16 @@ const certificateStack = new CertificateStack(app, 'CertificateStack', {
   env: { region: 'us-east-1', account: account },
 });
 
-// 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成し、先ほどの証明書ARNを渡す
+// us-east-1でLambdaEdgeStackを作成
+const lambdaEdgeStack = new LambdaEdgeStack(app, 'LambdaEdgeStack', {
+  env: { region: 'us-east-1', account: account },
+});
+
+// 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成
 const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, 'CloudFrontDistributionStack', {
   env: { region: 'ap-northeast-1', account: account },
-}); 
+});
 
+// 依存関係を設定
 cloudFrontDistributionStack.addDependency(certificateStack);
+cloudFrontDistributionStack.addDependency(lambdaEdgeStack);

@@ -1,0 +1,6 @@
+import { createRoute } from "honox/factory";
+import { contextStorage } from "hono/context-storage";
+import { logger } from "hono/logger";
+
+// contextStorage() middleware is necessary for getting the env variables.
+export default createRoute(logger(), contextStorage());

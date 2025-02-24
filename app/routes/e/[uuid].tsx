@@ -5,7 +5,7 @@ import { createImmutable } from "../../libs/immutable/immutable";
 
 export default createRoute(async (c) => {
   const uuid = c.req.param("uuid");
-  const wikiModel = new WikiModel({bucket: c.env.MY_BUCKET});
+  const wikiModel = new WikiModel();
   const wikiData = await wikiModel.load(uuid);
   return c.render(<Editor wikiData={wikiData} />,
      { title: wikiData.title });
@@ -13,7 +13,7 @@ export default createRoute(async (c) => {
 
 export const POST = createRoute(async (c) => {
   const uuid = c.req.param("uuid");
-  const wikiModel = new WikiModel({bucket: c.env.MY_BUCKET});
+  const wikiModel = new WikiModel();
 
   try {
     const wikiData = createImmutable(await wikiModel.load(uuid));

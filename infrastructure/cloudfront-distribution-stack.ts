@@ -20,7 +20,28 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       parameterName: '/bibo-note/certificate_arn',
       region: 'us-east-1',
     });
+
+    // us-east-1に保存されたSSMパラメータからLambda@Edge関数のARNを取得
+    const edgeFunctionArnReader = new SsmParameterReader(this, 'EdgeFunctionArnParameter', {
+      parameterName: '/bibo-note/edge_function_arn',
+      region: 'us-east-1',
+    });
+
+    // Lambda@Edge用のIAMロールを作成
+    const edgeFunctionRole = new iam.Role(this, 'EdgeFunctionRole', {
+      assumedBy: new iam.CompositePrincipal(
+        new iam.ServicePrincipal('lambda.amazonaws.com'),
+        new iam.ServicePrincipal('edgelambda.amazonaws.com')
+      ),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')
+      ]
+    });
+
     const certificate = acm.Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArnReader.getParameterValue());
+    
+    // Lambda@Edge関数のバージョンを取得
+    const edgeFunctionVersion = lambda.Version.fromVersionArn(this, 'EdgeFunctionVersion', edgeFunctionArnReader.getParameterValue());
 
     // Lambda関数 (./dist/worker/worker.ts) を作成
     const workerFunction = new lambda.Function(this, 'WorkerFunction', {
@@ -92,13 +113,20 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
         origin: lambdaOrigin,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         functionAssociations: [{
           function: addXForwardedHostFunction,
           eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
         }],
+        edgeLambdas: [{
+          eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
+          functionVersion: edgeFunctionVersion,
+          includeBody: true,
+        }],
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED, // デバッグ用にキャッシュを無効化
         originRequestPolicy: customOriginRequestPolicy,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT, // CORSを許可
       },
       additionalBehaviors: {
         // /static以下のリクエストをS3へ
@@ -136,6 +164,37 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       zone: hostedZone,
       recordName: '*.bibo-note.jp',
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+    });
+
+    // Wikiデータ保存用のS3バケットを作成
+    const wikiDataBucket = new s3.Bucket(this, 'WikiDataBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    // Lambda(workerFunction)からのみアクセスできるようにするためのバケットポリシー設定
+    wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [workerFunction.grantPrincipal],
+      actions: ['s3:PutObject', 's3:GetObject', 's3:DeleteObject'],
+      resources: [wikiDataBucket.bucketArn + '/*'],
+    }));
+
+    wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [workerFunction.grantPrincipal],
+      actions: ['s3:ListBucket'],
+      resources: [wikiDataBucket.bucketArn],
+    }));
+
+    // LambdaにWikiデータ保存用のS3バケット名を環境変数として設定
+    workerFunction.addEnvironment('WIKI_BUCKET_NAME', wikiDataBucket.bucketName);
+
+    // バケット名の出力
+    new cdk.CfnOutput(this, 'WikiDataBucketName', {
+      value: wikiDataBucket.bucketName,
     });
   }
 } 
