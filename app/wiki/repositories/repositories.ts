@@ -188,11 +188,11 @@ export class S3Repository implements Repository {
       Bucket: this.bucketName,
       Key: `${uuid}.toml`,
     }));
-    if (!res.Body) {
+    const body = await res.Body?.transformToString();
+    if (!body) {
       throw new Error(`Wiki data not found for UUID: ${uuid}`);
     }
-    const tomlString = await streamToString(res.Body as NodeJS.ReadableStream);
-    const tomlData = TOML.parse(tomlString) as {
+    const tomlData = TOML.parse(body) as {
       content: { title: string; content: string };
       header: { updatedAt: string; createdAt: string };
     };
