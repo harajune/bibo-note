@@ -15,9 +15,26 @@ export interface Repository {
 
 export class FileRepository implements Repository {
   private readonly filePath: string;
+  private readonly context: any;
 
   constructor(filePath: string) {
     this.filePath = filePath;
+    this.context = getContext();
+  }
+
+  private getUserBasePath(): string {
+    const envVariables = env<{ MULTITENANT: string }>(this.context);
+    const user = this.context.get('user');
+
+    if (envVariables.MULTITENANT === '1' && user) {
+      const userPath = path.join(this.filePath, user);
+      // ユーザーディレクトリが存在しない場合は作成
+      if (!fs.existsSync(userPath)) {
+        fs.mkdirSync(userPath, { recursive: true });
+      }
+      return userPath;
+    }
+    return this.filePath;
   }
 
   public save(data: WikiData): void {
@@ -60,7 +77,7 @@ export class FileRepository implements Repository {
   }
 
   private getFilePath(uuid: UUID): string {
-    return path.join(this.filePath, `${uuid}.toml`);
+    return path.join(this.getUserBasePath(), `${uuid}.toml`);
   }
 }
 
@@ -132,17 +149,19 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
 export class S3Repository implements Repository {
   private readonly bucketName: string;
   private readonly s3Client: S3Client;
+  private readonly context: any;
 
   constructor() {
     // get enviroment variables from context
-    const context = getContext();
+    this.context = getContext();
     const enviromentVariables = env<{
       WIKI_BUCKET_NAME: string,
       AWS_REGION: string,
       AWS_ACCESS_KEY_ID: string,
       AWS_SECRET_ACCESS_KEY: string,
-      AWS_SESSION_TOKEN: string
-    }>(context);
+      AWS_SESSION_TOKEN: string,
+      MULTITENANT: string
+    }>(this.context);
 
     const bucketName = enviromentVariables.WIKI_BUCKET_NAME;
 
@@ -162,6 +181,16 @@ export class S3Repository implements Repository {
     });
   }
 
+  private getObjectKey(uuid: UUID): string {
+    const envVariables = env<{ MULTITENANT: string }>(this.context);
+    const user = this.context.get('user');
+
+    if (envVariables.MULTITENANT === '1' && user) {
+      return `${user}/${uuid}.toml`;
+    }
+    return `${uuid}.toml`;
+  }
+
   public async save(data: WikiData): Promise<void> {
     const tomlData = {
       header: {
@@ -178,7 +207,7 @@ export class S3Repository implements Repository {
     const tomlString = TOML.stringify(tomlData);
     await this.s3Client.send(new PutObjectCommand({
       Bucket: this.bucketName,
-      Key: `${data.uuid}.toml`,
+      Key: this.getObjectKey(data.uuid),
       Body: tomlString
     }));
   }
@@ -186,7 +215,7 @@ export class S3Repository implements Repository {
   public async load(uuid: UUID): Promise<WikiData> {
     const res = await this.s3Client.send(new GetObjectCommand({
       Bucket: this.bucketName,
-      Key: `${uuid}.toml`,
+      Key: this.getObjectKey(uuid),
     }));
     const body = await res.Body?.transformToString();
     if (!body) {
@@ -206,20 +235,28 @@ export class S3Repository implements Repository {
   }
 
   public async list(): Promise<UUID[]> {
+    const envVariables = env<{ MULTITENANT: string }>(this.context);
+    const user = this.context.get('user');
+    const prefix = envVariables.MULTITENANT === '1' && user ? `${user}/` : '';
+
     const res = await this.s3Client.send(new ListObjectsCommand({
       Bucket: this.bucketName,
+      Prefix: prefix
     }));
     if (!res.Contents) return [];
     return res.Contents
       .filter(item => item.Key && item.Key.endsWith('.toml'))
-      .map(item => item.Key!.replace('.toml', ''));
+      .map(item => {
+        const key = item.Key!;
+        return key.substring(key.lastIndexOf('/') + 1).replace('.toml', '');
+      });
   }
 
   public async isExists(uuid: UUID): Promise<boolean> {
     try {
       await this.s3Client.send(new HeadObjectCommand({
         Bucket: this.bucketName,
-        Key: `${uuid}.toml`,
+        Key: this.getObjectKey(uuid),
       }));
       return true;
     } catch (e) {

@@ -192,6 +192,12 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // LambdaにWikiデータ保存用のS3バケット名を環境変数として設定
     workerFunction.addEnvironment('WIKI_BUCKET_NAME', wikiDataBucket.bucketName);
 
+    // Lambdaにマルチテナントモードを環境変数として設定
+    workerFunction.addEnvironment('MULTITENANT', '1');
+
+    // LambdaにMODEを環境変数として設定
+    workerFunction.addEnvironment('MODE', 'production');
+
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {
       value: wikiDataBucket.bucketName,
