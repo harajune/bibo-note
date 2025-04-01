@@ -113,13 +113,12 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     const subdomainCachePolicy = new cloudfront.CachePolicy(this, 'SubdomainCachePolicy', {
       cachePolicyName: 'SubdomainCachePolicy',
       comment: 'Cache policy that includes Host header in the cache key',
-      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Host'),
-      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('x-forwarded-host'),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      defaultTtl: cdk.Duration.seconds(1),  // デバッグ用にキャッシュを無効化
-      maxTtl: cdk.Duration.seconds(1),      // デバッグ用にキャッシュを無効化
-      minTtl: cdk.Duration.seconds(1),      // デバッグ用にキャッシュを無効化
+      defaultTtl: cdk.Duration.seconds(0),  // デバッグ用にキャッシュを無効化
+      maxTtl: cdk.Duration.seconds(0),      // デバッグ用にキャッシュを無効化
+      minTtl: cdk.Duration.seconds(0),      // デバッグ用にキャッシュを無効化
     });
 
     // CloudFrontディストリビューションを作成
