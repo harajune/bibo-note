@@ -109,16 +109,27 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList('x-forwarded-host')
     });
 
-    // サブドメインごとにキャッシュを分けるためのカスタムキャッシュポリシー
-    const subdomainCachePolicy = new cloudfront.CachePolicy(this, 'SubdomainCachePolicy', {
-      cachePolicyName: 'SubdomainCachePolicy',
-      comment: 'Cache policy that includes Host header in the cache key',
+    // 記事表示用のキャッシュポリシー
+    const articleCachePolicy = new cloudfront.CachePolicy(this, 'ArticleCachePolicy', {
+      cachePolicyName: 'ArticleCachePolicy',
+      comment: 'Cache policy for article pages',
       headerBehavior: cloudfront.CacheHeaderBehavior.allowList('x-forwarded-host'),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      defaultTtl: cdk.Duration.seconds(0),  // デバッグ用にキャッシュを無効化
-      maxTtl: cdk.Duration.seconds(0),      // デバッグ用にキャッシュを無効化
-      minTtl: cdk.Duration.seconds(0),      // デバッグ用にキャッシュを無効化
+      defaultTtl: cdk.Duration.seconds(1), //TODO: デバッグ用にキャッシュを無効化
+      maxTtl: cdk.Duration.seconds(1),
+      minTtl: cdk.Duration.seconds(1),
+    });
+
+    // 静的ファイル用のキャッシュポリシー
+    const staticCachePolicy = new cloudfront.CachePolicy(this, 'StaticCachePolicy', {
+      cachePolicyName: 'StaticCachePolicy',
+      comment: 'Cache policy for static files',
+      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingBrotli: true,
+      defaultTtl: cdk.Duration.seconds(1), //TODO: デバッグ用にキャッシュを無効化 
+      maxTtl: cdk.Duration.seconds(1),
+      minTtl: cdk.Duration.seconds(1),
     });
 
     // CloudFrontディストリビューションを作成
@@ -135,7 +146,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
           functionVersion: edgeFunctionVersion,
           includeBody: true,
         }],
-        cachePolicy: subdomainCachePolicy,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
         originRequestPolicy: customOriginRequestPolicy,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
@@ -143,8 +154,20 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       additionalBehaviors: {
         'static/*': {
           origin: s3Origin,
-          cachePolicy: subdomainCachePolicy,
+          cachePolicy: staticCachePolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        },
+        'v/*': {
+          origin: lambdaOrigin,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+          functionAssociations: [{
+            function: addXForwardedHostFunction,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          }],
+          cachePolicy: articleCachePolicy,
+          originRequestPolicy: customOriginRequestPolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
         },
       },
       domainNames: ['bibo-note.jp', '*.bibo-note.jp'],
