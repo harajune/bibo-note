@@ -109,6 +109,19 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList('x-forwarded-host')
     });
 
+    // サブドメインごとにキャッシュを分けるためのカスタムキャッシュポリシー
+    const subdomainCachePolicy = new cloudfront.CachePolicy(this, 'SubdomainCachePolicy', {
+      cachePolicyName: 'SubdomainCachePolicy',
+      comment: 'Cache policy that includes Host header in the cache key',
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Host'),
+      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingBrotli: true,
+      defaultTtl: cdk.Duration.seconds(1),  // デバッグ用にキャッシュを無効化
+      maxTtl: cdk.Duration.seconds(1),      // デバッグ用にキャッシュを無効化
+      minTtl: cdk.Duration.seconds(1),      // デバッグ用にキャッシュを無効化
+    });
+
     // CloudFrontディストリビューションを作成
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -123,16 +136,15 @@ export class CloudFrontDistributionStack extends cdk.Stack {
           functionVersion: edgeFunctionVersion,
           includeBody: true,
         }],
-        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED, // デバッグ用にキャッシュを無効化
+        cachePolicy: subdomainCachePolicy,
         originRequestPolicy: customOriginRequestPolicy,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT, // CORSを許可
+        responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
       },
       additionalBehaviors: {
-        // /static以下のリクエストをS3へ
         'static/*': {
           origin: s3Origin,
-          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+          cachePolicy: subdomainCachePolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
       },
