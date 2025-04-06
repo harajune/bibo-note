@@ -27,6 +27,12 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       region: 'us-east-1',
     });
 
+    // us-east-1に保存されたSSMパラメータからLambda@Edge関数のARNを取得
+    const authorizationEdgeFunctionArnReader = new SsmParameterReader(this, 'AuthorizationEdgeFunctionArnParameter', {
+      parameterName: '/bibo-note/authorization_edge_function_arn',
+      region: 'us-east-1',
+    });
+
     // Lambda@Edge用のIAMロールを作成
     const edgeFunctionRole = new iam.Role(this, 'EdgeFunctionRole', {
       assumedBy: new iam.CompositePrincipal(
@@ -42,6 +48,9 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     
     // Lambda@Edge関数のバージョンを取得
     const edgeFunctionVersion = lambda.Version.fromVersionArn(this, 'EdgeFunctionVersion', edgeFunctionArnReader.getParameterValue());
+
+    // Lambda@Edge関数のバージョンを取得
+    const authorizationEdgeFunctionVersion = lambda.Version.fromVersionArn(this, 'AuthorizationEdgeFunctionVersion', authorizationEdgeFunctionArnReader.getParameterValue());
 
     // Lambda関数 (./dist/worker/worker.ts) を作成
     const workerFunction = new lambda.Function(this, 'WorkerFunction', {
@@ -89,31 +98,14 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       originAccessControlId: lambdaOAC.ref,
     });
 
-    // x-forwarded-host を付与する CloudFront Function の作成
-    const addXForwardedHostFunction = new cloudfront.Function(this, 'AddXForwardedHostFunction', {
-      functionName: 'add-x-forwarded-host',
-      code: cloudfront.FunctionCode.fromInline(`
-        function handler(event) {
-          var request = event.request;
-          if (request.headers['host']) {
-            request.headers['x-forwarded-host'] = { value: request.headers['host'].value };
-          }
-          return request;
-        }
-      `)
-    });
-
-    // オリジンリクエストポリシーを定義し、'x-forwarded-host'ヘッダーを転送
-    const customOriginRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'AllowXForwardedHostPolicy', {
-      originRequestPolicyName: 'AllowXForwardedHostPolicy',
-      headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList('x-forwarded-host')
-    });
-
     // 記事表示用のキャッシュポリシー
     const articleCachePolicy = new cloudfront.CachePolicy(this, 'ArticleCachePolicy', {
       cachePolicyName: 'ArticleCachePolicy',
       comment: 'Cache policy for article pages',
-      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('x-forwarded-host'),
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
+        'x-forwarded-host',
+        'authorization'
+      ),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
       defaultTtl: cdk.Duration.seconds(1), //TODO: デバッグ用にキャッシュを無効化
@@ -137,17 +129,17 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       defaultBehavior: {
         origin: lambdaOrigin,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-        functionAssociations: [{
-          function: addXForwardedHostFunction,
-          eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
-        }],
         edgeLambdas: [{
           eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
           functionVersion: edgeFunctionVersion,
           includeBody: true,
+        }, {
+          eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+          functionVersion: authorizationEdgeFunctionVersion,
+          includeBody: true,
         }],
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-        originRequestPolicy: customOriginRequestPolicy,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
       },
@@ -160,14 +152,15 @@ export class CloudFrontDistributionStack extends cdk.Stack {
         'v/*': {
           origin: lambdaOrigin,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-          functionAssociations: [{
-            function: addXForwardedHostFunction,
-            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
-          }],
           cachePolicy: articleCachePolicy,
-          originRequestPolicy: customOriginRequestPolicy,
+          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           responseHeadersPolicy: cloudfront.ResponseHeadersPolicy.CORS_ALLOW_ALL_ORIGINS_WITH_PREFLIGHT,
+          edgeLambdas: [{
+            eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+            functionVersion: authorizationEdgeFunctionVersion,
+            includeBody: true,
+          }],
         },
       },
       domainNames: ['bibo-note.jp', '*.bibo-note.jp'],
