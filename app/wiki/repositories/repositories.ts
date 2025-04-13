@@ -5,10 +5,10 @@ import * as path from 'node:path';
 import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
-
+import { logger } from "../../libs/logger/logger";
 export interface Repository {
   save(data: WikiData): void | Promise<void>;
-  load(uuid: UUID): WikiData | Promise<WikiData>;
+  load(uuid: UUID): WikiData | Promise<WikiData | null>;
   list(): UUID[] | Promise<UUID[]>;
   isExists(uuid: UUID): boolean | Promise<boolean>;
 }
@@ -57,15 +57,22 @@ export class FileRepository implements Repository {
     fs.writeFileSync(filename, tomlString, 'utf-8');
   }
 
-  public load(uuid: UUID): WikiData {
+  public async load(uuid: UUID): Promise<WikiData | null> {
     const filename = this.getFilePath(uuid);
-    const tomlString = fs.readFileSync(filename, 'utf-8');
-    const tomlData = TOML.parse(tomlString) as {
-      content: { title: string; content: string };
-      header: { updatedAt: string; createdAt: string };
-    };
-
-    return new WikiData(uuid, tomlData.content.title, tomlData.content.content, new Date(tomlData.header.updatedAt), new Date(tomlData.header.createdAt));
+    try {
+      const tomlString = fs.readFileSync(filename, 'utf-8');
+      if (!tomlString) {
+        return null;
+      }
+      const tomlData = TOML.parse(tomlString) as {
+        content: { title: string; content: string };
+        header: { updatedAt: string; createdAt: string };
+      };
+      return new WikiData(uuid, tomlData.content.title, tomlData.content.content, new Date(tomlData.header.updatedAt), new Date(tomlData.header.createdAt));
+    } catch (e) {
+      logger.error(`Failed to load wiki data for filename: ${filename}`);
+      return null;
+    }
   }
 
   public list(): UUID[] {
@@ -212,26 +219,32 @@ export class S3Repository implements Repository {
     }));
   }
 
-  public async load(uuid: UUID): Promise<WikiData> {
-    const res = await this.s3Client.send(new GetObjectCommand({
-      Bucket: this.bucketName,
-      Key: this.getObjectKey(uuid),
-    }));
-    const body = await res.Body?.transformToString();
-    if (!body) {
-      throw new Error(`Wiki data not found for UUID: ${uuid}`);
+  public async load(uuid: UUID): Promise<WikiData | null> {
+    const objectKey = this.getObjectKey(uuid);
+    try {
+      const res = await this.s3Client.send(new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: objectKey,
+      }));
+      const body = await res.Body?.transformToString();
+      if (!body) {
+        throw new Error(`ObjectKey ${objectKey} is not found`);
+      }
+      const tomlData = TOML.parse(body) as {
+        content: { title: string; content: string };
+        header: { updatedAt: string; createdAt: string };
+      };
+      return new WikiData(
+        uuid,
+        tomlData.content.title,
+        tomlData.content.content,
+        new Date(tomlData.header.updatedAt),
+        new Date(tomlData.header.createdAt)
+      );
+    } catch (e) {
+      logger.error(`Failed to load wiki data for objectKey: ${objectKey}`);
+      return null;
     }
-    const tomlData = TOML.parse(body) as {
-      content: { title: string; content: string };
-      header: { updatedAt: string; createdAt: string };
-    };
-    return new WikiData(
-      uuid,
-      tomlData.content.title,
-      tomlData.content.content,
-      new Date(tomlData.header.updatedAt),
-      new Date(tomlData.header.createdAt)
-    );
   }
 
   public async list(): Promise<UUID[]> {

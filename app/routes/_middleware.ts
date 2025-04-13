@@ -31,6 +31,7 @@ const multitenant = (): MiddlewareHandler => {
     } else {
       c.set('user', null);
     }
+
     await next();
   };
 };

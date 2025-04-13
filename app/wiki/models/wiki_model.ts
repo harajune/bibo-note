@@ -25,7 +25,7 @@ export class WikiModel {
     await this.repository.save(wikiData);
   }
 
-  public async load(uuid: string): Promise<WikiData> {
+  public async load(uuid: string): Promise<WikiData | null> {
     return await this.repository.load(uuid);
   }
 

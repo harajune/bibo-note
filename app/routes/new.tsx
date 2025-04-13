@@ -4,7 +4,7 @@ import { WikiModel } from "../wiki/models/wiki_model";
 import { createImmutable } from "../libs/immutable/immutable";
 import { v7 as uuidv7 } from "uuid";
 import { WikiData } from "../wiki/models/wiki_data";
-
+import { logger } from "../libs/logger/logger";
 export default createRoute((c) => {
   const blankWikiData = new WikiData(
     "",  // uuid
@@ -35,7 +35,7 @@ export const POST = createRoute(async (c) => {
     await wikiModel.save(newArticle);
     return c.redirect(`/v/${newUuid}`);
   } catch (e) {
-    console.error(e);
+    logger.error(e);
     return c.notFound();
   }
 });
