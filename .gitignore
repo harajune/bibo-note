@@ -38,3 +38,7 @@ data/
 
 # coverage
 coverage/
+
+cdk.out/
+.vscode/
+.cursor/
