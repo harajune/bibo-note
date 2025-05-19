@@ -1,12 +1,15 @@
 import { Sidebar } from "../../global/$sidebar";
 import { WikiData } from "../models/wiki_data";
 import { DashboardIcon } from "../../global/$icons";
+import { getLatestArticlesMenuSection } from "../components/latest_articles_sidebar";
 
 interface EditorProps {
   wikiData: WikiData;
 }
 
-export function Editor({ wikiData }: EditorProps) {
+export async function Editor({ wikiData }: EditorProps) {
+  const latestArticlesSection = await getLatestArticlesMenuSection();
+  
   const menuSections = [
     {
       children: [
@@ -29,6 +32,7 @@ export function Editor({ wikiData }: EditorProps) {
         },
       ],
     },
+    latestArticlesSection,
   ];
   return (
     <div>

@@ -1,5 +1,5 @@
 import { useState } from 'hono/jsx'
-interface MenuItem {
+export interface MenuItem {
   name: string;
   href: string;
   // honox JSX.Element 型はエラーになるので無視
@@ -8,7 +8,7 @@ interface MenuItem {
   current?: boolean;
 }
 
-interface MenuSection {
+export interface MenuSection {
   header?: HeaderItem;
   children: MenuItem[];
 }

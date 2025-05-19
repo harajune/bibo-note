@@ -2,12 +2,15 @@ import { Sidebar } from "../../global/$sidebar";
 import { DashboardIcon } from "../../global/$icons";
 import { SyntaxParser } from "../../libs/syntax_parser/syntax_parser";
 import { WikiData } from "../models/wiki_data";
+import { getLatestArticlesMenuSection } from "../components/latest_articles_sidebar";
 
 interface ViewerProps {
   wikiData: WikiData;
 }
 
-export function Viewer({ wikiData }: ViewerProps) {
+export async function Viewer({ wikiData }: ViewerProps) {
+  const latestArticlesSection = await getLatestArticlesMenuSection();
+  
   const menuSections = [
     {
       children: [{
@@ -27,7 +30,8 @@ export function Viewer({ wikiData }: ViewerProps) {
           icon: DashboardIcon()
         }
       ]
-    }
+    },
+    latestArticlesSection
   ];
 
   const title = wikiData.title;
