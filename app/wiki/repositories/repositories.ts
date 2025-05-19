@@ -140,7 +140,10 @@ export class R2Repository implements Repository {
   }
 
   public async list(): Promise<UUID[]> {
-    return []; // Not implemented yet as per plan
+    const objects = await this.bucket.list();
+    return objects.objects
+      .filter(item => item.key.endsWith('.toml'))
+      .map(item => item.key.replace('.toml', ''));
   }
 
   public async isExists(uuid: UUID): Promise<boolean> {
@@ -262,12 +265,15 @@ export class S3Repository implements Repository {
       Prefix: prefix
     }));
     if (!res.Contents) return [];
-    return res.Contents
+    
+    const uuids = res.Contents
       .filter(item => item.Key && item.Key.endsWith('.toml'))
       .map(item => {
         const key = item.Key!;
         return key.substring(key.lastIndexOf('/') + 1).replace('.toml', '');
       });
+    
+    return uuids.sort((a, b) => b.localeCompare(a));
   }
 
   public async isExists(uuid: UUID): Promise<boolean> {

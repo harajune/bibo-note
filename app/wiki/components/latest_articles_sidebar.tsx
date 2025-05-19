@@ -27,15 +27,14 @@ export async function getLatestArticlesMenuSection(limit: number = 20) {
   
   try {
     const uuids = await wikiModel.list();
-    const articlesPromises = uuids.map(uuid => wikiModel.load(uuid));
+    
+    const sortedUuids = uuids.sort((a, b) => b.localeCompare(a));
+    
+    const articlesPromises = sortedUuids.map(uuid => wikiModel.load(uuid));
     const articles = (await Promise.all(articlesPromises))
       .filter(article => article !== null) as WikiData[];
     
-    const sortedArticles = articles.sort((a, b) => 
-      b.updatedAt.getTime() - a.updatedAt.getTime()
-    );
-    
-    const simplifiedArticles = sortedArticles.map(article => ({
+    const simplifiedArticles = articles.map(article => ({
       uuid: article.uuid,
       title: article.title || "Untitled",
       updatedAt: article.updatedAt.toISOString()
