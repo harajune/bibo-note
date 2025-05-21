@@ -1430,11 +1430,11 @@ __metadata:
   linkType: hard
 
 "@hono/vite-build@file:../vite-plugins/packages/build::locator=bibo-note%40workspace%3A.":
-  version: 1.2.1
-  resolution: "@hono/vite-build@file:../vite-plugins/packages/build#../vite-plugins/packages/build::hash=451bbf&locator=bibo-note%40workspace%3A."
+  version: 1.6.1
+  resolution: "@hono/vite-build@file:../vite-plugins/packages/build#../vite-plugins/packages/build::hash=170935&locator=bibo-note%40workspace%3A."
   peerDependencies:
     hono: "*"
-  checksum: 10c0/6c1c60dfd1555904141d0790b3be54b292d851ed04c419f2081842f5f597bd6f3e5743cbbd41b0a9e807c150a05bf0febbb5622046a7033de8cf2009d9b8a037
+  checksum: 10c0/e8c0d74acca5c3c481e112a3f91be76b47d919dc6841d5fcd4b5bdfa73045ff7c5f3dfe39d38debb8702040a6d82581b3dbac401e727edacbee8b8dec9ebe052
   languageName: node
   linkType: hard
 
