@@ -5,15 +5,15 @@ export class SyntaxParser {
   private input: string = '';
   private lines: string[] = [];
 
-  parse(input: string) {
+  parse(input: string): any {
     this.pos = 0;
     this.input = input;
     this.lines = input.split('\n');
     return this.parseDocument();
   }
 
-  private parseDocument() {
-    const elements = [];
+  private parseDocument(): any {
+    const elements: any[] = [];
     while (this.pos < this.lines.length) {
       const block = this.parseBlock();
       if (block) {
@@ -23,7 +23,7 @@ export class SyntaxParser {
     return createElement(Fragment, null, ...elements);
   }
 
-  private parseBlock() {
+  private parseBlock(): any | null {
     const line = this.lines[this.pos];
     
     if (!line) {
@@ -44,25 +44,25 @@ export class SyntaxParser {
   }
 
   // Because the page should have the title, the heading should start with h2
-  private parseHeading1() {
+  private parseHeading1(): any {
     const text = this.lines[this.pos].substring(2);
     this.pos++;
     return createElement('h2', null, text);
   }
 
-  private parseHeading2() {
+  private parseHeading2(): any {
     const text = this.lines[this.pos].substring(3);
     this.pos++;
     return createElement('h3', null, text);
   }
 
-  private parseHeading3() {
+  private parseHeading3(): any {
     const text = this.lines[this.pos].substring(4);
     this.pos++;
     return createElement('h4', null, text);
   }
 
-  private parseParagraph() {
+  private parseParagraph(): any {
     let textContent = '';
     while (this.pos < this.lines.length && this.lines[this.pos].trim() !== '') {
       textContent += this.lines[this.pos] + ' ';
@@ -73,8 +73,8 @@ export class SyntaxParser {
     return createElement('p', null, this.parseInlineText(textContent.trim()));
   }
 
-  private parseList() {
-    const items = [];
+  private parseList(): any {
+    const items: any[] = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('-')) {
       const text = this.lines[this.pos].substring(1);
       items.push(createElement('li', null, text));
@@ -83,8 +83,8 @@ export class SyntaxParser {
     return createElement('ul', null, ...items);
   }
 
-  private parseNumberedList() {
-    const items = [];
+  private parseNumberedList(): any {
+    const items: any[] = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('+')) {
       const text = this.lines[this.pos].substring(1);
       items.push(createElement('li', null, text));
@@ -93,9 +93,9 @@ export class SyntaxParser {
     return createElement('ol', null, ...items);
   }
 
-  private parseInlineText(text: string) {
+  private parseInlineText(text: string): any {
     // Process bold and italic text
-    const parts = [];
+    const parts: any[] = [];
     let currentText = '';
     let i = 0;
     
@@ -152,8 +152,8 @@ export class SyntaxParser {
     return parts.length === 1 ? parts[0] : parts;
   }
   
-  private processItalic(text: string) {
-    const parts = [];
+  private processItalic(text: string): any {
+    const parts: any[] = [];
     let currentText = '';
     let i = 0;
     
@@ -189,4 +189,4 @@ export class SyntaxParser {
     
     return parts.length === 1 ? parts[0] : parts;
   }
-}    
+}             
