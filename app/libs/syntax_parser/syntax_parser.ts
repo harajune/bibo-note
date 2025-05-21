@@ -1,5 +1,7 @@
 import { createElement, Fragment } from 'hono/jsx';
-import type { JSXNode, Child } from 'hono/jsx/base';
+
+type JSXNode = any;
+type Child = any;
 
 export class SyntaxParser {
   private pos: number = 0;
