@@ -1744,6 +1744,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jspm/core@npm:^2.0.1":
+  version: 2.1.0
+  resolution: "@jspm/core@npm:2.1.0"
+  checksum: 10c0/4e10f912b60f33d216a68f46351dd430f10a2024ce5b149ac93e4d19f85d0dbf0b929cbb90397ea0e8cef28f1723ea1f94c88b7c5d16ecf1f62e391ea072bc33
+  languageName: node
+  linkType: hard
+
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -2948,6 +2955,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"acorn@npm:^8.12.1":
+  version: 8.14.1
+  resolution: "acorn@npm:8.14.1"
+  bin:
+    acorn: bin/acorn
+  checksum: 10c0/dbd36c1ed1d2fa3550140000371fcf721578095b18777b85a79df231ca093b08edc6858d75d6e48c73e431c174dcf9214edbd7e6fa5911b93bd8abfa54e47123
+  languageName: node
+  linkType: hard
+
 "agent-base@npm:^7.1.0, agent-base@npm:^7.1.2":
   version: 7.1.3
   resolution: "agent-base@npm:7.1.3"
@@ -3222,6 +3238,7 @@ __metadata:
     aws-cdk-lib: "npm:^2.175.1"
     aws-lambda: "npm:^1.0.7"
     constructs: "npm:^10.4.2"
+    esbuild-plugin-polyfill-node: "npm:^0.3.0"
     hono: "npm:^4.6.12"
     honox: "npm:^0.1.27"
     postcss: "npm:^8.4.49"
@@ -3231,6 +3248,7 @@ __metadata:
     uuid: "npm:^11.0.5"
     vite: "npm:^5.2.12"
     vite-plugin-cjs-interop: "npm:^2.2.0"
+    vite-plugin-commonjs: "npm:^0.10.4"
     vite-plugin-node-polyfills: "npm:^0.23.0"
     vitest: "npm:^2.1.8"
     wrangler: "npm:^3.57.2"
@@ -4239,6 +4257,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"esbuild-plugin-polyfill-node@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "esbuild-plugin-polyfill-node@npm:0.3.0"
+  dependencies:
+    "@jspm/core": "npm:^2.0.1"
+    import-meta-resolve: "npm:^3.0.0"
+  peerDependencies:
+    esbuild: "*"
+  checksum: 10c0/8e7e7ee7034a11995f99eefbb75b56b162f5b43b849f7d199cbc7b1089867a8595f48a640a1487f496d2af27986b467ccf3a34bf81cbf9961928c8b8d8cbd3ac
+  languageName: node
+  linkType: hard
+
 "esbuild-sunos-64@npm:0.14.54":
   version: 0.14.54
   resolution: "esbuild-sunos-64@npm:0.14.54"
@@ -5233,6 +5263,13 @@ __metadata:
   version: 5.3.2
   resolution: "ignore@npm:5.3.2"
   checksum: 10c0/f9f652c957983634ded1e7f02da3b559a0d4cc210fca3792cb67f1b153623c9c42efdc1c4121af171e295444459fc4a9201101fb041b1104a3c000bccb188337
+  languageName: node
+  linkType: hard
+
+"import-meta-resolve@npm:^3.0.0":
+  version: 3.1.1
+  resolution: "import-meta-resolve@npm:3.1.1"
+  checksum: 10c0/75545f3f0f4f789f15b91a541b2d3e9d5b25fc9e8c60e8423cbdef4fff226f45520bd040219c63eee001878f075e82b52e436ca0d7d05e6c4fdc0348b7f251dd
   languageName: node
   linkType: hard
 
@@ -7740,6 +7777,29 @@ __metadata:
   peerDependencies:
     vite: 4 || 5 || 6
   checksum: 10c0/91e457c68d4217b97b9d8d629f7c33d7ab138b9292c5af6a9a1999050425c347b1ca979ccef5285d7a9ec38c0cb0cab6dcba423c2bd0f50b74b4c052bfad5aef
+  languageName: node
+  linkType: hard
+
+"vite-plugin-commonjs@npm:^0.10.4":
+  version: 0.10.4
+  resolution: "vite-plugin-commonjs@npm:0.10.4"
+  dependencies:
+    acorn: "npm:^8.12.1"
+    magic-string: "npm:^0.30.11"
+    vite-plugin-dynamic-import: "npm:^1.6.0"
+  checksum: 10c0/074e0d7a1e8f20d605f1a02c53867706639ea5a9aac8657e8d90442f13cf86154a6ebc65de1f05eb62e1a98523422d5025f3b7ccaabe88c486bec12b45e5d136
+  languageName: node
+  linkType: hard
+
+"vite-plugin-dynamic-import@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "vite-plugin-dynamic-import@npm:1.6.0"
+  dependencies:
+    acorn: "npm:^8.12.1"
+    es-module-lexer: "npm:^1.5.4"
+    fast-glob: "npm:^3.3.2"
+    magic-string: "npm:^0.30.11"
+  checksum: 10c0/049f953b404157346e06a729eb055bc5b3630ac990bf36d52e6c44b1b223ac8e1f22fa1c44cadea55e7621366a0666439860fd4572f09c87daa45affd5dd15b6
   languageName: node
   linkType: hard
 
