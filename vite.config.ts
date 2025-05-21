@@ -19,7 +19,8 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       'process.env': {},
-      'global': 'globalThis'
+      'global': 'globalThis',
+      'module': '{}'
     },
     plugins: [
       nodePolyfills({
