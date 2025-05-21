@@ -1,19 +1,20 @@
 import { createElement, Fragment } from 'hono/jsx';
+import type { JSXNode, Child } from 'hono/jsx/base';
 
 export class SyntaxParser {
   private pos: number = 0;
   private input: string = '';
   private lines: string[] = [];
 
-  parse(input: string): any {
+  parse(input: string): JSXNode {
     this.pos = 0;
     this.input = input;
     this.lines = input.split('\n');
     return this.parseDocument();
   }
 
-  private parseDocument(): any {
-    const elements: any[] = [];
+  private parseDocument(): JSXNode {
+    const elements: Child[] = [];
     while (this.pos < this.lines.length) {
       const block = this.parseBlock();
       if (block) {
@@ -23,7 +24,7 @@ export class SyntaxParser {
     return createElement(Fragment, null, ...elements);
   }
 
-  private parseBlock(): any | null {
+  private parseBlock(): JSXNode | null {
     const line = this.lines[this.pos];
     
     if (!line) {
@@ -44,25 +45,25 @@ export class SyntaxParser {
   }
 
   // Because the page should have the title, the heading should start with h2
-  private parseHeading1(): any {
+  private parseHeading1(): JSXNode {
     const text = this.lines[this.pos].substring(2);
     this.pos++;
     return createElement('h2', null, text);
   }
 
-  private parseHeading2(): any {
+  private parseHeading2(): JSXNode {
     const text = this.lines[this.pos].substring(3);
     this.pos++;
     return createElement('h3', null, text);
   }
 
-  private parseHeading3(): any {
+  private parseHeading3(): JSXNode {
     const text = this.lines[this.pos].substring(4);
     this.pos++;
     return createElement('h4', null, text);
   }
 
-  private parseParagraph(): any {
+  private parseParagraph(): JSXNode {
     let textContent = '';
     while (this.pos < this.lines.length && this.lines[this.pos].trim() !== '') {
       textContent += this.lines[this.pos] + ' ';
@@ -73,8 +74,8 @@ export class SyntaxParser {
     return createElement('p', null, this.parseInlineText(textContent.trim()));
   }
 
-  private parseList(): any {
-    const items: any[] = [];
+  private parseList(): JSXNode {
+    const items: Child[] = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('-')) {
       const text = this.lines[this.pos].substring(1);
       items.push(createElement('li', null, text));
@@ -83,8 +84,8 @@ export class SyntaxParser {
     return createElement('ul', null, ...items);
   }
 
-  private parseNumberedList(): any {
-    const items: any[] = [];
+  private parseNumberedList(): JSXNode {
+    const items: Child[] = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('+')) {
       const text = this.lines[this.pos].substring(1);
       items.push(createElement('li', null, text));
@@ -93,9 +94,9 @@ export class SyntaxParser {
     return createElement('ol', null, ...items);
   }
 
-  private parseInlineText(text: string): any {
+  private parseInlineText(text: string): Child | Child[] {
     // Process bold and italic text
-    const parts: any[] = [];
+    const parts: Child[] = [];
     let currentText = '';
     let i = 0;
     
@@ -152,8 +153,8 @@ export class SyntaxParser {
     return parts.length === 1 ? parts[0] : parts;
   }
   
-  private processItalic(text: string): any {
-    const parts: any[] = [];
+  private processItalic(text: string): Child | Child[] {
+    const parts: Child[] = [];
     let currentText = '';
     let i = 0;
     
@@ -189,4 +190,4 @@ export class SyntaxParser {
     
     return parts.length === 1 ? parts[0] : parts;
   }
-}             
+}
