@@ -6,6 +6,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import commonjs from '@rollup/plugin-commonjs'
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs'
 import { resolve } from 'path'
+import fs from 'fs'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -37,6 +38,65 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
+      {
+        name: 'provide-commonjs-helpers',
+        configureServer(server) {
+          server.middlewares.use((req, res, next) => {
+            if (req.url === '/@id/\0commonjsHelpers.js') {
+              res.setHeader('Content-Type', 'application/javascript');
+              res.end(`
+                export const commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+                export function getDefaultExportFromCjs(x) { return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x; }
+                export function getDefaultExportFromNamespaceIfPresent(n) { return n && Object.prototype.hasOwnProperty.call(n, 'default') ? n['default'] : n; }
+                export function getDefaultExportFromNamespaceIfNotNamed(n) { return n && Object.prototype.hasOwnProperty.call(n, 'default') && Object.keys(n).length === 1 ? n['default'] : n; }
+                export function getAugmentedNamespace(n) {
+                  if (n.__esModule) return n;
+                  var a = Object.defineProperty({}, '__esModule', { value: true });
+                  Object.keys(n).forEach(function (k) {
+                    var d = Object.getOwnPropertyDescriptor(n, k);
+                    Object.defineProperty(a, k, d.get ? d : {
+                      enumerable: true,
+                      get: function () { return n[k]; }
+                    });
+                  });
+                  return a;
+                }
+              `);
+              return;
+            }
+            next();
+          });
+        },
+        resolveId(id) {
+          if (id === '\0commonjsHelpers.js') {
+            return id;
+          }
+          return null;
+        },
+        load(id) {
+          if (id === '\0commonjsHelpers.js') {
+            return `
+              export const commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+              export function getDefaultExportFromCjs(x) { return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x; }
+              export function getDefaultExportFromNamespaceIfPresent(n) { return n && Object.prototype.hasOwnProperty.call(n, 'default') ? n['default'] : n; }
+              export function getDefaultExportFromNamespaceIfNotNamed(n) { return n && Object.prototype.hasOwnProperty.call(n, 'default') && Object.keys(n).length === 1 ? n['default'] : n; }
+              export function getAugmentedNamespace(n) {
+                if (n.__esModule) return n;
+                var a = Object.defineProperty({}, '__esModule', { value: true });
+                Object.keys(n).forEach(function (k) {
+                  var d = Object.getOwnPropertyDescriptor(n, k);
+                  Object.defineProperty(a, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () { return n[k]; }
+                  });
+                });
+                return a;
+              }
+            `;
+          }
+          return null;
+        }
+      },
       viteCommonjs({
         include: [
           'node_modules/fast-xml-parser/**',
