@@ -38,13 +38,6 @@ export default defineConfig({
     {
       name: 'patch-commonjs-modules',
       configResolved() {
-        const pathBrowserifyPath = path.resolve(__dirname, 'node_modules/path-browserify/index.js');
-        if (fs.existsSync(pathBrowserifyPath)) {
-          let content = fs.readFileSync(pathBrowserifyPath, 'utf8');
-          content = content.replace(/module\.exports\s*=\s*/, 'var pathBrowserifyExports = ');
-          content += '\nexport default pathBrowserifyExports;';
-          fs.writeFileSync(pathBrowserifyPath, content);
-        }
         
         const fxpPath = path.resolve(__dirname, 'node_modules/fast-xml-parser/src/fxp.js');
         if (fs.existsSync(fxpPath)) {
