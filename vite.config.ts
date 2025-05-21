@@ -2,6 +2,7 @@ import build from '@hono/vite-build/aws-lambda'
 import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -21,6 +22,9 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
+      nodePolyfills({
+        protocolImports: true,
+      }),
       honox({
         client: {
           input: ['/app/global.css'],
