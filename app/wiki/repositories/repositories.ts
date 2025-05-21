@@ -2,7 +2,15 @@ import { WikiData, UUID } from "../models/wiki_data";
 import * as TOML from 'smol-toml';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import type { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+
+let s3Module: Promise<typeof import('@aws-sdk/client-s3')> | null = null;
+const loadS3Module = async () => {
+  if (!s3Module) {
+    s3Module = import('@aws-sdk/client-s3');
+  }
+  return s3Module;
+};
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
 import { logger } from "../../libs/logger/logger";
@@ -96,6 +104,8 @@ export class R2Repository implements Repository {
   }
 
   public async save(data: WikiData): Promise<void> {
+    await this.ensureClient();
+    const { PutObjectCommand } = this.s3Commands!;
     const tomlData = {
       header: {
         fileVersion: "0.0.1",
@@ -155,11 +165,23 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
 
 export class S3Repository implements Repository {
   private readonly bucketName: string;
-  private readonly s3Client: S3Client;
+  private s3Client: S3Client | null = null;
+  private s3Commands: {
+    PutObjectCommand: typeof PutObjectCommand;
+    GetObjectCommand: typeof GetObjectCommand;
+    ListObjectsCommand: typeof ListObjectsCommand;
+    HeadObjectCommand: typeof HeadObjectCommand;
+  } | null = null;
   private readonly context: any;
+  private readonly envVars: {
+    AWS_REGION: string;
+    AWS_ACCESS_KEY_ID: string;
+    AWS_SECRET_ACCESS_KEY: string;
+    AWS_SESSION_TOKEN: string;
+  };
 
   constructor() {
-    // get enviroment variables from context
+    // get environment variables from context
     this.context = getContext();
     const enviromentVariables = env<{
       WIKI_BUCKET_NAME: string,
@@ -176,16 +198,32 @@ export class S3Repository implements Repository {
       throw new Error('WIKI_BUCKET_NAME environment variable is not set.');
     }
     this.bucketName = bucketName;
+    this.envVars = {
+      AWS_REGION: enviromentVariables.AWS_REGION,
+      AWS_ACCESS_KEY_ID: enviromentVariables.AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: enviromentVariables.AWS_SECRET_ACCESS_KEY,
+      AWS_SESSION_TOKEN: enviromentVariables.AWS_SESSION_TOKEN,
+    };
+  }
 
-    // s3 is same region as lambda
-    this.s3Client = new S3Client({
-      region: enviromentVariables.AWS_REGION,
-      credentials: {
-        accessKeyId: enviromentVariables.AWS_ACCESS_KEY_ID,
-        secretAccessKey: enviromentVariables.AWS_SECRET_ACCESS_KEY,
-        sessionToken: enviromentVariables.AWS_SESSION_TOKEN,
-      }
-    });
+  private async ensureClient() {
+    if (!this.s3Client || !this.s3Commands) {
+      const mod = await loadS3Module();
+      this.s3Commands = {
+        PutObjectCommand: mod.PutObjectCommand,
+        GetObjectCommand: mod.GetObjectCommand,
+        ListObjectsCommand: mod.ListObjectsCommand,
+        HeadObjectCommand: mod.HeadObjectCommand,
+      };
+      this.s3Client = new mod.S3Client({
+        region: this.envVars.AWS_REGION,
+        credentials: {
+          accessKeyId: this.envVars.AWS_ACCESS_KEY_ID,
+          secretAccessKey: this.envVars.AWS_SECRET_ACCESS_KEY,
+          sessionToken: this.envVars.AWS_SESSION_TOKEN,
+        },
+      });
+    }
   }
 
   private getObjectKey(uuid: UUID): string {
@@ -199,6 +237,8 @@ export class S3Repository implements Repository {
   }
 
   public async save(data: WikiData): Promise<void> {
+    await this.ensureClient();
+    const { PutObjectCommand } = this.s3Commands!;
     const tomlData = {
       header: {
         fileVersion: "0.0.1",
@@ -212,7 +252,7 @@ export class S3Repository implements Repository {
       }
     };
     const tomlString = TOML.stringify(tomlData);
-    await this.s3Client.send(new PutObjectCommand({
+    await this.s3Client!.send(new PutObjectCommand({
       Bucket: this.bucketName,
       Key: this.getObjectKey(data.uuid),
       Body: tomlString
@@ -220,9 +260,11 @@ export class S3Repository implements Repository {
   }
 
   public async load(uuid: UUID): Promise<WikiData | null> {
+    await this.ensureClient();
+    const { GetObjectCommand } = this.s3Commands!;
     const objectKey = this.getObjectKey(uuid);
     try {
-      const res = await this.s3Client.send(new GetObjectCommand({
+      const res = await this.s3Client!.send(new GetObjectCommand({
         Bucket: this.bucketName,
         Key: objectKey,
       }));
@@ -248,11 +290,13 @@ export class S3Repository implements Repository {
   }
 
   public async list(): Promise<UUID[]> {
+    await this.ensureClient();
+    const { ListObjectsCommand } = this.s3Commands!;
     const envVariables = env<{ MULTITENANT: string }>(this.context);
     const user = this.context.get('user');
     const prefix = envVariables.MULTITENANT === '1' && user ? `${user}/` : '';
 
-    const res = await this.s3Client.send(new ListObjectsCommand({
+    const res = await this.s3Client!.send(new ListObjectsCommand({
       Bucket: this.bucketName,
       Prefix: prefix
     }));
@@ -266,8 +310,10 @@ export class S3Repository implements Repository {
   }
 
   public async isExists(uuid: UUID): Promise<boolean> {
+    await this.ensureClient();
+    const { HeadObjectCommand } = this.s3Commands!;
     try {
-      await this.s3Client.send(new HeadObjectCommand({
+      await this.s3Client!.send(new HeadObjectCommand({
         Bucket: this.bucketName,
         Key: this.getObjectKey(uuid),
       }));
