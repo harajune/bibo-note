@@ -22,7 +22,8 @@ export default defineConfig({
     }
   },
   define: {
-    'global': 'globalThis'
+    'global': 'globalThis',
+    'module': '{}'
   },
   resolve: {
     alias: {
@@ -52,6 +53,14 @@ export default defineConfig({
           content = content.replace(/module\.exports\s*=\s*/, 'var fxpExports = ');
           content += '\nexport default fxpExports;';
           fs.writeFileSync(fxpPath, content);
+        }
+        
+        const streamBrowserifyPath = path.resolve(__dirname, 'node_modules/stream-browserify/index.js');
+        if (fs.existsSync(streamBrowserifyPath)) {
+          let content = fs.readFileSync(streamBrowserifyPath, 'utf8');
+          content = content.replace(/module\.exports\s*=\s*/, 'var streamBrowserifyExports = ');
+          content += '\nexport default streamBrowserifyExports;';
+          fs.writeFileSync(streamBrowserifyPath, content);
         }
       }
     },
