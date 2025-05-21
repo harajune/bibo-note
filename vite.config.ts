@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: [
         'fast-xml-parser',
-        '@aws-sdk/client-s3'
+        '@aws-sdk/client-s3',
+        'stream-browserify',
+        'path-browserify'
       ],
       force: true,
       esbuildOptions: {
