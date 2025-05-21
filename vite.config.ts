@@ -26,9 +26,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'fast-xml-parser': '/app/lib/xml-parser-wrapper.js',
-      'path-browserify': '/app/lib/path-browserify-wrapper.js',
-      'stream-browserify': '/app/lib/stream-browserify-wrapper.js',
+      'fast-xml-parser': './app/lib/xml-parser-wrapper.js',
+      'path-browserify': './app/lib/path-browserify-wrapper.js',
+      'stream-browserify': './app/lib/stream-browserify-wrapper.js',
       'stream': 'stream-browserify',
       'path': 'path-browserify'
     }
