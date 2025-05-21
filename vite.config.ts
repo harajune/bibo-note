@@ -4,6 +4,7 @@ import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import commonjs from '@rollup/plugin-commonjs'
+import { cjsInterop } from 'vite-plugin-cjs-interop'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -35,6 +36,14 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
+      cjsInterop({
+        dependencies: [
+          'fast-xml-parser',
+          'stream-browserify',
+          'path-browserify',
+          '@aws-sdk/**'
+        ]
+      }),
       commonjs(),
       nodePolyfills({
         globals: {

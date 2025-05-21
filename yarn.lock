@@ -1802,6 +1802,69 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oxc-parser/binding-darwin-arm64@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-darwin-arm64@npm:0.36.0"
+  conditions: os=darwin & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-darwin-x64@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-darwin-x64@npm:0.36.0"
+  conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-linux-arm64-gnu@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-linux-arm64-gnu@npm:0.36.0"
+  conditions: os=linux & cpu=arm64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-linux-arm64-musl@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-linux-arm64-musl@npm:0.36.0"
+  conditions: os=linux & cpu=arm64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-linux-x64-gnu@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-linux-x64-gnu@npm:0.36.0"
+  conditions: os=linux & cpu=x64 & libc=glibc
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-linux-x64-musl@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-linux-x64-musl@npm:0.36.0"
+  conditions: os=linux & cpu=x64 & libc=musl
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-win32-arm64-msvc@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-win32-arm64-msvc@npm:0.36.0"
+  conditions: os=win32 & cpu=arm64
+  languageName: node
+  linkType: hard
+
+"@oxc-parser/binding-win32-x64-msvc@npm:0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-parser/binding-win32-x64-msvc@npm:0.36.0"
+  conditions: os=win32 & cpu=x64
+  languageName: node
+  linkType: hard
+
+"@oxc-project/types@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "@oxc-project/types@npm:0.36.0"
+  checksum: 10c0/5fc5fd2af25da93e574ab69be819ba691fc881ed27a532867ae133100b82713535c6ece6ff8eeaf7f2bf0f7b3ccd89206902e4cf240b75aa877334e2d628cf24
+  languageName: node
+  linkType: hard
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -3167,6 +3230,7 @@ __metadata:
     tsx: "npm:^4.19.3"
     uuid: "npm:^11.0.5"
     vite: "npm:^5.2.12"
+    vite-plugin-cjs-interop: "npm:^2.2.0"
     vite-plugin-node-polyfills: "npm:^0.23.0"
     vitest: "npm:^2.1.8"
     wrangler: "npm:^3.57.2"
@@ -5568,7 +5632,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"magic-string@npm:^0.30.11, magic-string@npm:^0.30.12, magic-string@npm:^0.30.3":
+"magic-string@npm:^0.30.11, magic-string@npm:^0.30.12, magic-string@npm:^0.30.17, magic-string@npm:^0.30.3":
   version: 0.30.17
   resolution: "magic-string@npm:0.30.17"
   dependencies:
@@ -5720,6 +5784,15 @@ __metadata:
   version: 1.0.1
   resolution: "minimalistic-crypto-utils@npm:1.0.1"
   checksum: 10c0/790ecec8c5c73973a4fbf2c663d911033e8494d5fb0960a4500634766ab05d6107d20af896ca2132e7031741f19888154d44b2408ada0852446705441383e9f8
+  languageName: node
+  linkType: hard
+
+"minimatch@npm:^10.0.1":
+  version: 10.0.1
+  resolution: "minimatch@npm:10.0.1"
+  dependencies:
+    brace-expansion: "npm:^2.0.1"
+  checksum: 10c0/e6c29a81fe83e1877ad51348306be2e8aeca18c88fdee7a99df44322314279e15799e41d7cb274e4e8bb0b451a3bc622d6182e157dfa1717d6cda75e9cd8cd5d
   languageName: node
   linkType: hard
 
@@ -6059,6 +6132,40 @@ __metadata:
   version: 0.3.0
   resolution: "os-browserify@npm:0.3.0"
   checksum: 10c0/6ff32cb1efe2bc6930ad0fd4c50e30c38010aee909eba8d65be60af55efd6cbb48f0287e3649b4e3f3a63dce5a667b23c187c4293a75e557f0d5489d735bcf52
+  languageName: node
+  linkType: hard
+
+"oxc-parser@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "oxc-parser@npm:0.36.0"
+  dependencies:
+    "@oxc-parser/binding-darwin-arm64": "npm:0.36.0"
+    "@oxc-parser/binding-darwin-x64": "npm:0.36.0"
+    "@oxc-parser/binding-linux-arm64-gnu": "npm:0.36.0"
+    "@oxc-parser/binding-linux-arm64-musl": "npm:0.36.0"
+    "@oxc-parser/binding-linux-x64-gnu": "npm:0.36.0"
+    "@oxc-parser/binding-linux-x64-musl": "npm:0.36.0"
+    "@oxc-parser/binding-win32-arm64-msvc": "npm:0.36.0"
+    "@oxc-parser/binding-win32-x64-msvc": "npm:0.36.0"
+    "@oxc-project/types": "npm:^0.36.0"
+  dependenciesMeta:
+    "@oxc-parser/binding-darwin-arm64":
+      optional: true
+    "@oxc-parser/binding-darwin-x64":
+      optional: true
+    "@oxc-parser/binding-linux-arm64-gnu":
+      optional: true
+    "@oxc-parser/binding-linux-arm64-musl":
+      optional: true
+    "@oxc-parser/binding-linux-x64-gnu":
+      optional: true
+    "@oxc-parser/binding-linux-x64-musl":
+      optional: true
+    "@oxc-parser/binding-win32-arm64-msvc":
+      optional: true
+    "@oxc-parser/binding-win32-x64-msvc":
+      optional: true
+  checksum: 10c0/7cc9cb102eb5aa89e7d5229b3c860fb904bad96f047515190d7f1e5903be8bbc6fc95ec7bc222ee7d6ddecb1bc5486797769554a7ac89efe9aeabe404b35bc99
   languageName: node
   linkType: hard
 
@@ -7619,6 +7726,20 @@ __metadata:
   bin:
     vite-node: vite-node.mjs
   checksum: 10c0/0d3589f9f4e9cff696b5b49681fdb75d1638c75053728be52b4013f70792f38cb0120a9c15e3a4b22bdd6b795ad7c2da13bcaf47242d439f0906049e73bdd756
+  languageName: node
+  linkType: hard
+
+"vite-plugin-cjs-interop@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "vite-plugin-cjs-interop@npm:2.2.0"
+  dependencies:
+    estree-walker: "npm:^3.0.3"
+    magic-string: "npm:^0.30.17"
+    minimatch: "npm:^10.0.1"
+    oxc-parser: "npm:^0.36.0"
+  peerDependencies:
+    vite: 4 || 5 || 6
+  checksum: 10c0/91e457c68d4217b97b9d8d629f7c33d7ab138b9292c5af6a9a1999050425c347b1ca979ccef5285d7a9ec38c0cb0cab6dcba423c2bd0f50b74b4c052bfad5aef
   languageName: node
   linkType: hard
 
