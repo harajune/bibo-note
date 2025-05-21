@@ -3,6 +3,7 @@ import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import commonjs from '@rollup/plugin-commonjs'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -34,6 +35,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
+      commonjs(),
       nodePolyfills({
         globals: {
           Buffer: true,
