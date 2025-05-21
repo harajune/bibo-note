@@ -27,23 +27,22 @@ export default defineConfig({
       },
       protocolImports: true,
     }),
-      honox({
-        client: {
-          input: ['/app/global.css'],
-        },
-        devServer: { 
-          adapter
-        } 
-      }), 
-      build({
-        outputDir: 'dist/worker',
-      })
-    ],
-    resolve: {
-      alias: {
-        'stream': 'stream-browserify',
-        'path': 'path-browserify'
-      }
+    honox({
+      client: {
+        input: ['/app/global.css'],
+      },
+      devServer: { 
+        adapter
+      } 
+    }), 
+    build({
+      outputDir: 'dist/worker',
+    })
+  ],
+  resolve: {
+    alias: {
+      'stream': 'stream-browserify',
+      'path': 'path-browserify'
     }
   }
 })
