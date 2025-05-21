@@ -3,6 +3,8 @@ import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import fs from 'fs'
+import path from 'path'
 
 export default defineConfig({
   build: {
@@ -15,31 +17,35 @@ export default defineConfig({
     ],
     esbuildOptions: {
       define: {
-        global: 'globalThis'
+        global: 'globalThis',
+        module: '{}'
       }
     }
   },
+  define: {
+    'module': '{}',
+    'global': 'globalThis'
+  },
   plugins: [
     {
-      name: 'inject-module-global',
-      transformIndexHtml() {
-        return [
-          {
-            tag: 'script',
-            attrs: { type: 'text/javascript' },
-            children: `
-              window.module = window.module || {};
-              window.require = window.require || function(mod) {
-                console.log('Polyfilled require called for:', mod);
-                if (mod === 'stream-browserify') return window.streamBrowserify;
-                if (mod === 'path-browserify') return window.pathBrowserify;
-                if (mod === 'fast-xml-parser') return window.fastXmlParser;
-                throw new Error('Module not found: ' + mod);
-              };
-            `,
-            injectTo: 'head-prepend'
-          }
-        ];
+      name: 'patch-commonjs-modules',
+      configResolved() {
+        const pathBrowserifyPath = path.resolve(__dirname, 'node_modules/path-browserify/index.js');
+        if (fs.existsSync(pathBrowserifyPath)) {
+          let content = fs.readFileSync(pathBrowserifyPath, 'utf8');
+          content = content.replace(/module\.exports\s*=\s*/, 'var pathBrowserifyExports = ');
+          content += '\nexport default pathBrowserifyExports;';
+          fs.writeFileSync(pathBrowserifyPath, content);
+        }
+        
+        const fxpPath = path.resolve(__dirname, 'node_modules/fast-xml-parser/src/fxp.js');
+        if (fs.existsSync(fxpPath)) {
+          let content = fs.readFileSync(fxpPath, 'utf8');
+          content = content.replace(/require\(/g, 'import(');
+          content = content.replace(/module\.exports\s*=\s*/, 'var fxpExports = ');
+          content += '\nexport default fxpExports;';
+          fs.writeFileSync(fxpPath, content);
+        }
       }
     },
     nodePolyfills({
