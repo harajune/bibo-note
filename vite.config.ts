@@ -65,8 +65,7 @@ export default defineConfig({
       },
       protocolImports: true,
       overrides: {
-        stream: 'stream-browserify',
-        path: 'path-browserify'
+        stream: 'stream-browserify'
       }
     }),
     honox({
