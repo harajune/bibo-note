@@ -17,14 +17,21 @@ export default defineConfig({
     ],
     esbuildOptions: {
       define: {
-        global: 'globalThis',
-        module: '{}'
+        global: 'globalThis'
       }
     }
   },
   define: {
-    'module': '{}',
     'global': 'globalThis'
+  },
+  resolve: {
+    alias: {
+      'fast-xml-parser': '/app/lib/xml-parser-wrapper.js',
+      'path-browserify': '/app/lib/path-browserify-wrapper.js',
+      'stream-browserify': '/app/lib/stream-browserify-wrapper.js',
+      'stream': 'stream-browserify',
+      'path': 'path-browserify'
+    }
   },
   plugins: [
     {
@@ -71,11 +78,5 @@ export default defineConfig({
     build({
       outputDir: 'dist/worker',
     })
-  ],
-  resolve: {
-    alias: {
-      'stream': 'stream-browserify',
-      'path': 'path-browserify'
-    }
-  }
+  ]
 })
