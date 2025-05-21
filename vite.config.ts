@@ -8,6 +8,12 @@ export default defineConfig(({ mode }) => {
     build: {
       copyPublicDir: false
     },
+    optimizeDeps: {
+      include: [
+        'fast-xml-parser',
+        '@aws-sdk/client-s3'
+      ]
+    },
     plugins: [
       honox({
         client: {
