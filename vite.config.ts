@@ -3,6 +3,7 @@ import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import commonjs from '@rollup/plugin-commonjs'
 
 export default defineConfig({
   build: {
@@ -20,6 +21,15 @@ export default defineConfig({
     'module': '{}'
   },
   plugins: [
+    commonjs({
+      transformMixedEsModules: true,
+      requireReturnsDefault: 'auto',
+      dynamicRequireTargets: [
+        'node_modules/stream-browserify/**/*.js',
+        'node_modules/path-browserify/**/*.js',
+        'node_modules/fast-xml-parser/**/*.js'
+      ]
+    }),
     nodePolyfills({
       globals: {
         Buffer: true,
