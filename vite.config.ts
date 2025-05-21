@@ -14,7 +14,17 @@ export default defineConfig(({ mode }) => {
         'fast-xml-parser',
         '@aws-sdk/client-s3'
       ],
-      force: true
+      force: true,
+      esbuildOptions: {
+        define: {
+          global: 'globalThis'
+        }
+      }
+    },
+    define: {
+      'process.env': {},
+      'global': 'globalThis',
+      'module': '{}'
     },
     server: {
       hmr: {
@@ -23,6 +33,11 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       nodePolyfills({
+        globals: {
+          Buffer: true,
+          global: true,
+          process: true,
+        },
         protocolImports: true,
       }),
       honox({
