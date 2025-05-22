@@ -55,6 +55,15 @@ export class WikiModel {
     return await this.rebuildCache(limit);
   }
 
+  /**
+   * Rebuilds the entire article list cache from scratch by fetching all articles.
+   * This is a more expensive operation that loads all articles from storage,
+   * sorts them chronologically by UUID (which is UUIDv7), and creates a new cache.
+   * Used when the cache doesn't exist or is invalid.
+   * 
+   * @param limit Maximum number of articles to include in the cache
+   * @returns List of article metadata items
+   */
   private async rebuildCache(limit = 20): Promise<ArticleListItem[]> {
     const uuids = await this.list();
     
@@ -79,6 +88,15 @@ export class WikiModel {
     return articleList;
   }
 
+  /**
+   * Updates the existing article list cache when a single article is created or modified.
+   * This is a more efficient operation than rebuildCache as it only updates the cache
+   * for the specific article without loading all articles from storage.
+   * It removes the article if it exists in the cache, adds it to the top of the list,
+   * and ensures the list doesn't exceed the limit.
+   * 
+   * @param wikiData The article data to update in the cache
+   */
   private async updateCache(wikiData: WikiData): Promise<void> {
     try {
       let articleList: ArticleListItem[] = [];

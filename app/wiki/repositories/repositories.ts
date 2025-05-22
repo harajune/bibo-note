@@ -346,9 +346,9 @@ export class S3Repository implements Repository {
     const user = this.context.get('user');
     
     if (envVariables.MULTITENANT === '1' && user) {
-      return `${user}/cache/article_list_cache.json`;
+      return `${user}/article_list_cache.json`;
     }
-    return 'cache/article_list_cache.json';
+    return 'article_list_cache.json';
   }
   
   public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
