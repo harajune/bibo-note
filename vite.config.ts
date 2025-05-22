@@ -10,11 +10,12 @@ export default defineConfig(({ mode }) => {
       copyPublicDir: false
     },
     optimizeDeps: {
-      include: ['fast-xml-parser'],
+      exclude: ['@aws-sdk/client-s3'],
       esbuildOptions: {
         define: {
           global: 'globalThis'
-        }
+        },
+        platform: 'node'
       }
     },
     resolve: {
@@ -23,7 +24,8 @@ export default defineConfig(({ mode }) => {
     plugins: [
       commonjs({
         transformMixedEsModules: true,
-        requireReturnsDefault: 'auto'
+        requireReturnsDefault: 'auto',
+        ignoreDynamicRequires: true
       }),
       honox({
         client: {
