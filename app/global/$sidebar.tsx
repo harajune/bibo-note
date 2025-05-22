@@ -1,4 +1,6 @@
 import { useState } from 'hono/jsx'
+import { ArticleListItem } from '../wiki/models/wiki_model';
+
 interface MenuItem {
   name: string;
   href: string;
@@ -19,14 +21,28 @@ interface HeaderItem {
 
 interface SidebarProps {
   children: MenuSection[];
+  articles?: ArticleListItem[];
 }
 
-export function Sidebar({ children }: SidebarProps) {
+export function Sidebar({ children, articles = [] }: SidebarProps) {
   const [isOpen, setOpen] = useState(false);
+
+  const allSections = [...children];
+  if (articles.length > 0) {
+    allSections.push({
+      header: { name: "Recent Articles" },
+      children: articles.map(article => ({
+        name: article.title || "Untitled",
+        href: `/v/${article.uuid}`,
+        current: false,
+        icon: <span class="size-5 flex-none text-gray-400">📄</span>
+      }))
+    });
+  }
 
   return (
     <>
-      {isOpen && <NarrowScreenSidebar isOpen={isOpen} setOpen={setOpen} children={children} />}
+      {isOpen && <NarrowScreenSidebar isOpen={isOpen} setOpen={setOpen} children={allSections} />}
 
       <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
@@ -39,7 +55,7 @@ export function Sidebar({ children }: SidebarProps) {
           </div>
           <nav class="flex flex-1 flex-col">
             <ul role="list" class="flex flex-1 flex-col gap-y-7">
-              {children.map((section) => renderSection(section))}
+              {allSections.map((section) => renderSection(section))}
             </ul>
           </nav>
         </div>
