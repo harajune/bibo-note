@@ -1,12 +1,14 @@
 import { Sidebar } from "../../global/$sidebar";
 import { WikiData } from "../models/wiki_data";
 import { DashboardIcon } from "../../global/$icons";
+import { ArticleListItem } from "../models/wiki_model";
 
 interface EditorProps {
   wikiData: WikiData;
+  articles?: ArticleListItem[];
 }
 
-export function Editor({ wikiData }: EditorProps) {
+export function Editor({ wikiData, articles }: EditorProps) {
   const menuSections = [
     {
       children: [
@@ -32,7 +34,7 @@ export function Editor({ wikiData }: EditorProps) {
   ];
   return (
     <div>
-      <Sidebar children={menuSections} />
+      <Sidebar children={menuSections} articles={articles} />
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8">
 

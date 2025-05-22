@@ -10,7 +10,10 @@ export default createRoute(async (c) => {
   if (!wikiData) {
     return c.notFound();
   }
-  return c.render(<Editor wikiData={wikiData} />,
+  
+  const articles = await wikiModel.getLatestArticles();
+  
+  return c.render(<Editor wikiData={wikiData} articles={articles} />,
      { title: wikiData.title });
 });
 

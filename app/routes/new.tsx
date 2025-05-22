@@ -5,7 +5,8 @@ import { createImmutable } from "../libs/immutable/immutable";
 import { v7 as uuidv7 } from "uuid";
 import { WikiData } from "../wiki/models/wiki_data";
 import { logger } from "../libs/logger/logger";
-export default createRoute((c) => {
+export default createRoute(async (c) => {
+  const wikiModel = new WikiModel();
   const blankWikiData = new WikiData(
     "",  // uuid
     "",  // title
@@ -14,7 +15,9 @@ export default createRoute((c) => {
     new Date()  // createdAt
   );
   
-  return c.render(<Editor wikiData={blankWikiData} />,
+  const articles = await wikiModel.getLatestArticles();
+  
+  return c.render(<Editor wikiData={blankWikiData} articles={articles} />,
      { title: "New Article" });
 });
 

@@ -2,12 +2,14 @@ import { Sidebar } from "../../global/$sidebar";
 import { DashboardIcon } from "../../global/$icons";
 import { SyntaxParser } from "../../libs/syntax_parser/syntax_parser";
 import { WikiData } from "../models/wiki_data";
+import { ArticleListItem } from "../models/wiki_model";
 
 interface ViewerProps {
   wikiData: WikiData;
+  articles?: ArticleListItem[];
 }
 
-export function Viewer({ wikiData }: ViewerProps) {
+export function Viewer({ wikiData, articles }: ViewerProps) {
   const menuSections = [
     {
       children: [{
@@ -37,7 +39,7 @@ export function Viewer({ wikiData }: ViewerProps) {
 
   return (
     <div>
-      <Sidebar children={menuSections} />
+      <Sidebar children={menuSections} articles={articles} />
 
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8" id="wiki-content">

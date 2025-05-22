@@ -76,7 +76,11 @@ export class FileRepository implements Repository {
   }
 
   public list(): UUID[] {
-    return [];
+    const basePath = this.getUserBasePath();
+    const files = fs.readdirSync(basePath);
+    return files
+      .filter(file => file.endsWith('.toml'))
+      .map(file => file.replace('.toml', ''));
   }
 
   public isExists(uuid: UUID): boolean {
