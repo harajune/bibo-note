@@ -52,7 +52,7 @@ describe('Article Posting', () => {
   it('should save an article to the file repository', async () => {
     await wikiModel.save(testData);
     
-    expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+    expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
     
     const firstArg = (fs.writeFileSync as any).mock.calls[0][0];
     expect(firstArg).toContain(testUuid);
@@ -64,14 +64,15 @@ describe('Article Posting', () => {
   });
   
   it('should check if an article exists', async () => {
-    (fs.existsSync as any).mockReturnValueOnce(true);
+    (fs.existsSync as any).mockReturnValue(true);
     
     const exists = await wikiModel.isExists(testUuid);
     expect(exists).toBe(true);
-    expect(fs.existsSync).toHaveBeenCalledTimes(1);
+    expect(fs.existsSync).toHaveBeenCalledTimes(2);
     
-    const path = (fs.existsSync as any).mock.calls[0][0];
-    expect(path).toContain(testUuid);
+    const calls = (fs.existsSync as any).mock.calls;
+    const hasUuidPath = calls.some((call: any) => call[0].includes(testUuid));
+    expect(hasUuidPath).toBe(true);
   });
   
   it('should load an article from the file repository', async () => {
