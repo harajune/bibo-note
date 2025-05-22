@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WikiModel } from '../app/wiki/models/wiki_model';
 import { WikiData } from '../app/wiki/models/wiki_data';
-import { FileRepository } from '../app/wiki/repositories/repositories';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { v7 as uuidv7 } from "uuid";
 
 vi.mock('hono/context-storage', () => ({
@@ -64,15 +62,16 @@ describe('Article Posting', () => {
   });
   
   it('should check if an article exists', async () => {
-    (fs.existsSync as any).mockReturnValue(true);
+    (fs.existsSync as any).mockImplementation((path: string) => {
+      return path.includes(testUuid);
+    });
     
     const exists = await wikiModel.isExists(testUuid);
     expect(exists).toBe(true);
     expect(fs.existsSync).toHaveBeenCalledTimes(2);
     
-    const calls = (fs.existsSync as any).mock.calls;
-    const hasUuidPath = calls.some((call: any) => call[0].includes(testUuid));
-    expect(hasUuidPath).toBe(true);
+    const path = (fs.existsSync as any).mock.calls[1][0];
+    expect(path).toContain(testUuid);
   });
   
   it('should load an article from the file repository', async () => {
