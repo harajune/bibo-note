@@ -14,7 +14,7 @@ export class SyntaxParser {
   }
 
   private parseDocument(): JSXNode {
-    const elements: Child[] = [];
+    const elements = [];
     while (this.pos < this.lines.length) {
       const block = this.parseBlock();
       if (block) {
@@ -75,7 +75,7 @@ export class SyntaxParser {
   }
 
   private parseList(): JSXNode {
-    const items: Child[] = [];
+    const items = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('-')) {
       const text = this.lines[this.pos].substring(1);
       items.push(createElement('li', null, text));
@@ -85,7 +85,7 @@ export class SyntaxParser {
   }
 
   private parseNumberedList(): JSXNode {
-    const items: Child[] = [];
+    const items = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('+')) {
       const text = this.lines[this.pos].substring(1);
       items.push(createElement('li', null, text));
@@ -96,7 +96,7 @@ export class SyntaxParser {
 
   private parseInlineText(text: string): Child | Child[] {
     // Process bold and italic text
-    const parts: Child[] = [];
+    const parts = [];
     let currentText = '';
     let i = 0;
     
@@ -154,7 +154,7 @@ export class SyntaxParser {
   }
   
   private processItalic(text: string): Child | Child[] {
-    const parts: Child[] = [];
+    const parts = [];
     let currentText = '';
     let i = 0;
     
