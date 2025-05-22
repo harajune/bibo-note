@@ -93,13 +93,20 @@ export class FileRepository implements Repository {
   }
 
   private getFilePath(uuid: UUID): string {
-    return path.join(this.getUserBasePath(), `${uuid}.toml`);
+    const basePath = this.getUserBasePath();
+    const dataDir = path.join(basePath, 'data');
+    
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    
+    return path.join(dataDir, `${uuid}.toml`);
   }
   
   public getCacheFilePath(): string {
     const basePath = this.getUserBasePath();
-    const cacheDir = path.join(path.dirname(basePath), 'cache');
-    return path.join(cacheDir, 'article_list_cache.json');
+    const tenantDir = path.dirname(basePath);
+    return path.join(tenantDir, 'cache', 'article_list_cache.json');
   }
   
   public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
@@ -257,9 +264,9 @@ export class S3Repository implements Repository {
     const user = this.context.get('user');
 
     if (envVariables.MULTITENANT === '1' && user) {
-      return `${user}/${uuid}.toml`;
+      return `${user}/data/${uuid}.toml`;
     }
-    return `${uuid}.toml`;
+    return `data/${uuid}.toml`;
   }
 
   public async save(data: WikiData): Promise<void> {
@@ -314,7 +321,7 @@ export class S3Repository implements Repository {
   public async list(): Promise<UUID[]> {
     const envVariables = env<{ MULTITENANT: string }>(this.context);
     const user = this.context.get('user');
-    const prefix = envVariables.MULTITENANT === '1' && user ? `${user}/` : '';
+    const prefix = envVariables.MULTITENANT === '1' && user ? `${user}/data/` : 'data/';
 
     const res = await this.s3Client.send(new ListObjectsCommand({
       Bucket: this.bucketName,
@@ -346,9 +353,9 @@ export class S3Repository implements Repository {
     const user = this.context.get('user');
     
     if (envVariables.MULTITENANT === '1' && user) {
-      return `${user}/article_list_cache.json`;
+      return `${user}/cache/article_list_cache.json`;
     }
-    return 'article_list_cache.json';
+    return `cache/article_list_cache.json`;
   }
   
   public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
