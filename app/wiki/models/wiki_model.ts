@@ -29,7 +29,12 @@ export class WikiModel {
       this.cacheFilePath = '/tmp/article_list_cache.json';
     } else {
       this.repository = new FileRepository("./data");
-      this.cacheFilePath = './data/article_list_cache.json';
+      this.cacheFilePath = './cache/article_list_cache.json';
+      
+      const cacheDir = path.dirname(this.cacheFilePath);
+      if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+      }
     }
   }
 
