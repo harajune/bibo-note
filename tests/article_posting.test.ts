@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WikiModel } from '../app/wiki/models/wiki_model';
 import { WikiData } from '../app/wiki/models/wiki_data';
-import { FileRepository } from '../app/wiki/repositories/repositories';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { v7 as uuidv7 } from "uuid";
 
 vi.mock('hono/context-storage', () => ({
