@@ -44,7 +44,7 @@ export function Viewer({ wikiData, articles }: ViewerProps) {
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8" id="wiki-content">
           <h1>{title}</h1>
-          <div dangerouslySetInnerHTML={{ __html: content }} />
+          <div>{content}</div>
         </div>
       </main>
     </div>
