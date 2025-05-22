@@ -113,8 +113,7 @@ export class FileRepository implements Repository {
   
   public getCacheFilePath(): string {
     const basePath = this.getUserBasePath();
-    const tenantDir = path.dirname(basePath);
-    return path.join(tenantDir, 'cache', 'article_list_cache.json');
+    return path.join(basePath, 'cache', 'article_list_cache.json');
   }
   
   public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
