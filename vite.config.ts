@@ -7,15 +7,18 @@ import commonjs from '@rollup/plugin-commonjs'
 export default defineConfig(({ mode }) => {
   return {
     build: {
-      copyPublicDir: false
+      copyPublicDir: false,
+      commonjsOptions: {
+        transformMixedEsModules: true
+      }
     },
     optimizeDeps: {
+      include: ['fast-xml-parser'],
       exclude: ['@aws-sdk/client-s3'],
       esbuildOptions: {
         define: {
           global: 'globalThis'
-        },
-        platform: 'node'
+        }
       }
     },
     resolve: {
