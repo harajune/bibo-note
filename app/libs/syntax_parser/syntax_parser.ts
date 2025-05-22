@@ -5,14 +5,14 @@ export class SyntaxParser {
   private input: string = '';
   private lines: string[] = [];
 
-  parse(input: string) {
+  parse(input: string): ReturnType<typeof createElement> {
     this.pos = 0;
     this.input = input;
     this.lines = input.split('\n');
     return this.parseDocument();
   }
 
-  private parseDocument() {
+  private parseDocument(): ReturnType<typeof createElement> {
     const elements = [];
     while (this.pos < this.lines.length) {
       const block = this.parseBlock();
@@ -23,7 +23,7 @@ export class SyntaxParser {
     return createElement(Fragment, null, ...elements);
   }
 
-  private parseBlock() {
+  private parseBlock(): ReturnType<typeof createElement> | null {
     const line = this.lines[this.pos];
     
     if (!line) {
@@ -44,25 +44,25 @@ export class SyntaxParser {
   }
 
   // Because the page should have the title, the heading should start with h2
-  private parseHeading1() {
+  private parseHeading1(): ReturnType<typeof createElement> {
     const text = this.lines[this.pos].substring(2);
     this.pos++;
     return createElement('h2', null, text);
   }
 
-  private parseHeading2() {
+  private parseHeading2(): ReturnType<typeof createElement> {
     const text = this.lines[this.pos].substring(3);
     this.pos++;
     return createElement('h3', null, text);
   }
 
-  private parseHeading3() {
+  private parseHeading3(): ReturnType<typeof createElement> {
     const text = this.lines[this.pos].substring(4);
     this.pos++;
     return createElement('h4', null, text);
   }
 
-  private parseParagraph() {
+  private parseParagraph(): ReturnType<typeof createElement> {
     let textContent = '';
     while (this.pos < this.lines.length && this.lines[this.pos].trim() !== '') {
       textContent += this.lines[this.pos] + ' ';
@@ -73,7 +73,7 @@ export class SyntaxParser {
     return createElement('p', null, this.parseInlineText(textContent.trim()));
   }
 
-  private parseList() {
+  private parseList(): ReturnType<typeof createElement> {
     const items = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('-')) {
       const text = this.lines[this.pos].substring(1);
@@ -83,7 +83,7 @@ export class SyntaxParser {
     return createElement('ul', null, ...items);
   }
 
-  private parseNumberedList() {
+  private parseNumberedList(): ReturnType<typeof createElement> {
     const items = [];
     while (this.pos < this.lines.length && this.lines[this.pos].startsWith('+')) {
       const text = this.lines[this.pos].substring(1);
@@ -93,7 +93,7 @@ export class SyntaxParser {
     return createElement('ol', null, ...items);
   }
 
-  private parseInlineText(text: string) {
+  private parseInlineText(text: string): ReturnType<typeof createElement> | ReturnType<typeof createElement>[] {
     // Process bold and italic text
     const parts = [];
     let currentText = '';
@@ -152,7 +152,7 @@ export class SyntaxParser {
     return parts.length === 1 ? parts[0] : parts;
   }
   
-  private processItalic(text: string) {
+  private processItalic(text: string): ReturnType<typeof createElement> | ReturnType<typeof createElement>[] {
     const parts = [];
     let currentText = '';
     let i = 0;
