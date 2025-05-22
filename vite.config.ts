@@ -16,12 +16,6 @@ export default defineConfig(({ mode }) => {
       build({
         outputDir: 'dist/worker',
       })
-    ],
-    test: {
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'json', 'html'],
-      },
-    }
+    ]
   }
 })
