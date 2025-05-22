@@ -3,7 +3,6 @@ import adapter from '@hono/vite-dev-server/cloudflare'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 import commonjs from '@rollup/plugin-commonjs'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -23,10 +22,12 @@ export default defineConfig(({ mode }) => {
       }
     },
     resolve: {
-      mainFields: ['module', 'jsnext:main', 'jsnext', 'browser', 'main']
+      mainFields: ['module', 'jsnext:main', 'jsnext', 'browser', 'main'],
+      alias: {
+        path: 'path-browserify'
+      }
     },
     plugins: [
-      nodePolyfills(),
       commonjs({
         transformMixedEsModules: true,
         requireReturnsDefault: 'auto',
