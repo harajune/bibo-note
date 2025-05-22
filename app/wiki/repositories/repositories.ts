@@ -6,11 +6,16 @@ import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsCommand, HeadO
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
 import { logger } from "../../libs/logger/logger";
+import { ArticleListItem } from "../models/wiki_model";
 export interface Repository {
   save(data: WikiData): void | Promise<void>;
   load(uuid: UUID): WikiData | Promise<WikiData | null>;
   list(): UUID[] | Promise<UUID[]>;
   isExists(uuid: UUID): boolean | Promise<boolean>;
+  
+  saveArticleListCache(articles: ArticleListItem[]): void | Promise<void>;
+  loadArticleListCache(): Promise<ArticleListItem[] | null>;
+  getCacheFilePath(): string;
 }
 
 export class FileRepository implements Repository {
@@ -90,6 +95,38 @@ export class FileRepository implements Repository {
   private getFilePath(uuid: UUID): string {
     return path.join(this.getUserBasePath(), `${uuid}.toml`);
   }
+  
+  public getCacheFilePath(): string {
+    const basePath = this.getUserBasePath();
+    const cacheDir = path.join(path.dirname(basePath), 'cache');
+    return path.join(cacheDir, 'article_list_cache.json');
+  }
+  
+  public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
+    const cacheFilePath = this.getCacheFilePath();
+    const cacheDir = path.dirname(cacheFilePath);
+    
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+    }
+    
+    fs.writeFileSync(cacheFilePath, JSON.stringify(articles), 'utf-8');
+  }
+  
+  public async loadArticleListCache(): Promise<ArticleListItem[] | null> {
+    const cacheFilePath = this.getCacheFilePath();
+    
+    try {
+      if (fs.existsSync(cacheFilePath)) {
+        const cacheData = fs.readFileSync(cacheFilePath, 'utf-8');
+        return JSON.parse(cacheData) as ArticleListItem[];
+      }
+    } catch (error) {
+      console.error('Failed to read cache file:', error);
+    }
+    
+    return null;
+  }
 }
 
 export class R2Repository implements Repository {
@@ -145,6 +182,29 @@ export class R2Repository implements Repository {
   public async isExists(uuid: UUID): Promise<boolean> {
     const object = await this.bucket.head(`${uuid}.toml`);
     return object !== null;
+  }
+  
+  public getCacheFilePath(): string {
+    return 'cache/article_list_cache.json';
+  }
+  
+  public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
+    await this.bucket.put(this.getCacheFilePath(), JSON.stringify(articles));
+  }
+  
+  public async loadArticleListCache(): Promise<ArticleListItem[] | null> {
+    try {
+      const object = await this.bucket.get(this.getCacheFilePath());
+      if (!object) {
+        return null;
+      }
+      
+      const cacheData = await object.text();
+      return JSON.parse(cacheData) as ArticleListItem[];
+    } catch (error) {
+      console.error('Failed to read cache file:', error);
+      return null;
+    }
   }
 }
 
@@ -279,5 +339,41 @@ export class S3Repository implements Repository {
     } catch (e) {
       return false;
     }
+  }
+  
+  public getCacheFilePath(): string {
+    const envVariables = env<{ MULTITENANT: string }>(this.context);
+    const user = this.context.get('user');
+    
+    if (envVariables.MULTITENANT === '1' && user) {
+      return `${user}/cache/article_list_cache.json`;
+    }
+    return 'cache/article_list_cache.json';
+  }
+  
+  public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
+    await this.s3Client.send(new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: this.getCacheFilePath(),
+      Body: JSON.stringify(articles)
+    }));
+  }
+  
+  public async loadArticleListCache(): Promise<ArticleListItem[] | null> {
+    try {
+      const response = await this.s3Client.send(new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: this.getCacheFilePath()
+      }));
+      
+      const body = await response.Body?.transformToString();
+      if (body) {
+        return JSON.parse(body) as ArticleListItem[];
+      }
+    } catch (error) {
+      console.error('Failed to read S3 cache file:', error);
+    }
+    
+    return null;
   }
 }
