@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebar Article List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+    .sidebar {
+      width: 300px;
+      background-color: #f5f5f5;
+      height: 100vh;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .article-list {
+      list-style: none;
+      padding: 0;
+    }
+    .article-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .article-item a {
+      text-decoration: none;
+      color: #333;
+      display: flex;
+      align-items: center;
+    }
+    .article-item a:hover {
+      color: #0066cc;
+    }
+    .article-icon {
+      margin-right: 10px;
+      color: #999;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Recent Articles</h2>
+    <ul class="article-list">
+      <li class="article-item">
+        <a href="/v/01h9xz3r5e8n6j7k8l9m0n1o2">
+          <span class="article-icon">📄</span>
+          Getting Started with Bibo-Note
+        </a>
+      </li>
+      <li class="article-item">
+        <a href="/v/01h9xz3r5e8n6j7k8l9m0n1p3">
+          <span class="article-icon">📄</span>
+          How to Create Articles
+        </a>
+      </li>
+      <li class="article-item">
+        <a href="/v/01h9xz3r5e8n6j7k8l9m0n1q4">
+          <span class="article-icon">📄</span>
+          Markdown Support
+        </a>
+      </li>
+      <li class="article-item">
+        <a href="/v/01h9xz3r5e8n6j7k8l9m0n1r5">
+          <span class="article-icon">📄</span>
+          Multi-tenant Support
+        </a>
+      </li>
+      <li class="article-item">
+        <a href="/v/01h9xz3r5e8n6j7k8l9m0n1s6">
+          <span class="article-icon">📄</span>
+          Cloudflare Integration
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="main-content">
+    <h1>Sidebar Article List with Caching</h1>
+    <p>This mockup demonstrates the sidebar article list functionality with caching.</p>
+    <p>The sidebar shows the latest articles sorted chronologically by UUIDv7.</p>
+    <p>The cache is updated when articles are created or modified.</p>
+    <p>Directory structure:</p>
+    <ul>
+      <li><code>tenant/data/uuid.toml</code> - Article files</li>
+      <li><code>tenant/cache/article_list_cache.json</code> - Cache files</li>
+    </ul>
+    <h2>Implementation Details</h2>
+    <p>The implementation follows these key principles:</p>
+    <ul>
+      <li>Repository classes handle all data access operations</li>
+      <li>Each repository implementation determines the appropriate file paths based on environment and tenant</li>
+      <li>Cache files are stored in a dedicated cache directory</li>
+      <li>Article files are stored in a dedicated data directory</li>
+      <li>Multi-tenant support is maintained with proper isolation</li>
+    </ul>
+    <h2>Directory Structure</h2>
+    <pre>
+tenant/
+  ├── data/
+  │   ├── article1.toml
+  │   ├── article2.toml
+  │   └── ...
+  └── cache/
+      └── article_list_cache.json
+    </pre>
+  </div>
+</body>
+</html>
