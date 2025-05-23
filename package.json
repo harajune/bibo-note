@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250204.0",
-    "@hono/vite-build": "../vite-plugins/packages/build",
+    "@hono/vite-build": "^1.6.2",
     "@hono/vite-dev-server": "^0.16.0",
     "@iarna/toml": "^2.2.5",
     "@rollup/plugin-commonjs": "^28.0.3",

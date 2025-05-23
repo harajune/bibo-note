@@ -1435,12 +1435,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hono/vite-build@file:../vite-plugins/packages/build::locator=bibo-note%40workspace%3A.":
-  version: 1.6.1
-  resolution: "@hono/vite-build@file:../vite-plugins/packages/build#../vite-plugins/packages/build::hash=a9ccf8&locator=bibo-note%40workspace%3A."
+"@hono/vite-build@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "@hono/vite-build@npm:1.6.2"
   peerDependencies:
     hono: "*"
-  checksum: 10c0/03633f22f9cd068b2974388ba07e2ca675c5a38ba532d6b41cfe4756b9ffcc11b9558fc7f7985982c103497245769c2beb2e38e4421576190611a0149c16fd02
+  checksum: 10c0/c9fe7be18108a5fb28617983823527763ba400c82ebdd0968281906b9297e852918c47c40b6ec755113939795a10af03d13f512369daa2dd045e08280712ea67
   languageName: node
   linkType: hard
 
@@ -3102,7 +3102,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.744.0"
     "@cloudflare/workers-types": "npm:^4.20250204.0"
-    "@hono/vite-build": ../vite-plugins/packages/build
+    "@hono/vite-build": "npm:^1.6.2"
     "@hono/vite-dev-server": "npm:^0.16.0"
     "@iarna/toml": "npm:^2.2.5"
     "@rollup/plugin-commonjs": "npm:^28.0.3"
