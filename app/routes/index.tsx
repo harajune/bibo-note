@@ -1,15 +1,24 @@
-import { css } from "hono/css";
 import { createRoute } from "honox/factory";
 import { Viewer } from "../wiki/screens/viewer";
+import { WikiModel } from "../wiki/models/wiki_model";
 
-const className = css`
-  font-family: sans-serif;
-`;
-
-export default createRoute((c) => {
-  const name = c.req.query("name") ?? "Hono";
+export default createRoute(async (c) => {
+  const wikiModel = new WikiModel();
+  
+  const latestArticles = await wikiModel.getLatestArticles(20);
+  
+  if (!latestArticles || latestArticles.length === 0) {
+    return c.notFound();
+  }
+  
+  const newestArticle = await wikiModel.load(latestArticles[0].uuid);
+  
+  if (!newestArticle) {
+    return c.notFound();
+  }
+  
   return c.render(
-    <Viewer uuid={name} />,
-    { title: name }
+    <Viewer wikiData={newestArticle} articles={latestArticles} />,
+    { title: newestArticle.title }
   );
 });
