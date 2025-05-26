@@ -9,7 +9,10 @@
     "test": "vitest run",
     "aws:login:prod": "aws sso login",
     "cdk:deploy:prod": "cdk deploy --all --require-approval never",
-    "cdk:synth:prod": "cdk synth"
+    "cdk:synth:prod": "cdk synth",
+    "aws:login:dev": "aws sso login",
+    "cdk:deploy:dev": "cdk deploy --all --require-approval never --context environment=development",
+    "cdk:synth:dev": "cdk synth --context environment=development"
   },
   "private": true,
   "dependencies": {
