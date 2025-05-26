@@ -7,9 +7,9 @@
     "preview": "wrangler pages dev",
     "deploy": "yarn run build && wrangler pages deploy",
     "test": "vitest run",
-    "aws:login:prod": "aws sso login --profile production",
-    "cdk:deploy:prod": "cdk deploy --all --require-approval never --profile production",
-    "cdk:synth:prod": "cdk synth --profile production"
+    "aws:login:prod": "aws sso login",
+    "cdk:deploy:prod": "cdk deploy --all --require-approval never",
+    "cdk:synth:prod": "cdk synth"
   },
   "private": true,
   "dependencies": {
