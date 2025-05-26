@@ -3036,6 +3036,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aws-cdk-local@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "aws-cdk-local@npm:3.0.1"
+  dependencies:
+    diff: "npm:^5.0.0"
+  bin:
+    cdklocal: bin/cdklocal
+  checksum: 10c0/42a791ce12500571f3ae865fad4b54d24afcbd04a39dabfb9caec50beb1668967a8bddc70dcd86eb6acd6b413c9f0e31474d37fee54efbf2111f2718feae38f5
+  languageName: node
+  linkType: hard
+
 "aws-cdk@npm:^2.1007.0":
   version: 2.1016.1
   resolution: "aws-cdk@npm:2.1016.1"
@@ -3113,6 +3124,7 @@ __metadata:
     autoprefixer: "npm:^10.4.20"
     aws-cdk: "npm:^2.1007.0"
     aws-cdk-lib: "npm:^2.178.2"
+    aws-cdk-local: "npm:^3.0.1"
     aws-lambda: "npm:^1.0.7"
     constructs: "npm:^10.4.2"
     hono: "npm:^4.7.1"
@@ -3615,6 +3627,13 @@ __metadata:
   version: 1.2.2
   resolution: "didyoumean@npm:1.2.2"
   checksum: 10c0/95d0b53d23b851aacff56dfadb7ecfedce49da4232233baecfeecb7710248c4aa03f0aa8995062f0acafaf925adf8536bd7044a2e68316fd7d411477599bc27b
+  languageName: node
+  linkType: hard
+
+"diff@npm:^5.0.0":
+  version: 5.2.0
+  resolution: "diff@npm:5.2.0"
+  checksum: 10c0/aed0941f206fe261ecb258dc8d0ceea8abbde3ace5827518ff8d302f0fc9cc81ce116c4d8f379151171336caf0516b79e01abdc1ed1201b6440d895a66689eb4
   languageName: node
   linkType: hard
 

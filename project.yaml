@@ -1,0 +1,22 @@
+
+regions:
+  certificate: us-east-1
+  lambda_edge: us-east-1
+  authorization_edge: us-east-1
+  cloudfront: ap-northeast-1
+
+stacks:
+  certificate: CertificateStack
+  lambda_edge: LambdaEdgeStack
+  authorization_edge: AuthorizationEdgeFunctionStack
+  cloudfront: CloudFrontDistributionStack
+
+deployment_order:
+  - certificate
+  - lambda_edge
+  - authorization_edge
+  - cloudfront
+
+environment:
+  MODE: production
+  MULTITENANT: "1"

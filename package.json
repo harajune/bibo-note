@@ -7,7 +7,9 @@
     "preview": "wrangler pages dev",
     "deploy": "yarn run build && wrangler pages deploy",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "aws:login:prod": "aws sso login --profile production",
+    "cdk:deploy:prod": "cdk deploy --all --require-approval never --profile production",
+    "cdk:synth:prod": "cdk synth --profile production"
   },
   "private": true,
   "dependencies": {
@@ -30,6 +32,7 @@
     "autoprefixer": "^10.4.20",
     "aws-cdk": "^2.1007.0",
     "aws-cdk-lib": "^2.178.2",
+    "aws-cdk-local": "^3.0.1",
     "aws-lambda": "^1.0.7",
     "constructs": "^10.4.2",
     "postcss": "^8.5.2",
