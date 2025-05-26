@@ -8,8 +8,10 @@
     "deploy": "yarn run build && wrangler pages deploy",
     "test": "vitest run",
     "aws:login:prod": "aws sso login",
-    "cdk:deploy:prod": "cdk deploy --all --require-approval never",
-    "cdk:synth:prod": "cdk synth"
+    "cdk:deploy:dev": "DEPLOY_ENV=development cdk deploy --all --require-approval never",
+    "cdk:deploy:prod": "DEPLOY_ENV=production cdk deploy --all --require-approval never",
+    "cdk:synth:dev": "DEPLOY_ENV=development cdk synth",
+    "cdk:synth:prod": "DEPLOY_ENV=production cdk synth"
   },
   "private": true,
   "dependencies": {

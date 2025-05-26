@@ -11,15 +11,10 @@ export class CertificateStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Route53のHostedZoneを取得（既に存在している場合）
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-      domainName: 'bibo-note.jp'
-    });
-
     const certificate = new acm.Certificate(this, 'SiteCertificate', {
       domainName: 'bibo-note.jp',
       subjectAlternativeNames: ['*.bibo-note.jp'],
-      validation: acm.CertificateValidation.fromDns(hostedZone),
+      validation: acm.CertificateValidation.fromDns(),
     });
 
     // Save the certificate ARN to SSM Parameter Store
@@ -32,4 +27,4 @@ export class CertificateStack extends cdk.Stack {
 
     this.certificateArn = certificate.certificateArn;
   }
-} 
+}  

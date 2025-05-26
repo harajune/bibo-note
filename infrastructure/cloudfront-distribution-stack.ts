@@ -181,16 +181,9 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     });
 
     // Create Route53 A records for both the apex and wildcard domains
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: 'bibo-note.jp' });
-    new route53.ARecord(this, 'AliasRecordApex', {
-      zone: hostedZone,
-      recordName: 'bibo-note.jp',
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
-    });
-    new route53.ARecord(this, 'AliasRecordWildcard', {
-      zone: hostedZone,
-      recordName: '*.bibo-note.jp',
-      target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+    new cdk.CfnOutput(this, 'DomainConfiguration', {
+      value: 'Configure DNS: Create A records for bibo-note.jp and *.bibo-note.jp pointing to the CloudFront distribution',
+      description: 'Manual DNS configuration required'
     });
 
     // Wikiデータ保存用のS3バケットを作成
@@ -230,4 +223,4 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       value: wikiDataBucket.bucketName,
     });
   }
-} 
+}  
