@@ -88,6 +88,6 @@ jobs:
           aws-region: ap-northeast-1
       
       - name: Deploy to AWS using CDK
-        run: yarn cdk:deploy
+        run: yarn cdk:deploy:prod
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
