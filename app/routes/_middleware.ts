@@ -3,6 +3,32 @@ import { contextStorage } from "hono/context-storage";
 import { logger } from "hono/logger";
 import { MiddlewareHandler } from "hono";
 import { env } from "hono/adapter";
+import { basicAuth } from "hono/basic-auth";
+
+// 開発環境用のBasic Auth認証ミドルウェア
+const developmentAuth = (): MiddlewareHandler => {
+  return async (c, next) => {
+    const envVariables = env<{
+      MODE: string;
+      DEV_AUTH_USERNAME?: string;
+      DEV_AUTH_PASSWORD?: string;
+    }>(c);
+    
+    // 開発環境の場合のみBasic認証を適用
+    if (envVariables.MODE === 'development') {
+      const username = envVariables.DEV_AUTH_USERNAME || 'dev-user';
+      const password = envVariables.DEV_AUTH_PASSWORD || 'dev-password-change-me';
+      
+      return basicAuth({
+        username,
+        password,
+        realm: 'Bibo Note Development Environment',
+      })(c, next);
+    }
+    
+    await next();
+  };
+};
 
 // マルチテナント用のミドルウェア
 const multitenant = (): MiddlewareHandler => {
@@ -37,4 +63,4 @@ const multitenant = (): MiddlewareHandler => {
 };
 
 // contextStorage() middleware is necessary for getting the env variables.
-export default createRoute(logger(), multitenant(), contextStorage());
+export default createRoute(logger(), developmentAuth(), multitenant(), contextStorage());

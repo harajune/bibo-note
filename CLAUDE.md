@@ -22,18 +22,29 @@ yarn test --coverage  # Run tests with coverage report
 # Cloudflare deployment
 yarn deploy           # Build and deploy to Cloudflare Pages
 
-# AWS deployment  
+# AWS Production deployment  
 yarn aws:login:prod   # Login to AWS SSO
-yarn cdk:synth:prod   # Synthesize CDK stack
-yarn cdk:deploy:prod  # Deploy all CDK stacks to AWS
+yarn cdk:synth:prod   # Synthesize production CDK stack
+yarn cdk:deploy:prod  # Deploy all production CDK stacks to AWS
+
+# AWS Development deployment
+yarn aws:login:dev    # Login to AWS SSO  
+yarn cdk:synth:dev    # Synthesize development CDK stack
+yarn cdk:deploy:dev   # Deploy development CDK stack to AWS
 ```
 
 ## Architecture Overview
 
-### Dual-Platform Design
-The application supports two deployment targets:
+### Dual-Environment and Dual-Platform Design
+The application supports multiple deployment configurations:
+
+**Environments:**
+- **Production**: Full-featured environment with CloudFront, Lambda@Edge, and comprehensive caching
+- **Development**: Simplified environment with direct Lambda Function URL access and Basic Auth protection
+
+**Platforms:**
 - **Cloudflare**: Workers/Pages with R2 storage
-- **AWS**: Lambda@Edge with CloudFront and S3
+- **AWS**: Lambda@Edge with CloudFront and S3 (production) / Lambda Function URL (development)
 
 Platform selection is determined by the `MODE` environment variable and repository implementations.
 
@@ -108,3 +119,29 @@ Yarn (v4.9.1) - All commands should use `yarn`, not `npm`
 - Vitest for unit and integration tests
 - Test files colocated with source as `*.test.ts`
 - Coverage reports via V8 provider
+
+## Development Environment
+
+### Branch Strategy
+- `development`: Main development branch - latest code deployed to dev environment
+- `prod`: Production branch - stable code deployed to production
+- Feature branches: Created from `development`, merged back via PR
+
+### Development Environment Features
+- **Domain**: `dev.bibo-note.jp`
+- **Authentication**: Basic Auth protection (dev-user/dev-password-change-me)
+- **Infrastructure**: Simplified single-stack deployment without CloudFront
+- **Auto-deployment**: Triggered on pushes to `development` branch
+- **Access**: Direct Lambda Function URL for faster iteration
+
+### Environment Variables (Development)
+- `MODE`: "development"
+- `MULTITENANT`: "1" 
+- `DEV_AUTH_USERNAME`: Basic auth username
+- `DEV_AUTH_PASSWORD`: Basic auth password
+- `WIKI_BUCKET_NAME`: S3 bucket for wiki data storage
+- `STATIC_BUCKET_URL`: S3 bucket URL for static assets
+
+### GitHub Actions Workflows
+- `.github/workflows/deploy-development.yml`: Deploys to dev environment on `development` branch
+- `.github/workflows/deploy-production.yml`: Deploys to production on `prod` branch
