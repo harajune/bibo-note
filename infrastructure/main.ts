@@ -3,8 +3,15 @@ import { CertificateStack } from './certificate-stack';
 import { CloudFrontDistributionStack } from './cloudfront-distribution-stack';
 import { LambdaEdgeStack } from './lambda-edge-stack';
 import { AuthorizationEdgeFunctionStack } from './authorization-edge-function-stack';
+import { GitHubActionsRoleStack } from './github-actions-role-stack';
+
 const app = new cdk.App();
 const account = process.env.CDK_DEFAULT_ACCOUNT;
+
+// Create GitHub Actions role stack
+const githubActionsRoleStack = new GitHubActionsRoleStack(app, 'GitHubActionsRoleStack', {
+  env: { region: 'ap-northeast-1', account: account },
+});
 
 // us-east-1でCertificateStackを作成
 const certificateStack = new CertificateStack(app, 'CertificateStack', {
