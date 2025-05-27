@@ -42,3 +42,6 @@ coverage/
 cdk.out/
 .vscode/
 .cursor/
+
+# CDK generated JavaScript files
+infrastructure/*.js
