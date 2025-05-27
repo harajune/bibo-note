@@ -46,6 +46,15 @@ yarn cdk:synth:prod
 
 Changes should be made to the `main` branch first, tested in the development environment, and then merged to the `prod` branch for production deployment.
 
+## Automated Deployment
+
+The repository uses GitHub Actions for automated deployment:
+
+- **Main Branch**: Automatically deploys to development environment when changes are pushed
+- **Prod Branch**: Automatically deploys to production environment when changes are pushed
+
+The workflow file `.github/workflows/branch-deploy.yml` handles both environments with separate jobs that run based on the branch being pushed to.
+
 ## Authentication
 
 The development environment uses basic authentication for the `/e/*` (edit) and `/new` endpoints with the same credentials as the production environment.
