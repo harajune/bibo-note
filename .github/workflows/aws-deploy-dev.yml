@@ -91,4 +91,4 @@ jobs:
       - name: Deploy to AWS using CDK
         run: yarn cdk:deploy:dev
         env:
-          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_DEV_ACCOUNT_ID }}

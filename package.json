@@ -8,10 +8,10 @@
     "deploy": "yarn run build && wrangler pages deploy",
     "test": "vitest run",
     "aws:login:prod": "aws sso login",
-    "cdk:deploy:prod": "cdk deploy --all --require-approval never --app \"node infrastructure/main.js\"",
-    "cdk:deploy:dev": "cdk deploy --all --require-approval never --app \"node infrastructure/main-dev.js\"",
-    "cdk:synth:prod": "cdk synth --app \"node infrastructure/main.js\"",
-    "cdk:synth:dev": "cdk synth --app \"node infrastructure/main-dev.js\""
+    "cdk:deploy:prod": "cdk deploy --all --require-approval never --app \"tsx infrastructure/main.ts\"",
+    "cdk:deploy:dev": "cdk deploy --all --require-approval never --app \"tsx infrastructure/main-dev.ts\"",
+    "cdk:synth:prod": "cdk synth --app \"tsx infrastructure/main.ts\"",
+    "cdk:synth:dev": "cdk synth --app \"tsx infrastructure/main-dev.ts\""
   },
   "private": true,
   "dependencies": {

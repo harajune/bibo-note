@@ -24,6 +24,24 @@ Bibo-Note supports two environments:
 
 ## Deployment
 
+### GitHub Actions Setup
+
+Before deploying, you need to configure GitHub Actions environments and secrets:
+
+#### Development Environment Setup
+1. Create a GitHub environment named "AWS Development"
+2. Set the following secrets:
+   - `AWS_ROLE_ARN`: IAM role ARN for GitHub Actions OIDC (development account)
+   - `AWS_DEV_ACCOUNT_ID`: AWS account ID for development environment
+
+#### Production Environment Setup  
+1. Create a GitHub environment named "AWS Production"
+2. Set the following secrets:
+   - `AWS_ROLE_ARN`: IAM role ARN for GitHub Actions OIDC (production account)
+   - `AWS_ACCOUNT_ID`: AWS account ID for production environment
+
+### Manual Deployment
+
 ### Development
 
 ```bash

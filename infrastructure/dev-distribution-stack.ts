@@ -64,12 +64,8 @@ export class DevDistributionStack extends cdk.Stack {
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key'],
       },
-      // Basic認証を設定
-      defaultMethodOptions: {
-        authorizationType: apigateway.AuthorizationType.IAM,
-      },
       domainName: {
-        domainName: 'dev.bibo-note.jp',
+        domainName: 'bibo-note.dev',
         certificate,
         securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
       },
@@ -155,13 +151,13 @@ export class DevDistributionStack extends cdk.Stack {
     workerFunction.addEnvironment('MULTITENANT', '1');
 
     // LambdaにMODEを環境変数として設定
-    workerFunction.addEnvironment('MODE', 'development');
+    workerFunction.addEnvironment('MODE', 'production');
 
     // Route53 A record
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: 'bibo-note.jp' });
+    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: 'bibo-note.dev' });
     new route53.ARecord(this, 'DevAliasRecord', {
       zone: hostedZone,
-      recordName: 'dev.bibo-note.jp',
+      recordName: 'bibo-note.dev',
       target: route53.RecordTarget.fromAlias(new targets.ApiGateway(api)),
     });
 
