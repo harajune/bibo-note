@@ -14,9 +14,9 @@ export class DevDistributionStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // us-east-1に保存されたSSMパラメータから証明書ARNを取得してインポート
+    // us-east-1に保存されたSSMパラメータから証明書ARNを取得してインポート (Development環境用)
     const certificateArnReader = new SsmParameterReader(this, 'CertificateArnParameter', {
-      parameterName: '/bibo-note/certificate_arn',
+      parameterName: '/bibo-note/dev/certificate_arn',
       region: 'us-east-1',
     });
 

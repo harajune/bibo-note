@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { CertificateStack } from './certificate-stack';
+import { DevCertificateStack } from './dev-certificate-stack';
 import { DevDistributionStack } from './dev-distribution-stack';
 import { GitHubActionsRoleStack } from './github-actions-role-stack';
 
@@ -11,9 +11,8 @@ const githubActionsRoleStack = new GitHubActionsRoleStack(app, 'GitHubActionsRol
   env: { region: 'ap-northeast-1', account: account },
 });
 
-// us-east-1でCertificateStackを作成
-// Note: We're reusing the same certificate for both production and development
-const certificateStack = new CertificateStack(app, 'CertificateStack', {
+// us-east-1でDevCertificateStackを作成 (Development環境用)
+const devCertificateStack = new DevCertificateStack(app, 'DevCertificateStack', {
   env: { region: 'us-east-1', account: account },
 });
 
@@ -23,4 +22,4 @@ const devDistributionStack = new DevDistributionStack(app, 'DevDistributionStack
 });
 
 // 依存関係を設定
-devDistributionStack.addDependency(certificateStack);
+devDistributionStack.addDependency(devCertificateStack);
