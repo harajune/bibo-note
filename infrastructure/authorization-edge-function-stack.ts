@@ -19,6 +19,7 @@ export class AuthorizationEdgeFunctionStack extends cdk.Stack {
     const edgeFunction = new NodejsFunction(this, 'AuthorizationEdgeFunction', {
       functionName: `authorization-edge-function-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
+      // Note: authorization.ts depends on the environment variables and configuration defined in this stack
       entry: 'infrastructure/lambdaedge/authorization.ts',
       handler: 'handler',
       memorySize: 128,
