@@ -8,7 +8,7 @@ import { getEnvironmentConfig } from './environment-config';
 
 const app = new cdk.App();
 const account = process.env.CDK_DEFAULT_ACCOUNT;
-const environment = app.node.tryGetContext('environment') || process.env.ENVIRONMENT || 'production';
+const environment = app.node.tryGetContext('environment') || 'production';
 
 console.log(`Deploying environment: ${environment}`);
 
