@@ -10,26 +10,33 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import { SsmParameterReader } from './ssm-parameter-reader';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import { EnvironmentConfig } from './environment-config';
+
+interface CloudFrontDistributionStackProps extends cdk.StackProps {
+  environmentConfig: EnvironmentConfig;
+}
 
 export class CloudFrontDistributionStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: CloudFrontDistributionStackProps) {
     super(scope, id, props);
+
+    const { environmentConfig } = props;
 
     // us-east-1に保存されたSSMパラメータから証明書ARNを取得してインポート
     const certificateArnReader = new SsmParameterReader(this, 'CertificateArnParameter', {
-      parameterName: '/bibo-note/certificate_arn',
+      parameterName: environmentConfig.certificateParameterName,
       region: 'us-east-1',
     });
 
     // us-east-1に保存されたSSMパラメータからLambda@Edge関数のARNを取得
     const edgeFunctionArnReader = new SsmParameterReader(this, 'EdgeFunctionArnParameter', {
-      parameterName: '/bibo-note/edge_function_arn',
+      parameterName: `/bibo-note/${environmentConfig.name}/edge_function_arn`,
       region: 'us-east-1',
     });
 
     // us-east-1に保存されたSSMパラメータからLambda@Edge関数のARNを取得
     const authorizationEdgeFunctionArnReader = new SsmParameterReader(this, 'AuthorizationEdgeFunctionArnParameter', {
-      parameterName: '/bibo-note/authorization_edge_function_arn',
+      parameterName: `/bibo-note/${environmentConfig.name}/authorization_edge_function_arn`,
       region: 'us-east-1',
     });
 
@@ -54,7 +61,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
 
     // Lambda関数 (./dist/worker/worker.ts) を作成
     const workerFunction = new lambda.Function(this, 'WorkerFunction', {
-      functionName: 'application-worker',
+      functionName: `application-worker-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset('./dist/worker'),
       handler: 'worker.handler',
@@ -163,7 +170,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
           }],
         },
       },
-      domainNames: ['bibo-note.jp', '*.bibo-note.jp'],
+      domainNames: [environmentConfig.domainName, `*.${environmentConfig.domainName}`],
       certificate: certificate,
     });
 
@@ -181,15 +188,15 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     });
 
     // Create Route53 A records for both the apex and wildcard domains
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: 'bibo-note.jp' });
+    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: environmentConfig.domainName });
     new route53.ARecord(this, 'AliasRecordApex', {
       zone: hostedZone,
-      recordName: 'bibo-note.jp',
+      recordName: environmentConfig.domainName,
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
     });
     new route53.ARecord(this, 'AliasRecordWildcard', {
       zone: hostedZone,
-      recordName: '*.bibo-note.jp',
+      recordName: `*.${environmentConfig.domainName}`,
       target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
     });
 
@@ -223,7 +230,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     workerFunction.addEnvironment('MULTITENANT', '1');
 
     // LambdaにMODEを環境変数として設定
-    workerFunction.addEnvironment('MODE', 'production');
+    workerFunction.addEnvironment('MODE', environmentConfig.mode);
 
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {

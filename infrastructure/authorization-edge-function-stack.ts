@@ -4,18 +4,29 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { EnvironmentConfig } from './environment-config';
+
+interface AuthorizationEdgeFunctionStackProps extends cdk.StackProps {
+  environmentConfig: EnvironmentConfig;
+}
 
 export class AuthorizationEdgeFunctionStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: AuthorizationEdgeFunctionStackProps) {
     super(scope, id, props);
 
+    const { environmentConfig } = props;
+
     const edgeFunction = new NodejsFunction(this, 'AuthorizationEdgeFunction', {
-      functionName: 'authorization-edge-function',
+      functionName: `authorization-edge-function-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: 'infrastructure/lambdaedge/authorization.ts',
       handler: 'handler',
       memorySize: 128,
       timeout: cdk.Duration.seconds(5),
+      environment: {
+        ENVIRONMENT: environmentConfig.name,
+        SECURE_ENTIRE_ENVIRONMENT: environmentConfig.secureEntireEnvironment.toString(),
+      },
       role: new iam.Role(this, 'AuthorizationEdgeFunctionRole', {
         assumedBy: new iam.CompositePrincipal(
           new iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -31,8 +42,8 @@ export class AuthorizationEdgeFunctionStack extends cdk.Stack {
 
     // SSMパラメータにLambda@EdgeのARNを保存
     new ssm.StringParameter(this, 'AuthorizationEdgeFunctionArnParameter', {
-      description: 'The Lambda@Edge ARN for CloudFront',
-      parameterName: '/bibo-note/authorization_edge_function_arn',
+      description: `The Lambda@Edge ARN for CloudFront - ${environmentConfig.name}`,
+      parameterName: `/bibo-note/${environmentConfig.name}/authorization_edge_function_arn`,
       stringValue: edgeFunction.currentVersion.functionArn,
       tier: ssm.ParameterTier.STANDARD,
     });

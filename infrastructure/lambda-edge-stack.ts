@@ -4,13 +4,20 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { EnvironmentConfig } from './environment-config';
+
+interface LambdaEdgeStackProps extends cdk.StackProps {
+  environmentConfig: EnvironmentConfig;
+}
 
 export class LambdaEdgeStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: LambdaEdgeStackProps) {
     super(scope, id, props);
 
+    const { environmentConfig } = props;
+
     const edgeFunction = new NodejsFunction(this, 'ComputeSha256EdgeFunction', {
-      functionName: 'compute-sha256-edge-function',
+      functionName: `compute-sha256-edge-function-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: 'infrastructure/lambdaedge/computeSha256.ts',
       handler: 'handler',
@@ -31,8 +38,8 @@ export class LambdaEdgeStack extends cdk.Stack {
 
     // SSMパラメータにLambda@EdgeのARNを保存
     new ssm.StringParameter(this, 'EdgeFunctionArnParameter', {
-      description: 'The Lambda@Edge ARN for CloudFront',
-      parameterName: '/bibo-note/edge_function_arn',
+      description: `The Lambda@Edge ARN for CloudFront - ${environmentConfig.name}`,
+      parameterName: `/bibo-note/${environmentConfig.name}/edge_function_arn`,
       stringValue: edgeFunction.currentVersion.functionArn,
       tier: ssm.ParameterTier.STANDARD,
     });
