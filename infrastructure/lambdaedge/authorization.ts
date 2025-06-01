@@ -18,8 +18,10 @@ function addXForwardedHost(c: Context) {
   c.env.request.headers['x-forwarded-host'] = [{ key: 'x-forwarded-host', value: c.req.header('host') ?? '' }];
 }
 
-// Check if this is development environment and should secure entire site
-const isSecureEntireEnvironment = process.env.SECURE_ENTIRE_ENVIRONMENT === 'true';
+// Get environment from function name
+const functionName = process.env.AWS_LAMBDA_FUNCTION_NAME || '';
+const isDevelopment = functionName.includes('-development');
+const isSecureEntireEnvironment = isDevelopment;
 
 // Apply basic auth to all routes in development environment
 if (isSecureEntireEnvironment) {

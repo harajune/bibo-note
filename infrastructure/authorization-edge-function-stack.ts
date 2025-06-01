@@ -24,10 +24,6 @@ export class AuthorizationEdgeFunctionStack extends cdk.Stack {
       handler: 'handler',
       memorySize: 128,
       timeout: cdk.Duration.seconds(5),
-      environment: {
-        ENVIRONMENT: environmentConfig.name,
-        SECURE_ENTIRE_ENVIRONMENT: environmentConfig.secureEntireEnvironment.toString(),
-      },
       role: new iam.Role(this, 'AuthorizationEdgeFunctionRole', {
         assumedBy: new iam.CompositePrincipal(
           new iam.ServicePrincipal('lambda.amazonaws.com'),
