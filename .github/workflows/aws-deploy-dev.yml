@@ -52,7 +52,9 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: AWS Development
+    environment:
+      name: AWS Development
+      description: "AWS Development"
 
     steps:
       - uses: actions/checkout@v4
