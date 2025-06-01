@@ -7,19 +7,20 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 // DevCertificateStack: us-east-1でACM証明書を作成 (Development環境用)
 export class DevCertificateStack extends cdk.Stack {
   public readonly certificateArn: string;
+  public readonly hostedZone: route53.IHostedZone;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Route53のHostedZoneを取得（既に存在している場合）
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-      domainName: 'bibo-note.dev'
+    // Create a new hosted zone for bibo-note.dev
+    this.hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+      domainName: 'bibo-note.dev',
     });
 
     const certificate = new acm.Certificate(this, 'DevSiteCertificate', {
       domainName: 'bibo-note.dev',
       subjectAlternativeNames: ['*.bibo-note.dev'],
-      validation: acm.CertificateValidation.fromDns(hostedZone),
+      validation: acm.CertificateValidation.fromDns(this.hostedZone),
     });
 
     // Save the certificate ARN to SSM Parameter Store
