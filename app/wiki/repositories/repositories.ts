@@ -2,15 +2,8 @@ import { WikiData, UUID } from "../models/wiki_data";
 import * as TOML from 'smol-toml';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import type { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
-
-let s3Module: Promise<typeof import('@aws-sdk/client-s3')> | null = null;
-const loadS3Module = async () => {
-  if (!s3Module) {
-    s3Module = import('@aws-sdk/client-s3');
-  }
-  return s3Module;
-};
+// Use the wrapper to avoid CommonJS issues
+import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsCommand, HeadObjectCommand } from '../../libs/aws-sdk-wrapper';
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
 import { logger } from "../../libs/logger/logger";
@@ -151,8 +144,6 @@ export class R2Repository implements Repository {
   }
 
   public async save(data: WikiData): Promise<void> {
-    await this.ensureClient();
-    const { PutObjectCommand } = this.s3Commands!;
     const tomlData = {
       header: {
         fileVersion: "0.0.1",
@@ -235,13 +226,7 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
 
 export class S3Repository implements Repository {
   private readonly bucketName: string;
-  private s3Client: S3Client | null = null;
-  private s3Commands: {
-    PutObjectCommand: typeof PutObjectCommand;
-    GetObjectCommand: typeof GetObjectCommand;
-    ListObjectsCommand: typeof ListObjectsCommand;
-    HeadObjectCommand: typeof HeadObjectCommand;
-  } | null = null;
+  private s3Client: any | null = null;
   private readonly context: any;
   private readonly envVars: {
     AWS_REGION: string;
@@ -277,15 +262,10 @@ export class S3Repository implements Repository {
   }
 
   private async ensureClient() {
-    if (!this.s3Client || !this.s3Commands) {
-      const mod = await loadS3Module();
-      this.s3Commands = {
-        PutObjectCommand: mod.PutObjectCommand,
-        GetObjectCommand: mod.GetObjectCommand,
-        ListObjectsCommand: mod.ListObjectsCommand,
-        HeadObjectCommand: mod.HeadObjectCommand,
-      };
-      this.s3Client = new mod.S3Client({
+    if (!this.s3Client) {
+      // Get S3Client constructor from wrapper
+      const S3ClientConstructor = await S3Client();
+      this.s3Client = new S3ClientConstructor({
         region: this.envVars.AWS_REGION,
         credentials: {
           accessKeyId: this.envVars.AWS_ACCESS_KEY_ID,
@@ -308,7 +288,8 @@ export class S3Repository implements Repository {
 
   public async save(data: WikiData): Promise<void> {
     await this.ensureClient();
-    const { PutObjectCommand } = this.s3Commands!;
+    // Get PutObjectCommand constructor
+    const PutObjectCommandConstructor = await PutObjectCommand();
     const tomlData = {
       header: {
         fileVersion: "0.0.1",
@@ -322,7 +303,7 @@ export class S3Repository implements Repository {
       }
     };
     const tomlString = TOML.stringify(tomlData);
-    await this.s3Client!.send(new PutObjectCommand({
+    await this.s3Client!.send(new PutObjectCommandConstructor({
       Bucket: this.bucketName,
       Key: this.getObjectKey(data.uuid),
       Body: tomlString
@@ -331,10 +312,11 @@ export class S3Repository implements Repository {
 
   public async load(uuid: UUID): Promise<WikiData | null> {
     await this.ensureClient();
-    const { GetObjectCommand } = this.s3Commands!;
+    // Get GetObjectCommand constructor
+    const GetObjectCommandConstructor = await GetObjectCommand();
     const objectKey = this.getObjectKey(uuid);
     try {
-      const res = await this.s3Client!.send(new GetObjectCommand({
+      const res = await this.s3Client!.send(new GetObjectCommandConstructor({
         Bucket: this.bucketName,
         Key: objectKey,
       }));
@@ -361,19 +343,20 @@ export class S3Repository implements Repository {
 
   public async list(): Promise<UUID[]> {
     await this.ensureClient();
-    const { ListObjectsCommand } = this.s3Commands!;
+    // Get ListObjectsCommand constructor
+    const ListObjectsCommandConstructor = await ListObjectsCommand();
     const envVariables = env<{ MULTITENANT: string }>(this.context);
     const user = this.context.get('user');
     const prefix = envVariables.MULTITENANT === '1' && user ? `${user}/data/` : 'data/';
 
-    const res = await this.s3Client!.send(new ListObjectsCommand({
+    const res = await this.s3Client!.send(new ListObjectsCommandConstructor({
       Bucket: this.bucketName,
       Prefix: prefix
     }));
     if (!res.Contents) return [];
     return res.Contents
-      .filter(item => item.Key && item.Key.endsWith('.toml'))
-      .map(item => {
+      .filter((item: any) => item.Key && item.Key.endsWith('.toml'))
+      .map((item: any) => {
         const key = item.Key!;
         return key.substring(key.lastIndexOf('/') + 1).replace('.toml', '');
       });
@@ -381,9 +364,10 @@ export class S3Repository implements Repository {
 
   public async isExists(uuid: UUID): Promise<boolean> {
     await this.ensureClient();
-    const { HeadObjectCommand } = this.s3Commands!;
+    // Get HeadObjectCommand constructor
+    const HeadObjectCommandConstructor = await HeadObjectCommand();
     try {
-      await this.s3Client!.send(new HeadObjectCommand({
+      await this.s3Client!.send(new HeadObjectCommandConstructor({
         Bucket: this.bucketName,
         Key: this.getObjectKey(uuid),
       }));
@@ -404,7 +388,9 @@ export class S3Repository implements Repository {
   }
   
   public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
-    await this.s3Client.send(new PutObjectCommand({
+    await this.ensureClient();
+    const PutObjectCommandConstructor = await PutObjectCommand();
+    await this.s3Client!.send(new PutObjectCommandConstructor({
       Bucket: this.bucketName,
       Key: this.getCacheFilePath(),
       Body: JSON.stringify(articles)
@@ -412,8 +398,10 @@ export class S3Repository implements Repository {
   }
   
   public async loadArticleListCache(): Promise<ArticleListItem[] | null> {
+    await this.ensureClient();
     try {
-      const response = await this.s3Client.send(new GetObjectCommand({
+      const GetObjectCommandConstructor = await GetObjectCommand();
+      const response = await this.s3Client!.send(new GetObjectCommandConstructor({
         Bucket: this.bucketName,
         Key: this.getCacheFilePath()
       }));
