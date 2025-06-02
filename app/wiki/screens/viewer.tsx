@@ -1,5 +1,4 @@
 import { Sidebar } from "../../global/$sidebar";
-import { DashboardIcon } from "../../global/$icons";
 import { SyntaxParser } from "../../libs/syntax_parser/syntax_parser";
 import { WikiData } from "../models/wiki_data";
 import { ArticleListItem } from "../models/wiki_model";
@@ -9,28 +8,25 @@ interface ViewerProps {
   articles?: ArticleListItem[];
 }
 
-export function Viewer({ wikiData, articles }: ViewerProps) {
-  const menuSections = [
+export function Viewer({ wikiData, articles = [] }: ViewerProps) {
+
+  const allSections = [
     {
-      children: [{
-        name: "Dashboard",
-        href: "/dashboard",
-        current: true,
-        icon: DashboardIcon()
-      }]
-    },
-    {
-      header: {name: "Your Teams"},
-      children: [
-        {
-          name: "Projects",
-          href: "/projects",
-          current: false,
-          icon: DashboardIcon()
-        }
-      ]
+      header: { name: "Wiki" },
+      children: []
     }
   ];
+  if (articles.length > 0) {
+    allSections.push({
+      header: { name: "Recent Articles" },
+      children: articles.map(article => ({
+        name: article.title || "Untitled",
+        href: `/v/${article.uuid}`,
+        current: false,
+        icon: <span class="size-5 flex-none text-gray-400">📄</span>
+      }))
+    });
+  }
 
   const title = wikiData.title;
 
@@ -39,7 +35,7 @@ export function Viewer({ wikiData, articles }: ViewerProps) {
 
   return (
     <div>
-      <Sidebar children={menuSections} articles={articles} />
+      <Sidebar children={allSections} />
 
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8" id="wiki-content">

@@ -8,33 +8,30 @@ interface EditorProps {
   articles?: ArticleListItem[];
 }
 
-export function Editor({ wikiData, articles }: EditorProps) {
+export function Editor({ wikiData, articles = [] }: EditorProps) {
   const menuSections = [
     {
-      children: [
-        {
-          name: "Dashboard",
-          href: "/dashboard",
-          current: true,
-          icon: DashboardIcon(),
-        },
-      ],
-    },
-    {
-      header: { name: "Your Teams" },
-      children: [
-        {
-          name: "Projects",
-          href: "/projects",
-          current: false,
-          icon: DashboardIcon(),
-        },
-      ],
-    },
+      header: { name: "Wiki" },
+      children: []
+    }
   ];
+
+  const allSections = [...menuSections];
+  if (articles.length > 0) {
+    allSections.push({
+      header: { name: "Recent Articles" },
+      children: articles.map(article => ({
+        name: article.title || "Untitled",
+        href: `/v/${article.uuid}`,
+        current: false,
+        icon: <span class="size-5 flex-none text-gray-400">📄</span>
+      }))
+    });
+  }
+
   return (
     <div>
-      <Sidebar children={menuSections} articles={articles} />
+      <Sidebar children={allSections} />
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8">
 
