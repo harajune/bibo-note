@@ -6,5 +6,13 @@
   "hosted-zone:account=557690619781:domainName=bibo-note.jp:region=ap-northeast-1": {
     "Id": "/hostedzone/Z08641051STVZTDK95QAW",
     "Name": "bibo-note.jp."
+  },
+  "hosted-zone:account=433980486853:domainName=bibo-note.dev:region=us-east-1": {
+    "Id": "/hostedzone/Z04501705BWHTQN762M8",
+    "Name": "bibo-note.dev."
+  },
+  "hosted-zone:account=433980486853:domainName=bibo-note.dev:region=ap-northeast-1": {
+    "Id": "/hostedzone/Z04501705BWHTQN762M8",
+    "Name": "bibo-note.dev."
   }
 }

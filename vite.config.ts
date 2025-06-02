@@ -1,4 +1,4 @@
-import build from '@hono/vite-build/node'
+import build from '@hono/vite-build/aws-lambda'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 

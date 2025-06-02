@@ -1,10 +1,10 @@
-name: AWS CDK Production Deployment
+name: AWS CDK Development Deployment
 
 on:
   push:
-    branches: [ prod ]
+    branches: [ main ]
   pull_request:
-    branches: [ prod ]
+    branches: [ main ]
 
 permissions:
   id-token: write
@@ -48,11 +48,11 @@ jobs:
       - name: Build
         run: yarn build
   
-  deploy:
+  deploy-dev:
     needs: build-and-test
-    if: github.ref == 'refs/heads/prod' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: AWS Production
+    environment: AWS Development
 
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
       
-      - name: Deploy to AWS using CDK
-        run: yarn cdk:deploy:prod
+      - name: Deploy to AWS Development using CDK
+        run: yarn cdk:deploy:dev
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}

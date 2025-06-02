@@ -8,8 +8,10 @@
     "deploy": "yarn run build && wrangler pages deploy",
     "test": "vitest run",
     "aws:login:prod": "aws sso login",
-    "cdk:deploy:prod": "cdk deploy --all --require-approval never",
-    "cdk:synth:prod": "cdk synth"
+    "cdk:deploy:prod": "cdk deploy --all --require-approval never --context environment=production",
+    "cdk:synth:prod": "cdk synth --context environment=production",
+    "cdk:deploy:dev": "cdk deploy --all --require-approval never --context environment=development",
+    "cdk:synth:dev": "cdk synth --context environment=development"
   },
   "private": true,
   "dependencies": {
@@ -22,7 +24,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250204.0",
-    "@hono/vite-build": "^1.6.2",
+    "@hono/vite-build": "https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge",
     "@hono/vite-dev-server": "^0.16.0",
     "@iarna/toml": "^2.2.5",
     "@rollup/plugin-commonjs": "^28.0.3",
