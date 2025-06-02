@@ -11,7 +11,9 @@ export const environments: Record<string, EnvironmentConfig> = {
     name: 'development',
     domainName: 'bibo-note.dev',
     certificateParameterName: '/bibo-note/dev/certificate_arn',
-    mode: 'development',
+    // note that use production mode for the development environment.
+    // because the development mode is only for the local development.
+    mode: 'production',
     secureEntireEnvironment: true,
   },
   production: {
