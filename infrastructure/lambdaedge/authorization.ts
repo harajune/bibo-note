@@ -55,13 +55,13 @@ if (!isSecureEntireEnvironment) {
   });
 } else {
   // In development, auth is already applied globally, so just handle the routes
-  app.get('e/*', async (c, next) => {
+  app.use('e/*', async (c, next) => {
     await next();
     addXForwardedHost(c);
     c.env.callback(null, c.env.request);
   });
 
-  app.get('new', async (c, next) => {
+  app.use('new', async (c, next) => {
     await next();
     addXForwardedHost(c);
     c.env.callback(null, c.env.request);

@@ -2,6 +2,7 @@ import { Sidebar } from "../../global/$sidebar";
 import { SyntaxParser } from "../../libs/syntax_parser/syntax_parser";
 import { WikiData } from "../models/wiki_data";
 import { ArticleListItem } from "../models/wiki_model";
+import { MenuSection } from "../../global/$sidebar";
 
 interface ViewerProps {
   wikiData: WikiData;
@@ -10,16 +11,12 @@ interface ViewerProps {
 
 export function Viewer({ wikiData, articles = [] }: ViewerProps) {
 
-  const allSections = [
-    {
-      header: { name: "Wiki" },
-      children: []
-    }
-  ];
+  const allSections: MenuSection[] = [];
+
   if (articles.length > 0) {
     allSections.push({
       header: { name: "Recent Articles" },
-      children: articles.map(article => ({
+      items: articles.map(article => ({
         name: article.title || "Untitled",
         href: `/v/${article.uuid}`,
         current: false,
@@ -35,7 +32,7 @@ export function Viewer({ wikiData, articles = [] }: ViewerProps) {
 
   return (
     <div>
-      <Sidebar children={allSections} />
+      <Sidebar sections={allSections} />
 
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8" id="wiki-content">

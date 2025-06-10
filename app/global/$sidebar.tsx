@@ -1,17 +1,15 @@
 import { useState } from 'hono/jsx'
+import biboNoteLogo from '../assets/bibo-note.svg'
 
 interface MenuItem {
   name: string;
   href: string;
-  // honox JSX.Element 型はエラーになるので無視
-  // @ts-ignore
-  icon: JSX.Element;
   current?: boolean;
 }
 
-interface MenuSection {
+export interface MenuSection {
   header?: HeaderItem;
-  children: MenuItem[];
+  items: MenuItem[];
 }
 
 interface HeaderItem {
@@ -19,7 +17,7 @@ interface HeaderItem {
 }
 
 interface SidebarProps {
-  children: MenuSection[];
+  sections: MenuSection[];
 }
 
 // Common components
@@ -27,23 +25,24 @@ const Logo = () => (
   <div class="flex h-16 shrink-0 items-center">
     <img
       class="h-8 w-auto"
-      src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-      alt="Your Company"
+      src={biboNoteLogo}
+      alt="Bibo Note"
     />
   </div>
 );
 
-const Navigation = ({ sections }: { sections: MenuSection[] }) => (
+const Navigation = ({ sections }: { sections: MenuSection[] }) => {
+  return (
   <nav class="flex flex-1 flex-col">
     <ul role="list" class="flex flex-1 flex-col gap-y-7">
       {sections.map((section) => renderSection(section))}
     </ul>
   </nav>
-);
+  );
+};
 
 const renderSection = (section: MenuSection) => {
   const baseClasses = "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold";
-  
   return (
     <li>
       {section.header && (
@@ -52,7 +51,7 @@ const renderSection = (section: MenuSection) => {
         </div>
       )}
       <ul role="list" class="-mx-2 space-y-1">
-        {section.children.map((menuItem) => {
+        {section.items.map((menuItem) => {
           const activeClasses = menuItem.current
             ? "bg-gray-50 text-indigo-600"
             : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600";
@@ -60,7 +59,6 @@ const renderSection = (section: MenuSection) => {
           return (
             <li key={menuItem.name}>
               <a href={menuItem.href} class={`${baseClasses} ${activeClasses}`}>
-                {menuItem.icon}
                 {menuItem.name}
               </a>
             </li>
@@ -71,17 +69,17 @@ const renderSection = (section: MenuSection) => {
   );
 };
 
-export function Sidebar({ children }: SidebarProps) {
+export function Sidebar({ sections }: SidebarProps) {
   const [isOpen, setOpen] = useState(false);
 
   return (
     <>
-      <NarrowScreenSidebar isOpen={isOpen} setOpen={setOpen} children={children} />
+      <NarrowScreenSidebar isOpen={isOpen} setOpen={setOpen} sections={sections} />
 
       <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
           <Logo />
-          <Navigation sections={children} />
+          <Navigation sections={sections} />
         </div>
       </div>
 
@@ -112,10 +110,10 @@ export function Sidebar({ children }: SidebarProps) {
 interface NarrowSidebarProps {
   isOpen: boolean;
   setOpen: (open: boolean) => void;
-  children: MenuSection[];
+  sections: MenuSection[];
 }
 
-function NarrowScreenSidebar({ isOpen, setOpen, children }: NarrowSidebarProps) {
+function NarrowScreenSidebar({ isOpen, setOpen, sections }: NarrowSidebarProps) {
   return (
     <div class={`relative z-50 lg:hidden ${isOpen ? '' : 'pointer-events-none'}`} role="dialog" aria-modal="true">
       <div 
@@ -154,7 +152,7 @@ function NarrowScreenSidebar({ isOpen, setOpen, children }: NarrowSidebarProps) 
 
           <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2">
             <Logo />
-            <Navigation sections={children} />
+            <Navigation sections={sections} />
           </div>
         </div>
       </div>

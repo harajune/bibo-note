@@ -1,7 +1,7 @@
 import { Sidebar } from "../../global/$sidebar";
 import { WikiData } from "../models/wiki_data";
-import { DashboardIcon } from "../../global/$icons";
 import { ArticleListItem } from "../models/wiki_model";
+import { MenuSection } from "../../global/$sidebar";
 
 interface EditorProps {
   wikiData: WikiData;
@@ -9,29 +9,22 @@ interface EditorProps {
 }
 
 export function Editor({ wikiData, articles = [] }: EditorProps) {
-  const menuSections = [
-    {
-      header: { name: "Wiki" },
-      children: []
-    }
-  ];
 
-  const allSections = [...menuSections];
+  const allSections: MenuSection[] = [];
   if (articles.length > 0) {
     allSections.push({
       header: { name: "Recent Articles" },
-      children: articles.map(article => ({
+      items: articles.map(article => ({
         name: article.title || "Untitled",
         href: `/v/${article.uuid}`,
         current: false,
-        icon: <span class="size-5 flex-none text-gray-400">📄</span>
       }))
     });
   }
 
   return (
     <div>
-      <Sidebar children={allSections} />
+      <Sidebar sections={allSections} />
       <main class="py-10 lg:pl-72">
         <div class="px-4 sm:px-6 lg:px-8">
 
