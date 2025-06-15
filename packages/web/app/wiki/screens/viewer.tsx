@@ -3,7 +3,6 @@ import { SyntaxParser } from "../../libs/syntax_parser/syntax_parser";
 import { WikiData } from "../models/wiki_data";
 import { ArticleListItem } from "../models/wiki_model";
 import { MenuSection } from "../../global/$sidebar";
-import Counter2 from "../../global/$counter";
 
 interface ViewerProps {
   wikiData: WikiData;
