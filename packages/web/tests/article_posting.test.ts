@@ -4,6 +4,21 @@ import { WikiData } from '../app/wiki/models/wiki_data';
 import * as fs from 'node:fs';
 import { v7 as uuidv7 } from "uuid";
 
+vi.mock('canvas', () => ({
+  createCanvas: vi.fn(() => ({
+    getContext: vi.fn(() => ({
+      fillStyle: '',
+      fillRect: vi.fn(),
+      font: '',
+      textAlign: '',
+      textBaseline: '',
+      fillText: vi.fn()
+    })),
+    toBuffer: vi.fn(() => Buffer.from('mock-image-data'))
+  })),
+  registerFont: vi.fn()
+}));
+
 vi.mock('hono/context-storage', () => ({
   getContext: vi.fn(() => ({
     get: vi.fn((key) => key === 'user' ? 'test-user' : null)

@@ -9,32 +9,52 @@ export class OGPGenerator {
   public static async generateOGPImage(title: string, uuid: UUID): Promise<Buffer> {
     const displayTitle = title.length > 60 ? title.substring(0, 57) + '...' : title;
     
-    const svg = `
-      <svg width="${this.WIDTH}" height="${this.HEIGHT}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="${this.BACKGROUND_COLOR}"/>
-        <text x="50%" y="50%" 
-              font-family="Arial, sans-serif, 'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'Takao', 'IPAexGothic', 'IPAPGothic', 'VL PGothic', 'Noto Sans CJK JP'" 
-              font-size="48" 
-              font-weight="bold" 
-              fill="${this.TEXT_COLOR}" 
-              text-anchor="middle" 
-              dominant-baseline="middle"
-              textLength="90%" 
-              lengthAdjust="spacingAndGlyphs">
-          ${this.escapeXml(displayTitle)}
-        </text>
-      </svg>
-    `;
-
     try {
-      const sharp = (await import('sharp')).default;
-      return await sharp(Buffer.from(svg))
-        .png()
-        .toBuffer();
+      const { createCanvas, registerFont } = await this.loadCanvas();
+      
+      await this.registerFonts(registerFont);
+      
+      const canvas = createCanvas(this.WIDTH, this.HEIGHT);
+      const ctx = canvas.getContext('2d');
+      
+      ctx.fillStyle = this.BACKGROUND_COLOR;
+      ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
+      
+      ctx.fillStyle = this.TEXT_COLOR;
+      ctx.font = 'bold 48px "DejaVu Sans", Arial, sans-serif, "Hiragino Sans", "Yu Gothic", "Meiryo", "Takao", "IPAexGothic", "IPAPGothic", "VL PGothic", "Noto Sans CJK JP"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const x = this.WIDTH / 2;
+      const y = this.HEIGHT / 2;
+      ctx.fillText(displayTitle, x, y);
+      
+      return canvas.toBuffer('image/png');
     } catch (error) {
-      console.warn('Sharp not available, creating placeholder OGP image');
+      console.warn('Canvas not available, creating placeholder OGP image:', error);
       return Buffer.from(`OGP-${uuid}-${displayTitle}`, 'utf-8');
     }
+  }
+
+  private static async loadCanvas(): Promise<any> {
+    try {
+      return await import('canvas');
+    } catch (error) {
+      return require('canvas');
+    }
+  }
+
+  private static async registerFonts(registerFont: any): Promise<void> {
+    try {
+      const fontPath = '/var/task/fonts/DejaVuSans.ttf';
+      registerFont(fontPath, { family: 'DejaVu Sans' });
+    } catch (error) {
+      console.warn('Font registration failed:', error);
+    }
+  }
+
+  public static getOGPImageFilename(uuid: UUID): string {
+    return `${uuid}.png`;
   }
 
   private static escapeXml(text: string): string {
@@ -44,9 +64,5 @@ export class OGPGenerator {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
-  }
-
-  public static getOGPImageFilename(uuid: UUID): string {
-    return `${uuid}.png`;
   }
 }

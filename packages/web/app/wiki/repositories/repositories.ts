@@ -18,8 +18,7 @@ export interface Repository {
   loadArticleListCache(): Promise<ArticleListItem[] | null>;
   getCacheFilePath(): string;
   
-  saveOGPImage(uuid: UUID, imageBuffer: Buffer): void | Promise<void>;
-  getOGPImagePath(uuid: UUID): string;
+
 }
 
 export class FileRepository implements Repository {
@@ -140,27 +139,7 @@ export class FileRepository implements Repository {
     return null;
   }
   
-  public saveOGPImage(uuid: UUID, imageBuffer: Buffer): void {
-    const ogpImagePath = this.getOGPImagePath(uuid);
-    const ogpDir = path.dirname(ogpImagePath);
-    
-    if (!fs.existsSync(ogpDir)) {
-      fs.mkdirSync(ogpDir, { recursive: true });
-    }
-    
-    fs.writeFileSync(ogpImagePath, imageBuffer);
-  }
 
-  public getOGPImagePath(uuid: UUID): string {
-    const basePath = this.getUserBasePath();
-    const ogpDir = path.join(basePath, 'OGPimage');
-    
-    if (!fs.existsSync(ogpDir)) {
-      fs.mkdirSync(ogpDir, { recursive: true });
-    }
-    
-    return path.join(ogpDir, `${uuid}.png`);
-  }
 }
 
 export class R2Repository implements Repository {
@@ -245,17 +224,7 @@ export class R2Repository implements Repository {
     }
   }
   
-  public async saveOGPImage(uuid: UUID, imageBuffer: Buffer): Promise<void> {
-    await this.bucket.put(`OGPimage/${uuid}.png`, imageBuffer, {
-      httpMetadata: {
-        contentType: 'image/png'
-      }
-    });
-  }
 
-  public getOGPImagePath(uuid: UUID): string {
-    return `OGPimage/${uuid}.png`;
-  }
 }
 
 async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
@@ -464,30 +433,5 @@ export class S3Repository implements Repository {
     return null;
   }
   
-  public async saveOGPImage(uuid: UUID, imageBuffer: Buffer): Promise<void> {
-    await this.ensureClient();
-    const PutObjectCommandConstructor = await PutObjectCommand();
-    const objectKey = this.getOGPImageObjectKey(uuid);
-    
-    await this.s3Client!.send(new PutObjectCommandConstructor({
-      Bucket: this.bucketName,
-      Key: objectKey,
-      Body: imageBuffer,
-      ContentType: 'image/png'
-    }));
-  }
 
-  public getOGPImagePath(uuid: UUID): string {
-    return this.getOGPImageObjectKey(uuid);
-  }
-
-  private getOGPImageObjectKey(uuid: UUID): string {
-    const envVariables = env<{ MULTITENANT: string }>(this.context);
-    const user = this.context.get('user');
-
-    if (envVariables.MULTITENANT === '1' && user) {
-      return `${user}/OGPimage/${uuid}.png`;
-    }
-    return `OGPimage/${uuid}.png`;
-  }
 }
