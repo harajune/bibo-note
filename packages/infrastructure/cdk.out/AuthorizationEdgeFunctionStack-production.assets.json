@@ -1,0 +1,36 @@
+{
+  "version": "44.0.0",
+  "files": {
+    "fb15eab443cc207a8ea319d81ff24b23c55efd7cba0319c7d001863ce308f266": {
+      "displayName": "AuthorizationEdgeFunction/Code",
+      "source": {
+        "path": "asset.fb15eab443cc207a8ea319d81ff24b23c55efd7cba0319c7d001863ce308f266",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "557690619781-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-557690619781-us-east-1",
+          "objectKey": "fb15eab443cc207a8ea319d81ff24b23c55efd7cba0319c7d001863ce308f266.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::557690619781:role/cdk-hnb659fds-file-publishing-role-557690619781-us-east-1"
+        }
+      }
+    },
+    "290e85df4563e4c0759db3efd9320cc34ca878cac1de905dd88b6f91ef024808": {
+      "displayName": "AuthorizationEdgeFunctionStack-production Template",
+      "source": {
+        "path": "AuthorizationEdgeFunctionStack-production.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "557690619781-us-east-1": {
+          "bucketName": "cdk-hnb659fds-assets-557690619781-us-east-1",
+          "objectKey": "290e85df4563e4c0759db3efd9320cc34ca878cac1de905dd88b6f91ef024808.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::557690619781:role/cdk-hnb659fds-file-publishing-role-557690619781-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

@@ -1,0 +1,19 @@
+{
+    "name": "infrastructure",
+    "type": "module",
+    "scripts": {
+        "dev:login": "aws sso login --profile bibo-dev",
+        "dev:login:configure": "aws configure sso --profile bibo-dev",
+        "dev:deploy": "cdk deploy --all --profile bibo-dev --context environment=development",
+        "prod:login": "aws sso login --profile bibo-prod",
+        "prod:login:configure": "aws configure sso --profile bibo-prod",
+        "prod:deploy": "cdk deploy --all --profile bibo-prod --context environment=production"
+    },
+    "private": true,
+    "devDependencies": {
+        "aws-cdk": "^2.1018.1",
+        "aws-cdk-lib": "^2.201.0",
+        "constructs": "^10.4.2",
+        "esbuild": "^0.25.5"
+    }
+}

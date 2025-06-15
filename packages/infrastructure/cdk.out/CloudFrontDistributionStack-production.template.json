@@ -1,0 +1,1265 @@
+{
+ "Resources": {
+  "CertificateArnParameterCertificateArnParameterCustomResourceBDC1B823": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": "{\"service\":\"SSM\",\"action\":\"getParameter\",\"parameters\":{\"Name\":\"/bibo-note/certificate_arn\"},\"region\":\"us-east-1\",\"physicalResourceId\":{\"id\":\"1749964445561\"}}",
+    "Update": "{\"service\":\"SSM\",\"action\":\"getParameter\",\"parameters\":{\"Name\":\"/bibo-note/certificate_arn\"},\"region\":\"us-east-1\",\"physicalResourceId\":{\"id\":\"1749964445561\"}}",
+    "InstallLatestAwsSdk": false
+   },
+   "DependsOn": [
+    "CertificateArnParameterCertificateArnParameterCustomResourceCustomResourcePolicy28AB3103"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/CertificateArnParameter/CertificateArnParameterCustomResource/Resource/Default"
+   }
+  },
+  "CertificateArnParameterCertificateArnParameterCustomResourceCustomResourcePolicy28AB3103": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "ssm:GetParameter*",
+       "Effect": "Allow",
+       "Resource": "arn:aws:ssm:us-east-1:557690619781:parameter/bibo-note/certificate_arn"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CertificateArnParameterCertificateArnParameterCustomResourceCustomResourcePolicy28AB3103",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/CertificateArnParameter/CertificateArnParameterCustomResource/CustomResourcePolicy/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-557690619781-ap-northeast-1",
+     "S3Key": "c099eb4e32cbf1c3da9c45a3b280efe2bed38d27d74aa72702b67d86d1b52354.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+    "aws:asset:path": "asset.c099eb4e32cbf1c3da9c45a3b280efe2bed38d27d74aa72702b67d86d1b52354",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "EdgeFunctionArnParameterEdgeFunctionArnParameterCustomResourceA51A62E2": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": "{\"service\":\"SSM\",\"action\":\"getParameter\",\"parameters\":{\"Name\":\"/bibo-note/production/edge_function_arn\"},\"region\":\"us-east-1\",\"physicalResourceId\":{\"id\":\"1749964445565\"}}",
+    "Update": "{\"service\":\"SSM\",\"action\":\"getParameter\",\"parameters\":{\"Name\":\"/bibo-note/production/edge_function_arn\"},\"region\":\"us-east-1\",\"physicalResourceId\":{\"id\":\"1749964445565\"}}",
+    "InstallLatestAwsSdk": false
+   },
+   "DependsOn": [
+    "EdgeFunctionArnParameterEdgeFunctionArnParameterCustomResourceCustomResourcePolicy1330BADE"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/EdgeFunctionArnParameter/EdgeFunctionArnParameterCustomResource/Resource/Default"
+   }
+  },
+  "EdgeFunctionArnParameterEdgeFunctionArnParameterCustomResourceCustomResourcePolicy1330BADE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "ssm:GetParameter*",
+       "Effect": "Allow",
+       "Resource": "arn:aws:ssm:us-east-1:557690619781:parameter/bibo-note/production/edge_function_arn"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "EdgeFunctionArnParameterEdgeFunctionArnParameterCustomResourceCustomResourcePolicy1330BADE",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/EdgeFunctionArnParameter/EdgeFunctionArnParameterCustomResource/CustomResourcePolicy/Resource"
+   }
+  },
+  "AuthorizationEdgeFunctionArnParameterAuthorizationEdgeFunctionArnParameterCustomResourceFD7FE045": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": "{\"service\":\"SSM\",\"action\":\"getParameter\",\"parameters\":{\"Name\":\"/bibo-note/production/authorization_edge_function_arn\"},\"region\":\"us-east-1\",\"physicalResourceId\":{\"id\":\"1749964445566\"}}",
+    "Update": "{\"service\":\"SSM\",\"action\":\"getParameter\",\"parameters\":{\"Name\":\"/bibo-note/production/authorization_edge_function_arn\"},\"region\":\"us-east-1\",\"physicalResourceId\":{\"id\":\"1749964445566\"}}",
+    "InstallLatestAwsSdk": false
+   },
+   "DependsOn": [
+    "AuthorizationEdgeFunctionArnParameterAuthorizationEdgeFunctionArnParameterCustomResourceCustomResourcePolicyC480E23B"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/AuthorizationEdgeFunctionArnParameter/AuthorizationEdgeFunctionArnParameterCustomResource/Resource/Default"
+   }
+  },
+  "AuthorizationEdgeFunctionArnParameterAuthorizationEdgeFunctionArnParameterCustomResourceCustomResourcePolicyC480E23B": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "ssm:GetParameter*",
+       "Effect": "Allow",
+       "Resource": "arn:aws:ssm:us-east-1:557690619781:parameter/bibo-note/production/authorization_edge_function_arn"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "AuthorizationEdgeFunctionArnParameterAuthorizationEdgeFunctionArnParameterCustomResourceCustomResourcePolicyC480E23B",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/AuthorizationEdgeFunctionArnParameter/AuthorizationEdgeFunctionArnParameterCustomResource/CustomResourcePolicy/Resource"
+   }
+  },
+  "EdgeFunctionRole6FC7C5CE": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": [
+         "edgelambda.amazonaws.com",
+         "lambda.amazonaws.com"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/EdgeFunctionRole/Resource"
+   }
+  },
+  "WorkerFunctionServiceRole38D8F738": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WorkerFunction/ServiceRole/Resource"
+   }
+  },
+  "WorkerFunctionACE6A4B0": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-557690619781-ap-northeast-1",
+     "S3Key": "da748ab31f2c8f11a7914ccabf80bb953d702e4368c8f0177856d8f6af38a1d4.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "WIKI_BUCKET_NAME": {
+       "Ref": "WikiDataBucketBD2BC5D6"
+      },
+      "MULTITENANT": "1",
+      "MODE": "production"
+     }
+    },
+    "FunctionName": "application-worker-production",
+    "Handler": "worker.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "WorkerFunctionServiceRole38D8F738",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x"
+   },
+   "DependsOn": [
+    "WorkerFunctionServiceRole38D8F738"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WorkerFunction/Resource",
+    "aws:asset:path": "asset.da748ab31f2c8f11a7914ccabf80bb953d702e4368c8f0177856d8f6af38a1d4",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "WorkerFunctionFunctionUrl5A5A4F7F": {
+   "Type": "AWS::Lambda::Url",
+   "Properties": {
+    "AuthType": "AWS_IAM",
+    "TargetFunctionArn": {
+     "Fn::GetAtt": [
+      "WorkerFunctionACE6A4B0",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WorkerFunction/FunctionUrl/Resource"
+   }
+  },
+  "WorkerFunctionAllowCloudFrontAccessEDD378DC": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunctionUrl",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "WorkerFunctionACE6A4B0",
+      "Arn"
+     ]
+    },
+    "FunctionUrlAuthType": "AWS_IAM",
+    "Principal": "cloudfront.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:cloudfront::557690619781:distribution/",
+       {
+        "Ref": "Distribution830FAC52"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WorkerFunction/AllowCloudFrontAccess"
+   }
+  },
+  "StaticBucket92253581": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     },
+     {
+      "Key": "aws-cdk:cr-owned:static/:19172d17",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/StaticBucket/Resource"
+   }
+  },
+  "StaticBucketPolicy4D0F6D8E": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "StaticBucket92253581"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:PutBucketPolicy"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "StaticBucket92253581",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "StaticBucket92253581",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Condition": {
+        "StringEquals": {
+         "AWS:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":cloudfront::",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":distribution/",
+            {
+             "Ref": "Distribution830FAC52"
+            }
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "StaticBucket92253581",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/StaticBucket/Policy/Resource"
+   }
+  },
+  "StaticBucketAutoDeleteObjectsCustomResource0863C8EB": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "StaticBucket92253581"
+    }
+   },
+   "DependsOn": [
+    "StaticBucketPolicy4D0F6D8E"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/StaticBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-557690619781-ap-northeast-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "StaticBucket92253581"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "StaticDeploymentAwsCliLayer1897F131": {
+   "Type": "AWS::Lambda::LayerVersion",
+   "Properties": {
+    "Content": {
+     "S3Bucket": "cdk-hnb659fds-assets-557690619781-ap-northeast-1",
+     "S3Key": "b8ab94266984268614c3fb2824a1c3a55395746c48b28c003b08bc1d08688f3e.zip"
+    },
+    "Description": "/opt/awscli/aws"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/StaticDeployment/AwsCliLayer/Resource",
+    "aws:asset:path": "asset.b8ab94266984268614c3fb2824a1c3a55395746c48b28c003b08bc1d08688f3e.zip",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Content"
+   }
+  },
+  "StaticDeploymentCustomResource0C6E0441": {
+   "Type": "Custom::CDKBucketDeployment",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
+      "Arn"
+     ]
+    },
+    "SourceBucketNames": [
+     "cdk-hnb659fds-assets-557690619781-ap-northeast-1"
+    ],
+    "SourceObjectKeys": [
+     "95ffa0c71561f2c620dc363244bfff03d2586e0f074f89bf4ced319f75d9d362.zip"
+    ],
+    "DestinationBucketName": {
+     "Ref": "StaticBucket92253581"
+    },
+    "DestinationBucketKeyPrefix": "static/",
+    "Prune": true,
+    "OutputObjectKeys": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/StaticDeployment/CustomResource/Default"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        "arn:aws:s3:::cdk-hnb659fds-assets-557690619781-ap-northeast-1",
+        "arn:aws:s3:::cdk-hnb659fds-assets-557690619781-ap-northeast-1/*"
+       ]
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "StaticBucket92253581",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "StaticBucket92253581",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "Roles": [
+     {
+      "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-557690619781-ap-northeast-1",
+     "S3Key": "9a1fcb4a7ecba81ad70e9d3fb241f6794497da945dae5f25924e4dd002b65f2d.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "AWS_CA_BUNDLE": "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+     }
+    },
+    "Handler": "index.handler",
+    "Layers": [
+     {
+      "Ref": "StaticDeploymentAwsCliLayer1897F131"
+     }
+    ],
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+      "Arn"
+     ]
+    },
+    "Runtime": "python3.11",
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource",
+    "aws:asset:path": "asset.9a1fcb4a7ecba81ad70e9d3fb241f6794497da945dae5f25924e4dd002b65f2d",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "LambdaOAC": {
+   "Type": "AWS::CloudFront::OriginAccessControl",
+   "Properties": {
+    "OriginAccessControlConfig": {
+     "Description": "OAC for Lambda function URL",
+     "Name": "LambdaOAC",
+     "OriginAccessControlOriginType": "lambda",
+     "SigningBehavior": "always",
+     "SigningProtocol": "sigv4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/LambdaOAC"
+   }
+  },
+  "ArticleCachePolicy26554D02": {
+   "Type": "AWS::CloudFront::CachePolicy",
+   "Properties": {
+    "CachePolicyConfig": {
+     "Comment": "Cache policy for article pages",
+     "DefaultTTL": 1,
+     "MaxTTL": 1,
+     "MinTTL": 1,
+     "Name": "ArticleCachePolicy",
+     "ParametersInCacheKeyAndForwardedToOrigin": {
+      "CookiesConfig": {
+       "CookieBehavior": "none"
+      },
+      "EnableAcceptEncodingBrotli": true,
+      "EnableAcceptEncodingGzip": true,
+      "HeadersConfig": {
+       "HeaderBehavior": "whitelist",
+       "Headers": [
+        "x-forwarded-host",
+        "authorization"
+       ]
+      },
+      "QueryStringsConfig": {
+       "QueryStringBehavior": "none"
+      }
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/ArticleCachePolicy/Resource"
+   }
+  },
+  "StaticCachePolicy59539962": {
+   "Type": "AWS::CloudFront::CachePolicy",
+   "Properties": {
+    "CachePolicyConfig": {
+     "Comment": "Cache policy for static files",
+     "DefaultTTL": 1,
+     "MaxTTL": 1,
+     "MinTTL": 1,
+     "Name": "StaticCachePolicy",
+     "ParametersInCacheKeyAndForwardedToOrigin": {
+      "CookiesConfig": {
+       "CookieBehavior": "none"
+      },
+      "EnableAcceptEncodingBrotli": true,
+      "EnableAcceptEncodingGzip": true,
+      "HeadersConfig": {
+       "HeaderBehavior": "none"
+      },
+      "QueryStringsConfig": {
+       "QueryStringBehavior": "none"
+      }
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/StaticCachePolicy/Resource"
+   }
+  },
+  "DistributionOrigin2S3OriginAccessControlDC470594": {
+   "Type": "AWS::CloudFront::OriginAccessControl",
+   "Properties": {
+    "OriginAccessControlConfig": {
+     "Name": "CloudFrontDistributionStackpOrigin2S3OriginAccessControl05780A54",
+     "OriginAccessControlOriginType": "s3",
+     "SigningBehavior": "always",
+     "SigningProtocol": "sigv4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Distribution/Origin2/S3OriginAccessControl/Resource"
+   }
+  },
+  "Distribution830FAC52": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Aliases": [
+      "bibo-note.jp",
+      "*.bibo-note.jp"
+     ],
+     "CacheBehaviors": [
+      {
+       "CachePolicyId": {
+        "Ref": "StaticCachePolicy59539962"
+       },
+       "Compress": true,
+       "PathPattern": "static/*",
+       "TargetOriginId": "CloudFrontDistributionStackproductionDistributionOrigin264BFB3B2",
+       "ViewerProtocolPolicy": "redirect-to-https"
+      },
+      {
+       "AllowedMethods": [
+        "GET",
+        "HEAD",
+        "OPTIONS",
+        "PUT",
+        "PATCH",
+        "POST",
+        "DELETE"
+       ],
+       "CachePolicyId": {
+        "Ref": "ArticleCachePolicy26554D02"
+       },
+       "Compress": true,
+       "LambdaFunctionAssociations": [
+        {
+         "EventType": "viewer-request",
+         "IncludeBody": true,
+         "LambdaFunctionARN": {
+          "Fn::GetAtt": [
+           "AuthorizationEdgeFunctionArnParameterAuthorizationEdgeFunctionArnParameterCustomResourceFD7FE045",
+           "Parameter.Value"
+          ]
+         }
+        }
+       ],
+       "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+       "PathPattern": "v/*",
+       "ResponseHeadersPolicyId": "5cc3b908-e619-4b99-88e5-2cf7f45965bd",
+       "TargetOriginId": "CloudFrontDistributionStackproductionDistributionOrigin165B899B2",
+       "ViewerProtocolPolicy": "redirect-to-https"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD",
+       "OPTIONS",
+       "PUT",
+       "PATCH",
+       "POST",
+       "DELETE"
+      ],
+      "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+      "Compress": true,
+      "LambdaFunctionAssociations": [
+       {
+        "EventType": "origin-request",
+        "IncludeBody": true,
+        "LambdaFunctionARN": {
+         "Fn::GetAtt": [
+          "EdgeFunctionArnParameterEdgeFunctionArnParameterCustomResourceA51A62E2",
+          "Parameter.Value"
+         ]
+        }
+       },
+       {
+        "EventType": "viewer-request",
+        "IncludeBody": true,
+        "LambdaFunctionARN": {
+         "Fn::GetAtt": [
+          "AuthorizationEdgeFunctionArnParameterAuthorizationEdgeFunctionArnParameterCustomResourceFD7FE045",
+          "Parameter.Value"
+         ]
+        }
+       }
+      ],
+      "OriginRequestPolicyId": "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+      "ResponseHeadersPolicyId": "5cc3b908-e619-4b99-88e5-2cf7f45965bd",
+      "TargetOriginId": "CloudFrontDistributionStackproductionDistributionOrigin165B899B2",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "CustomOriginConfig": {
+        "OriginProtocolPolicy": "https-only",
+        "OriginSSLProtocols": [
+         "TLSv1.2"
+        ]
+       },
+       "DomainName": {
+        "Fn::Select": [
+         2,
+         {
+          "Fn::Split": [
+           "/",
+           {
+            "Fn::GetAtt": [
+             "WorkerFunctionFunctionUrl5A5A4F7F",
+             "FunctionUrl"
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       "Id": "CloudFrontDistributionStackproductionDistributionOrigin165B899B2",
+       "OriginAccessControlId": {
+        "Ref": "LambdaOAC"
+       }
+      },
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "StaticBucket92253581",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "CloudFrontDistributionStackproductionDistributionOrigin264BFB3B2",
+       "OriginAccessControlId": {
+        "Fn::GetAtt": [
+         "DistributionOrigin2S3OriginAccessControlDC470594",
+         "Id"
+        ]
+       },
+       "S3OriginConfig": {
+        "OriginAccessIdentity": ""
+       }
+      }
+     ],
+     "ViewerCertificate": {
+      "AcmCertificateArn": {
+       "Fn::GetAtt": [
+        "CertificateArnParameterCertificateArnParameterCustomResourceBDC1B823",
+        "Parameter.Value"
+       ]
+      },
+      "MinimumProtocolVersion": "TLSv1.2_2021",
+      "SslSupportMethod": "sni-only"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/Distribution/Resource"
+   }
+  },
+  "AliasRecordApex8C6D5BC4": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "Distribution830FAC52",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z08641051STVZTDK95QAW",
+    "Name": "bibo-note.jp.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/AliasRecordApex/Resource"
+   }
+  },
+  "AliasRecordWildcard5C7CA0CA": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "AliasTarget": {
+     "DNSName": {
+      "Fn::GetAtt": [
+       "Distribution830FAC52",
+       "DomainName"
+      ]
+     },
+     "HostedZoneId": {
+      "Fn::FindInMap": [
+       "AWSCloudFrontPartitionHostedZoneIdMap",
+       {
+        "Ref": "AWS::Partition"
+       },
+       "zoneId"
+      ]
+     }
+    },
+    "HostedZoneId": "Z08641051STVZTDK95QAW",
+    "Name": "*.bibo-note.jp.",
+    "Type": "A"
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/AliasRecordWildcard/Resource"
+   }
+  },
+  "WikiDataBucketBD2BC5D6": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WikiDataBucket/Resource"
+   }
+  },
+  "WikiDataBucketPolicy7D51B202": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "WikiDataBucketBD2BC5D6"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:PutBucketPolicy"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "WikiDataBucketBD2BC5D6",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "WikiDataBucketBD2BC5D6",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:PutObject"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "WorkerFunctionServiceRole38D8F738",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "WikiDataBucketBD2BC5D6",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": "s3:ListBucket",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "WorkerFunctionServiceRole38D8F738",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::GetAtt": [
+         "WikiDataBucketBD2BC5D6",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WikiDataBucket/Policy/Resource"
+   }
+  },
+  "WikiDataBucketAutoDeleteObjectsCustomResource839C6F2E": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "WikiDataBucketBD2BC5D6"
+    }
+   },
+   "DependsOn": [
+    "WikiDataBucketPolicy7D51B202"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/WikiDataBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21SS26DMBA9S/aOm097AELVVaukoHaLHDPQSYyNPHZQhLh7ZUOTNO3qfTwzhjde8dViyRcz0dFclse5wj3vcyfkkUlPzjSFBTLeSiCedJRGL5ssJjoqeiWafSl4n6OuFTijX7yWDo1mF5JWf82NIGDvXiisEMpf7o/4sCq0TrAD2yDRNO9VnMF+gg16YCga3u+MQnmOpSPLjIIgAw6M1kUviMARTwKwElplzg1oxzdeHsE9X4xQzfvRjZ800jBsYiNcr7zVA5PK+LKyRjvep5XeWqxRJ1ICUWq0s0axVMgvuPbfymckZ3HvY175+t/uSt9WDcwa7+BpzfskA2lsGf87shzcMLC7zcXTiV9IjCV3okZd3zXsrDlhCTaGMW68UGEFhehIKoyPQ2HcShi+9a71Ma830bao64FpUwI/0MNp9cgXfDk7EOLceu2wAZ6N+A3UKNQAjwIAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "CloudFrontDistributionStack-production/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "DistributionDomainName": {
+   "Value": {
+    "Fn::GetAtt": [
+     "Distribution830FAC52",
+     "DomainName"
+    ]
+   }
+  },
+  "WikiDataBucketName": {
+   "Value": {
+    "Ref": "WikiDataBucketBD2BC5D6"
+   }
+  }
+ },
+ "Mappings": {
+  "AWSCloudFrontPartitionHostedZoneIdMap": {
+   "aws": {
+    "zoneId": "Z2FDTNDATAQYW2"
+   },
+   "aws-cn": {
+    "zoneId": "Z3RFFRIM2A3IF5"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

@@ -32,13 +32,6 @@ lerna-debug.log*
 
 # misc
 .DS_Store
-
-# test data folder
-data/
-
-# coverage
-coverage/
-
-cdk.out/
 .vscode/
 .cursor/
+.cdk.out/
