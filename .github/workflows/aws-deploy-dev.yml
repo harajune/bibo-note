@@ -87,9 +87,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Install esbuild
-        run: pnpm add -D esbuild
-      
       - name: Build
         run: pnpm web build
       
