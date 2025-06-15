@@ -94,6 +94,6 @@ jobs:
           aws-region: ap-northeast-1
       
       - name: Deploy to AWS using CDK
-        run: cdk deploy --all
+        run: pnpm infrastructure cdk deploy --all
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
