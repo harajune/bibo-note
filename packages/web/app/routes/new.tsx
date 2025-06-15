@@ -39,7 +39,8 @@ export const POST = createRoute(async (c) => {
     ));
     
     await wikiModel.save(newArticle);
-    return c.redirect(`/v/${newUuid}`);
+    // Redirect to edit view if draft, otherwise to view
+    return c.redirect(isDraft ? `/e/${newUuid}` : `/v/${newUuid}`);
   } catch (e) {
     logger.error(e);
     return c.notFound();

@@ -36,7 +36,8 @@ export const POST = createRoute(async (c) => {
       draft: isDraft
     });
     await wikiModel.save(updatedWikiData);
-    return c.redirect(`/v/${uuid}`);
+    // Redirect to edit view if draft, otherwise to view
+    return c.redirect(isDraft ? `/e/${uuid}` : `/v/${uuid}`);
   } catch (e) {
     logger.error('Error saving wiki data:', e);
     return c.json({ error: (e as Error).message }, 500);

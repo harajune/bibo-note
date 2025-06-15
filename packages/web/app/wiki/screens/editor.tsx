@@ -15,7 +15,7 @@ export function Editor({ wikiData, articles = [] }: EditorProps) {
     allSections.push({
       header: { name: "Recent Articles" },
       items: articles.map(article => ({
-        name: article.title || "Untitled",
+        name: `${article.title || "Untitled"}${article.draft ? " (Draft)" : ""}`,
         href: `/e/${article.uuid}`,
         current: false,
       }))
