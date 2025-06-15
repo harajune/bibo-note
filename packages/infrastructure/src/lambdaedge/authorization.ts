@@ -33,8 +33,8 @@ app.use('*', handleRequest);
 if (isSecureEntireEnvironment) {
   app.use('*', basicAuthMiddleware);
 } else { // In production, only secure specific paths
-  app.use('e/*', basicAuthMiddleware, handleRequest);
-  app.use('new', basicAuthMiddleware, handleRequest);
+  app.use('e/*', basicAuthMiddleware);
+  app.use('new', basicAuthMiddleware);
 }
 
 export const handler = handle(app);
