@@ -41,7 +41,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --recursive
       
       - name: Run tests
         run: pnpm web test
@@ -82,7 +82,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
       
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --recursive
       
       - name: Build
         run: pnpm web build

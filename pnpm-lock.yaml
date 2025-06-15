@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      esbuild:
+        specifier: ^0.25.5
+        version: 0.25.5
 
   packages/infrastructure:
     devDependencies:
@@ -19,9 +23,6 @@ importers:
       constructs:
         specifier: ^10.4.2
         version: 10.4.2
-      esbuild:
-        specifier: ^0.25.5
-        version: 0.25.5
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
