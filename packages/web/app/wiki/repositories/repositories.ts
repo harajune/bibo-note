@@ -17,6 +17,9 @@ export interface Repository {
   saveArticleListCache(articles: ArticleListItem[]): void | Promise<void>;
   loadArticleListCache(): Promise<ArticleListItem[] | null>;
   getCacheFilePath(): string;
+  
+  saveOGPImage(uuid: UUID, imageBuffer: Buffer): void | Promise<void>;
+  getOGPImagePath(uuid: UUID): string;
 }
 
 export class FileRepository implements Repository {
@@ -52,7 +55,8 @@ export class FileRepository implements Repository {
         updatedAt: data.updatedAt.toISOString(),
         createdAt: data.createdAt.toISOString(),
         uuid: data.uuid,
-        isDraft: data.isDraft
+        isDraft: data.isDraft,
+        ogpImagePath: data.ogpImagePath
       },
       content: {
         title: data.title,
@@ -73,9 +77,9 @@ export class FileRepository implements Repository {
       }
       const tomlData = TOML.parse(tomlString) as {
         content: { title: string; content: string };
-        header: { updatedAt: string; createdAt: string; isDraft?: boolean };
+        header: { updatedAt: string; createdAt: string; isDraft?: boolean; ogpImagePath?: string };
       };
-      return new WikiData(uuid, tomlData.content.title, tomlData.content.content, new Date(tomlData.header.updatedAt), new Date(tomlData.header.createdAt), tomlData.header.isDraft || false);
+      return new WikiData(uuid, tomlData.content.title, tomlData.content.content, new Date(tomlData.header.updatedAt), new Date(tomlData.header.createdAt), tomlData.header.isDraft || false, tomlData.header.ogpImagePath);
     } catch (e) {
       logger.error(`Failed to load wiki data for filename: ${filename}`);
       return null;
@@ -135,6 +139,28 @@ export class FileRepository implements Repository {
     
     return null;
   }
+  
+  public saveOGPImage(uuid: UUID, imageBuffer: Buffer): void {
+    const ogpImagePath = this.getOGPImagePath(uuid);
+    const ogpDir = path.dirname(ogpImagePath);
+    
+    if (!fs.existsSync(ogpDir)) {
+      fs.mkdirSync(ogpDir, { recursive: true });
+    }
+    
+    fs.writeFileSync(ogpImagePath, imageBuffer);
+  }
+
+  public getOGPImagePath(uuid: UUID): string {
+    const basePath = this.getUserBasePath();
+    const ogpDir = path.join(basePath, 'OGPimage');
+    
+    if (!fs.existsSync(ogpDir)) {
+      fs.mkdirSync(ogpDir, { recursive: true });
+    }
+    
+    return path.join(ogpDir, `${uuid}.png`);
+  }
 }
 
 export class R2Repository implements Repository {
@@ -151,7 +177,8 @@ export class R2Repository implements Repository {
         updatedAt: data.updatedAt.toISOString(),
         createdAt: data.createdAt.toISOString(),
         uuid: data.uuid,
-        isDraft: data.isDraft
+        isDraft: data.isDraft,
+        ogpImagePath: data.ogpImagePath
       },
       content: {
         title: data.title,
@@ -172,7 +199,7 @@ export class R2Repository implements Repository {
     const tomlString = await object.text();
     const tomlData = TOML.parse(tomlString) as {
       content: { title: string; content: string };
-      header: { updatedAt: string; createdAt: string; isDraft?: boolean };
+      header: { updatedAt: string; createdAt: string; isDraft?: boolean; ogpImagePath?: string };
     };
 
     return new WikiData(
@@ -181,7 +208,8 @@ export class R2Repository implements Repository {
       tomlData.content.content,
       new Date(tomlData.header.updatedAt),
       new Date(tomlData.header.createdAt),
-      tomlData.header.isDraft || false
+      tomlData.header.isDraft || false,
+      tomlData.header.ogpImagePath
     );
   }
 
@@ -215,6 +243,18 @@ export class R2Repository implements Repository {
       console.error('Failed to read cache file:', error);
       return null;
     }
+  }
+  
+  public async saveOGPImage(uuid: UUID, imageBuffer: Buffer): Promise<void> {
+    await this.bucket.put(`OGPimage/${uuid}.png`, imageBuffer, {
+      httpMetadata: {
+        contentType: 'image/png'
+      }
+    });
+  }
+
+  public getOGPImagePath(uuid: UUID): string {
+    return `OGPimage/${uuid}.png`;
   }
 }
 
@@ -299,7 +339,8 @@ export class S3Repository implements Repository {
         updatedAt: data.updatedAt.toISOString(),
         createdAt: data.createdAt.toISOString(),
         uuid: data.uuid,
-        isDraft: data.isDraft
+        isDraft: data.isDraft,
+        ogpImagePath: data.ogpImagePath
       },
       content: {
         title: data.title,
@@ -330,7 +371,7 @@ export class S3Repository implements Repository {
       }
       const tomlData = TOML.parse(body) as {
         content: { title: string; content: string };
-        header: { updatedAt: string; createdAt: string; isDraft?: boolean };
+        header: { updatedAt: string; createdAt: string; isDraft?: boolean; ogpImagePath?: string };
       };
       return new WikiData(
         uuid,
@@ -338,7 +379,8 @@ export class S3Repository implements Repository {
         tomlData.content.content,
         new Date(tomlData.header.updatedAt),
         new Date(tomlData.header.createdAt),
-        tomlData.header.isDraft || false
+        tomlData.header.isDraft || false,
+        tomlData.header.ogpImagePath
       );
     } catch (e) {
       logger.error(`Failed to load wiki data for objectKey: ${objectKey}`);
@@ -420,5 +462,32 @@ export class S3Repository implements Repository {
     }
     
     return null;
+  }
+  
+  public async saveOGPImage(uuid: UUID, imageBuffer: Buffer): Promise<void> {
+    await this.ensureClient();
+    const PutObjectCommandConstructor = await PutObjectCommand();
+    const objectKey = this.getOGPImageObjectKey(uuid);
+    
+    await this.s3Client!.send(new PutObjectCommandConstructor({
+      Bucket: this.bucketName,
+      Key: objectKey,
+      Body: imageBuffer,
+      ContentType: 'image/png'
+    }));
+  }
+
+  public getOGPImagePath(uuid: UUID): string {
+    return this.getOGPImageObjectKey(uuid);
+  }
+
+  private getOGPImageObjectKey(uuid: UUID): string {
+    const envVariables = env<{ MULTITENANT: string }>(this.context);
+    const user = this.context.get('user');
+
+    if (envVariables.MULTITENANT === '1' && user) {
+      return `${user}/OGPimage/${uuid}.png`;
+    }
+    return `OGPimage/${uuid}.png`;
   }
 }

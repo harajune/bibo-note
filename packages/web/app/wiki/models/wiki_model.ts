@@ -2,6 +2,7 @@ import { WikiData, UUID } from "./wiki_data";
 import { Repository, FileRepository, S3Repository } from "../repositories/repositories";
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
+import { OGPGenerator } from "../../libs/ogp/ogp_generator";
 
 export interface ArticleListItem {
   uuid: UUID;
@@ -31,8 +32,15 @@ export class WikiModel {
   }
 
   public async save(wikiData: WikiData): Promise<void> {
-    await this.repository.save(wikiData);
-    await this.updateCache(wikiData);
+    const ogpImageBuffer = await OGPGenerator.generateOGPImage(wikiData.title, wikiData.uuid);
+    const ogpImageFilename = OGPGenerator.getOGPImageFilename(wikiData.uuid);
+    
+    await this.repository.saveOGPImage(wikiData.uuid, ogpImageBuffer);
+    
+    const updatedWikiData = new WikiData(wikiData.uuid, wikiData.title, wikiData.content, wikiData.updatedAt, wikiData.createdAt, wikiData.isDraft, ogpImageFilename);
+    
+    await this.repository.save(updatedWikiData);
+    await this.updateCache(updatedWikiData);
   }
 
   public async load(uuid: string): Promise<WikiData | null> {

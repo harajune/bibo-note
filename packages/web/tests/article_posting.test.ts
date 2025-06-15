@@ -51,16 +51,21 @@ describe('Article Posting', () => {
   it('should save an article to the file repository', async () => {
     await wikiModel.save(testData);
     
-    expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
+    expect(fs.writeFileSync).toHaveBeenCalledTimes(3);
     
-    const firstArg = (fs.writeFileSync as any).mock.calls[0][0];
-    expect(firstArg).toContain(testUuid);
-    expect(firstArg).toContain('.toml');
+    const ogpImageArg = (fs.writeFileSync as any).mock.calls[0][0];
+    expect(ogpImageArg).toContain(testUuid);
+    expect(ogpImageArg).toContain('.png');
     
-    const secondArg = (fs.writeFileSync as any).mock.calls[0][1];
-    expect(secondArg).toContain('Test Title');
-    expect(secondArg).toContain('Test Content');
-    expect(secondArg).toContain('isDraft = false');
+    const tomlFileArg = (fs.writeFileSync as any).mock.calls[1][0];
+    expect(tomlFileArg).toContain(testUuid);
+    expect(tomlFileArg).toContain('.toml');
+    
+    const tomlContentArg = (fs.writeFileSync as any).mock.calls[1][1];
+    expect(tomlContentArg).toContain('Test Title');
+    expect(tomlContentArg).toContain('Test Content');
+    expect(tomlContentArg).toContain('isDraft = false');
+    expect(tomlContentArg).toContain('ogpImagePath');
   });
   
   it('should check if an article exists', async () => {
