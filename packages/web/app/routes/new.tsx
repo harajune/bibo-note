@@ -12,7 +12,8 @@ export default createRoute(async (c) => {
     "",  // title
     "",  // content
     new Date(), // updatedAt
-    new Date()  // createdAt
+    new Date(),  // createdAt
+    false // draft
   );
   
   const articles = await wikiModel.getLatestArticles();
@@ -27,12 +28,14 @@ export const POST = createRoute(async (c) => {
   try {
     const data = await c.req.formData();
     const newUuid = uuidv7();
+    const isDraft = data.get("draft") === "on";
     const newArticle = createImmutable(new WikiData(
       newUuid,
       data.get("title") as string,
       data.get("content") as string,
       new Date(),
-      new Date()
+      new Date(),
+      isDraft
     ));
     
     await wikiModel.save(newArticle);

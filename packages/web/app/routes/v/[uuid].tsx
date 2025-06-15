@@ -7,11 +7,11 @@ export default createRoute(async (c) => {
   const wikiModel = new WikiModel();
   const wikiData = await wikiModel.load(uuid);
   
-  if (!wikiData) {
+  if (!wikiData || wikiData.draft) {
     return c.notFound();
   }
   
-  const articles = await wikiModel.getLatestArticles();
+  const articles = await wikiModel.getLatestArticlesForView();
 
   return c.render(
     <Viewer wikiData={wikiData} articles={articles} />,

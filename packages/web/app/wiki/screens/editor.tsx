@@ -16,7 +16,7 @@ export function Editor({ wikiData, articles = [] }: EditorProps) {
       header: { name: "Recent Articles" },
       items: articles.map(article => ({
         name: article.title || "Untitled",
-        href: `/v/${article.uuid}`,
+        href: `/e/${article.uuid}`,
         current: false,
       }))
     });
@@ -56,6 +56,18 @@ export function Editor({ wikiData, articles = [] }: EditorProps) {
 
         <div class="absolute inset-x-px bottom-0">
           <div class="flex items-center justify-between space-x-3 border-t border-gray-200 px-2 py-2 sm:px-3">
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                name="draft"
+                id="draft"
+                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                checked={wikiData.draft}
+              />
+              <label for="draft" class="ml-2 text-sm font-medium leading-6 text-gray-900">
+                Draft
+              </label>
+            </div>
             <div class="shrink-0">
               <button
                 type="submit"

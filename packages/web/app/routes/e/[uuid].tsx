@@ -28,10 +28,12 @@ export const POST = createRoute(async (c) => {
     }
     const immutableWikiData = createImmutable(wikiData);
     const data = await c.req.formData();  
+    const isDraft = data.get("draft") === "on";
     const updatedWikiData = immutableWikiData.copyWith({
       title: data.get("title") as string,
       content: data.get("content") as string,
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      draft: isDraft
     });
     await wikiModel.save(updatedWikiData);
     return c.redirect(`/v/${uuid}`);

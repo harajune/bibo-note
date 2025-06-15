@@ -8,6 +8,7 @@ export interface ArticleListItem {
   title: string;
   updatedAt: string;
   createdAt: string;
+  draft: boolean;
 }
 
 export class WikiModel {
@@ -55,6 +56,12 @@ export class WikiModel {
     return await this.rebuildCache(limit);
   }
 
+  public async getLatestArticlesForView(limit = 20): Promise<ArticleListItem[]> {
+    const allArticles = await this.getLatestArticles(limit * 2); // Get more to account for filtering
+    const nonDraftArticles = allArticles.filter(article => !article.draft);
+    return nonDraftArticles.slice(0, limit);
+  }
+
   /**
    * Rebuilds the entire article list cache from scratch by fetching all articles.
    * This is a more expensive operation that loads all articles from storage,
@@ -78,7 +85,8 @@ export class WikiModel {
           uuid: wikiData.uuid,
           title: wikiData.title,
           updatedAt: wikiData.updatedAt.toISOString(),
-          createdAt: wikiData.createdAt.toISOString()
+          createdAt: wikiData.createdAt.toISOString(),
+          draft: wikiData.draft
         });
       }
     }
@@ -110,7 +118,8 @@ export class WikiModel {
         uuid: wikiData.uuid,
         title: wikiData.title,
         updatedAt: wikiData.updatedAt.toISOString(),
-        createdAt: wikiData.createdAt.toISOString()
+        createdAt: wikiData.createdAt.toISOString(),
+        draft: wikiData.draft
       });
       
       articleList = articleList.slice(0, 20);
