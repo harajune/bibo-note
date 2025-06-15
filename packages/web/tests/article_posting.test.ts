@@ -41,7 +41,8 @@ describe('Article Posting', () => {
       'Test Title',
       'Test Content',
       new Date(),
-      new Date()
+      new Date(),
+      false
     );
     
     vi.clearAllMocks();
@@ -59,6 +60,7 @@ describe('Article Posting', () => {
     const secondArg = (fs.writeFileSync as any).mock.calls[0][1];
     expect(secondArg).toContain('Test Title');
     expect(secondArg).toContain('Test Content');
+    expect(secondArg).toContain('isDraft = false');
   });
   
   it('should check if an article exists', async () => {
@@ -81,6 +83,7 @@ describe('Article Posting', () => {
     updatedAt = "${new Date().toISOString()}"
     createdAt = "${new Date().toISOString()}"
     uuid = "${testUuid}"
+    isDraft = false
     
     [content]
     title = "Test Title"
@@ -96,6 +99,7 @@ describe('Article Posting', () => {
     expect(loadedData?.uuid).toBe(testUuid);
     expect(loadedData?.title).toBe('Test Title');
     expect(loadedData?.content).toBe('Test Content');
+    expect(loadedData?.isDraft).toBe(false);
   });
   
   it('should return null when loading a non-existent article', async () => {

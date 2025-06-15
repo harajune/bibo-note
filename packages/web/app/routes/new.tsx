@@ -15,7 +15,7 @@ export default createRoute(async (c) => {
     new Date()  // createdAt
   );
   
-  const articles = await wikiModel.getLatestArticles();
+  const articles = await wikiModel.getLatestArticles(20, true);
   
   return c.render(<Editor wikiData={blankWikiData} articles={articles} />,
      { title: "New Article" });
@@ -32,7 +32,8 @@ export const POST = createRoute(async (c) => {
       data.get("title") as string,
       data.get("content") as string,
       new Date(),
-      new Date()
+      new Date(),
+      data.get("isDraft") === "on"
     ));
     
     await wikiModel.save(newArticle);

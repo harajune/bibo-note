@@ -8,6 +8,7 @@ export interface ArticleListItem {
   title: string;
   updatedAt: string;
   createdAt: string;
+  isDraft: boolean;
 }
 
 export class WikiModel {
@@ -42,7 +43,15 @@ export class WikiModel {
     return await this.repository.list();
   }
 
-  public async getLatestArticles(limit = 20): Promise<ArticleListItem[]> {
+  public async getLatestArticles(limit = 20, includeDrafts = false): Promise<ArticleListItem[]> {
+    const allArticles = await this.getLatestArticlesInternal(limit);
+    if (includeDrafts) {
+      return allArticles;
+    }
+    return allArticles.filter(article => !article.isDraft);
+  }
+
+  private async getLatestArticlesInternal(limit = 20): Promise<ArticleListItem[]> {
     try {
       const articleList = await this.repository.loadArticleListCache();
       if (articleList) {
@@ -78,7 +87,8 @@ export class WikiModel {
           uuid: wikiData.uuid,
           title: wikiData.title,
           updatedAt: wikiData.updatedAt.toISOString(),
-          createdAt: wikiData.createdAt.toISOString()
+          createdAt: wikiData.createdAt.toISOString(),
+          isDraft: wikiData.isDraft
         });
       }
     }
@@ -110,7 +120,8 @@ export class WikiModel {
         uuid: wikiData.uuid,
         title: wikiData.title,
         updatedAt: wikiData.updatedAt.toISOString(),
-        createdAt: wikiData.createdAt.toISOString()
+        createdAt: wikiData.createdAt.toISOString(),
+        isDraft: wikiData.isDraft
       });
       
       articleList = articleList.slice(0, 20);

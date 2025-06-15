@@ -11,7 +11,11 @@ export default createRoute(async (c) => {
     return c.notFound();
   }
   
-  const articles = await wikiModel.getLatestArticles();
+  if (wikiData.isDraft) {
+    return c.notFound();
+  }
+  
+  const articles = await wikiModel.getLatestArticles(20, false);
 
   return c.render(
     <Viewer wikiData={wikiData} articles={articles} />,

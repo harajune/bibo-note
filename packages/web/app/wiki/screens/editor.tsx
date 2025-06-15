@@ -15,8 +15,8 @@ export function Editor({ wikiData, articles = [] }: EditorProps) {
     allSections.push({
       header: { name: "Recent Articles" },
       items: articles.map(article => ({
-        name: article.title || "Untitled",
-        href: `/v/${article.uuid}`,
+        name: `${article.title || "Untitled"}${article.isDraft ? " (Draft)" : ""}`,
+        href: `/e/${article.uuid}`,
         current: false,
       }))
     });
@@ -56,6 +56,17 @@ export function Editor({ wikiData, articles = [] }: EditorProps) {
 
         <div class="absolute inset-x-px bottom-0">
           <div class="flex items-center justify-between space-x-3 border-t border-gray-200 px-2 py-2 sm:px-3">
+            <div class="flex items-center space-x-3">
+              <label class="flex items-center">
+                <input
+                  type="checkbox"
+                  name="isDraft"
+                  class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  checked={wikiData.isDraft}
+                />
+                <span class="ml-2 text-sm text-gray-700">Save as draft</span>
+              </label>
+            </div>
             <div class="shrink-0">
               <button
                 type="submit"

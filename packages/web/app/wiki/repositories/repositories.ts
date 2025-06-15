@@ -51,7 +51,8 @@ export class FileRepository implements Repository {
         fileVersion: "0.0.1",
         updatedAt: data.updatedAt.toISOString(),
         createdAt: data.createdAt.toISOString(),
-        uuid: data.uuid
+        uuid: data.uuid,
+        isDraft: data.isDraft
       },
       content: {
         title: data.title,
@@ -72,9 +73,9 @@ export class FileRepository implements Repository {
       }
       const tomlData = TOML.parse(tomlString) as {
         content: { title: string; content: string };
-        header: { updatedAt: string; createdAt: string };
+        header: { updatedAt: string; createdAt: string; isDraft?: boolean };
       };
-      return new WikiData(uuid, tomlData.content.title, tomlData.content.content, new Date(tomlData.header.updatedAt), new Date(tomlData.header.createdAt));
+      return new WikiData(uuid, tomlData.content.title, tomlData.content.content, new Date(tomlData.header.updatedAt), new Date(tomlData.header.createdAt), tomlData.header.isDraft || false);
     } catch (e) {
       logger.error(`Failed to load wiki data for filename: ${filename}`);
       return null;
@@ -149,7 +150,8 @@ export class R2Repository implements Repository {
         fileVersion: "0.0.1",
         updatedAt: data.updatedAt.toISOString(),
         createdAt: data.createdAt.toISOString(),
-        uuid: data.uuid
+        uuid: data.uuid,
+        isDraft: data.isDraft
       },
       content: {
         title: data.title,
@@ -170,7 +172,7 @@ export class R2Repository implements Repository {
     const tomlString = await object.text();
     const tomlData = TOML.parse(tomlString) as {
       content: { title: string; content: string };
-      header: { updatedAt: string; createdAt: string };
+      header: { updatedAt: string; createdAt: string; isDraft?: boolean };
     };
 
     return new WikiData(
@@ -178,7 +180,8 @@ export class R2Repository implements Repository {
       tomlData.content.title,
       tomlData.content.content,
       new Date(tomlData.header.updatedAt),
-      new Date(tomlData.header.createdAt)
+      new Date(tomlData.header.createdAt),
+      tomlData.header.isDraft || false
     );
   }
 
@@ -296,6 +299,7 @@ export class S3Repository implements Repository {
         updatedAt: data.updatedAt.toISOString(),
         createdAt: data.createdAt.toISOString(),
         uuid: data.uuid,
+        isDraft: data.isDraft
       },
       content: {
         title: data.title,
@@ -326,14 +330,15 @@ export class S3Repository implements Repository {
       }
       const tomlData = TOML.parse(body) as {
         content: { title: string; content: string };
-        header: { updatedAt: string; createdAt: string };
+        header: { updatedAt: string; createdAt: string; isDraft?: boolean };
       };
       return new WikiData(
         uuid,
         tomlData.content.title,
         tomlData.content.content,
         new Date(tomlData.header.updatedAt),
-        new Date(tomlData.header.createdAt)
+        new Date(tomlData.header.createdAt),
+        tomlData.header.isDraft || false
       );
     } catch (e) {
       logger.error(`Failed to load wiki data for objectKey: ${objectKey}`);
