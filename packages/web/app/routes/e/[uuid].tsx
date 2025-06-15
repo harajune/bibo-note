@@ -11,7 +11,7 @@ export default createRoute(async (c) => {
     return c.notFound();
   }
   
-  const articles = await wikiModel.getLatestArticles();
+  const articles = await wikiModel.getLatestArticles(20, true);
   
   return c.render(<Editor wikiData={wikiData} articles={articles} />,
      { title: wikiData.title });
@@ -31,6 +31,7 @@ export const POST = createRoute(async (c) => {
     const updatedWikiData = immutableWikiData.copyWith({
       title: data.get("title") as string,
       content: data.get("content") as string,
+      isDraft: data.get("isDraft") === "on",
       updatedAt: new Date()
     });
     await wikiModel.save(updatedWikiData);

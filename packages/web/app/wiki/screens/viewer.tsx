@@ -14,15 +14,18 @@ export function Viewer({ wikiData, articles = [] }: ViewerProps) {
   const allSections: MenuSection[] = [];
 
   if (articles.length > 0) {
-    allSections.push({
-      header: { name: "Recent Articles" },
-      items: articles.map(article => ({
-        name: article.title || "Untitled",
-        href: `/v/${article.uuid}`,
-        current: false,
-        icon: <span class="size-5 flex-none text-gray-400">📄</span>
-      }))
-    });
+    const visibleArticles = articles.filter(article => !article.isDraft);
+    if (visibleArticles.length > 0) {
+      allSections.push({
+        header: { name: "Recent Articles" },
+        items: visibleArticles.map(article => ({
+          name: article.title || "Untitled",
+          href: `/v/${article.uuid}`,
+          current: false,
+          icon: <span class="size-5 flex-none text-gray-400">📄</span>
+        }))
+      });
+    }
   }
 
   const title = wikiData.title;
