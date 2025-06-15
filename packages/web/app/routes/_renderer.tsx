@@ -7,8 +7,8 @@ export default jsxRenderer(({ children }) => {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="/favicon.ico" />
         <Link href="/app/style.css" rel="stylesheet" />
+        <Link href="/app/assets/favicon.ico" rel="icon" />
         <Script src="/app/client.ts" async />
       </head>
       <body>{children}</body>

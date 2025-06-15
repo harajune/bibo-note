@@ -1,4 +1,5 @@
 import { useState } from 'hono/jsx'
+import BiboNoteLogo from '../assets/bibo-note.svg'
 
 interface MenuItem {
   name: string;
@@ -23,8 +24,8 @@ interface SidebarProps {
 const Logo = () => (
   <div class="flex h-16 shrink-0 items-center">
     <img
-      class="h-8 w-auto"
-      src="/app/assets/bibo-note.svg"
+      class="h-32 w-auto"
+      src={BiboNoteLogo}
       alt="Bibo Note"
     />
   </div>
