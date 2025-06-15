@@ -3,7 +3,6 @@ import { Repository, FileRepository, S3Repository } from "../repositories/reposi
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
 import { OGPGenerator } from "../../libs/ogp/ogp_generator";
-import { ImageRepository, FileImageRepository, S3ImageRepository } from "../../libs/image/image_repository";
 
 export interface ArticleListItem {
   uuid: UUID;
@@ -15,7 +14,6 @@ export interface ArticleListItem {
 
 export class WikiModel {
   private readonly repository: Repository;
-  private readonly imageRepository: ImageRepository;
   private readonly context: any;
 
   constructor() {
@@ -28,20 +26,23 @@ export class WikiModel {
     
     if (mode === 'production') {
       this.repository = new S3Repository();
-      this.imageRepository = new S3ImageRepository('bibo-note-bucket');
     } else {
       this.repository = new FileRepository("./data");
-      this.imageRepository = new FileImageRepository("./data");
     }
   }
 
   public async save(wikiData: WikiData): Promise<void> {
-    const ogpImageBuffer = await OGPGenerator.generateOGPImage(wikiData.title, wikiData.uuid);
-    const ogpImageFilename = OGPGenerator.getOGPImageFilename(wikiData.uuid);
+    const ogpImagePath = OGPGenerator.getOGPImageUrl(wikiData.title);
     
-    await this.imageRepository.saveImage(wikiData.uuid, ogpImageBuffer, ogpImageFilename);
-    
-    const updatedWikiData = new WikiData(wikiData.uuid, wikiData.title, wikiData.content, wikiData.updatedAt, wikiData.createdAt, wikiData.isDraft, ogpImageFilename);
+    const updatedWikiData = new WikiData(
+      wikiData.uuid, 
+      wikiData.title, 
+      wikiData.content, 
+      wikiData.updatedAt, 
+      wikiData.createdAt, 
+      wikiData.isDraft, 
+      ogpImagePath
+    );
     
     await this.repository.save(updatedWikiData);
     await this.updateCache(updatedWikiData);

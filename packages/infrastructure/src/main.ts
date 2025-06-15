@@ -3,6 +3,7 @@ import { CertificateStack } from './certificate-stack';
 import { CloudFrontDistributionStack } from './cloudfront-distribution-stack';
 import { LambdaEdgeStack } from './lambda-edge-stack';
 import { AuthorizationEdgeFunctionStack } from './authorization-edge-function-stack';
+import { OGPLambdaStack } from './ogp-lambda-stack';
 import { GitHubActionsRoleStack } from './github-actions-role-stack';
 import { getEnvironmentConfig } from './environment-config';
 
@@ -36,13 +37,20 @@ const authorizationEdgeFunctionStack = new AuthorizationEdgeFunctionStack(app, `
   environmentConfig,
 });
 
+const ogpLambdaStack = new OGPLambdaStack(app, `OGPLambdaStack-${environmentConfig.name}`, {
+  env: { region: 'ap-northeast-1', account: account },
+  environmentConfig,
+});
+
 // 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成
 const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudFrontDistributionStack-${environmentConfig.name}`, {
   env: { region: 'ap-northeast-1', account: account },
   environmentConfig,
+  ogpLambdaStack,
 });
 
 // 依存関係を設定
 cloudFrontDistributionStack.addDependency(certificateStack);
 cloudFrontDistributionStack.addDependency(lambdaEdgeStack);
 cloudFrontDistributionStack.addDependency(authorizationEdgeFunctionStack);
+cloudFrontDistributionStack.addDependency(ogpLambdaStack);

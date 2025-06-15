@@ -4,21 +4,6 @@ import { WikiData } from '../app/wiki/models/wiki_data';
 import * as fs from 'node:fs';
 import { v7 as uuidv7 } from "uuid";
 
-vi.mock('canvas', () => ({
-  createCanvas: vi.fn(() => ({
-    getContext: vi.fn(() => ({
-      fillStyle: '',
-      fillRect: vi.fn(),
-      font: '',
-      textAlign: '',
-      textBaseline: '',
-      fillText: vi.fn()
-    })),
-    toBuffer: vi.fn(() => Buffer.from('mock-image-data'))
-  })),
-  registerFont: vi.fn()
-}));
-
 vi.mock('hono/context-storage', () => ({
   getContext: vi.fn(() => ({
     get: vi.fn((key) => key === 'user' ? 'test-user' : null)
@@ -63,24 +48,21 @@ describe('Article Posting', () => {
     vi.clearAllMocks();
   });
   
-  it('should save an article to the file repository', async () => {
+  it('should save an article with OGP URL', async () => {
     await wikiModel.save(testData);
     
-    expect(fs.writeFileSync).toHaveBeenCalledTimes(3);
+    expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
     
-    const ogpImageArg = (fs.writeFileSync as any).mock.calls[0][0];
-    expect(ogpImageArg).toContain(testUuid);
-    expect(ogpImageArg).toContain('.png');
-    
-    const tomlFileArg = (fs.writeFileSync as any).mock.calls[1][0];
+    const tomlFileArg = (fs.writeFileSync as any).mock.calls[0][0];
     expect(tomlFileArg).toContain(testUuid);
     expect(tomlFileArg).toContain('.toml');
     
-    const tomlContentArg = (fs.writeFileSync as any).mock.calls[1][1];
+    const tomlContentArg = (fs.writeFileSync as any).mock.calls[0][1];
     expect(tomlContentArg).toContain('Test Title');
     expect(tomlContentArg).toContain('Test Content');
     expect(tomlContentArg).toContain('isDraft = false');
     expect(tomlContentArg).toContain('ogpImagePath');
+    expect(tomlContentArg).toContain('/ogp?title=');
   });
   
   it('should check if an article exists', async () => {

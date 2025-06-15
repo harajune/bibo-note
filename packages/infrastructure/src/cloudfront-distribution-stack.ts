@@ -11,16 +11,18 @@ import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import { SsmParameterReader } from './ssm-parameter-reader';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { EnvironmentConfig } from './environment-config';
+import { OGPLambdaStack } from './ogp-lambda-stack';
 
 interface CloudFrontDistributionStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
+  ogpLambdaStack: OGPLambdaStack;
 }
 
 export class CloudFrontDistributionStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: CloudFrontDistributionStackProps) {
     super(scope, id, props);
 
-    const { environmentConfig } = props;
+    const { environmentConfig, ogpLambdaStack } = props;
 
     // us-east-1に保存されたSSMパラメータから証明書ARNを取得してインポート
     const certificateArnReader = new SsmParameterReader(this, 'CertificateArnParameter', {
@@ -105,6 +107,9 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       originAccessControlId: lambdaOAC.ref,
     });
 
+    const ogpFunctionUrlDomain = ogpLambdaStack.ogpFunctionUrl.url.replace('https://', '').replace(/\/$/, '');
+    const ogpOrigin = new origins.HttpOrigin(ogpFunctionUrlDomain);
+
     // 記事表示用のキャッシュポリシー
     const articleCachePolicy = new cloudfront.CachePolicy(this, 'ArticleCachePolicy', {
       cachePolicyName: 'ArticleCachePolicy',
@@ -129,6 +134,17 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       defaultTtl: cdk.Duration.seconds(1), //TODO: デバッグ用にキャッシュを無効化 
       maxTtl: cdk.Duration.seconds(1),
       minTtl: cdk.Duration.seconds(1),
+    });
+
+    const ogpCachePolicy = new cloudfront.CachePolicy(this, 'OGPCachePolicy', {
+      cachePolicyName: 'OGPCachePolicy',
+      comment: 'Cache policy for OGP images',
+      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
+      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingBrotli: true,
+      defaultTtl: cdk.Duration.days(30),
+      maxTtl: cdk.Duration.days(365),
+      minTtl: cdk.Duration.days(1),
     });
 
     // CloudFrontディストリビューションを作成
@@ -168,6 +184,12 @@ export class CloudFrontDistributionStack extends cdk.Stack {
             functionVersion: authorizationEdgeFunctionVersion,
             includeBody: true,
           }],
+        },
+        'ogp': {
+          origin: ogpOrigin,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+          cachePolicy: ogpCachePolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         },
       },
       domainNames: [environmentConfig.domainName, `*.${environmentConfig.domainName}`],
@@ -237,4 +259,4 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       value: wikiDataBucket.bucketName,
     });
   }
-} 
+}  
