@@ -170,10 +170,10 @@ export class R2Repository implements Repository {
     await this.bucket.put(`${data.uuid}.toml`, tomlString);
   }
 
-  public async load(uuid: UUID): Promise<WikiData> {
+  public async load(uuid: UUID): Promise<WikiData | null> {
     const object = await this.bucket.get(`${uuid}.toml`);
     if (!object) {
-      throw new Error(`Wiki data not found for UUID: ${uuid}`);
+      return null;
     }
 
     const tomlString = await object.text();
