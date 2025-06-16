@@ -14,13 +14,16 @@ import { EnvironmentConfig } from './environment-config';
 
 interface CloudFrontDistributionStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
+  ogpFunctionUrl?: lambda.FunctionUrl;
 }
 
 export class CloudFrontDistributionStack extends cdk.Stack {
+  public readonly wikiDataBucket: s3.Bucket;
+
   constructor(scope: Construct, id: string, props: CloudFrontDistributionStackProps) {
     super(scope, id, props);
 
-    const { environmentConfig } = props;
+    const { environmentConfig, ogpFunctionUrl } = props;
 
     // us-east-1に保存されたSSMパラメータから証明書ARNを取得してインポート
     const certificateArnReader = new SsmParameterReader(this, 'CertificateArnParameter', {
@@ -131,6 +134,20 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       minTtl: cdk.Duration.seconds(1),
     });
 
+    // OGP画像用のキャッシュポリシー
+    const ogpCachePolicy = new cloudfront.CachePolicy(this, 'OGPCachePolicy', {
+      cachePolicyName: 'OGPCachePolicy',
+      comment: 'Cache policy for OGP images',
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
+        'x-forwarded-host'
+      ),
+      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingBrotli: true,
+      defaultTtl: cdk.Duration.hours(1),
+      maxTtl: cdk.Duration.hours(24),
+      minTtl: cdk.Duration.seconds(0),
+    });
+
     // CloudFrontディストリビューションを作成
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -201,7 +218,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     });
 
     // Wikiデータ保存用のS3バケットを作成
-    const wikiDataBucket = new s3.Bucket(this, 'WikiDataBucket', {
+    this.wikiDataBucket = new s3.Bucket(this, 'WikiDataBucket', {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       publicReadAccess: false,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -209,22 +226,22 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     });
 
     // Lambda(workerFunction)からのみアクセスできるようにするためのバケットポリシー設定
-    wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
+    this.wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       principals: [workerFunction.grantPrincipal],
       actions: ['s3:PutObject', 's3:GetObject', 's3:DeleteObject'],
-      resources: [wikiDataBucket.bucketArn + '/*'],
+      resources: [this.wikiDataBucket.bucketArn + '/*'],
     }));
 
-    wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
+    this.wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       principals: [workerFunction.grantPrincipal],
       actions: ['s3:ListBucket'],
-      resources: [wikiDataBucket.bucketArn],
+      resources: [this.wikiDataBucket.bucketArn],
     }));
 
     // LambdaにWikiデータ保存用のS3バケット名を環境変数として設定
-    workerFunction.addEnvironment('WIKI_BUCKET_NAME', wikiDataBucket.bucketName);
+    workerFunction.addEnvironment('WIKI_BUCKET_NAME', this.wikiDataBucket.bucketName);
 
     // Lambdaにマルチテナントモードを環境変数として設定
     workerFunction.addEnvironment('MULTITENANT', '1');
@@ -232,9 +249,32 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // LambdaにMODEを環境変数として設定
     workerFunction.addEnvironment('MODE', environmentConfig.mode);
 
+    if (ogpFunctionUrl) {
+      const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
+        originAccessControlConfig: {
+          name: 'OGPLambdaOAC',
+          description: 'OAC for OGP Lambda function URL',
+          originAccessControlOriginType: 'lambda',
+          signingBehavior: 'always',
+          signingProtocol: 'sigv4'
+        }
+      });
+
+      const ogpLambdaOrigin = new origins.FunctionUrlOrigin(ogpFunctionUrl, {
+        originAccessControlId: ogpLambdaOAC.ref,
+      });
+
+      distribution.addBehavior('ogp/*', ogpLambdaOrigin, {
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+        cachePolicy: ogpCachePolicy,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      });
+    }
+
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {
-      value: wikiDataBucket.bucketName,
+      value: this.wikiDataBucket.bucketName,
     });
   }
-} 
+}      

@@ -4,6 +4,7 @@ import { CloudFrontDistributionStack } from './cloudfront-distribution-stack';
 import { LambdaEdgeStack } from './lambda-edge-stack';
 import { AuthorizationEdgeFunctionStack } from './authorization-edge-function-stack';
 import { GitHubActionsRoleStack } from './github-actions-role-stack';
+import { OGPLambdaStack } from './ogp-lambda-stack';
 import { getEnvironmentConfig } from './environment-config';
 
 const app = new cdk.App();
@@ -42,7 +43,25 @@ const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudF
   environmentConfig,
 });
 
+const ogpLambdaStack = new OGPLambdaStack(app, `OGPLambdaStack-${environmentConfig.name}`, {
+  env: { region: 'ap-northeast-1', account: account },
+  environmentConfig,
+  wikiDataBucket: cloudFrontDistributionStack.wikiDataBucket,
+});
+
+const cloudFrontWithOGPStack = new CloudFrontDistributionStack(app, `CloudFrontWithOGPStack-${environmentConfig.name}`, {
+  env: { region: 'ap-northeast-1', account: account },
+  environmentConfig,
+  ogpFunctionUrl: ogpLambdaStack.ogpFunctionUrl,
+});
+
 // 依存関係を設定
 cloudFrontDistributionStack.addDependency(certificateStack);
 cloudFrontDistributionStack.addDependency(lambdaEdgeStack);
 cloudFrontDistributionStack.addDependency(authorizationEdgeFunctionStack);
+
+ogpLambdaStack.addDependency(cloudFrontDistributionStack);
+cloudFrontWithOGPStack.addDependency(ogpLambdaStack);
+cloudFrontWithOGPStack.addDependency(certificateStack);
+cloudFrontWithOGPStack.addDependency(lambdaEdgeStack);
+cloudFrontWithOGPStack.addDependency(authorizationEdgeFunctionStack);
