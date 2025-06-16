@@ -14,18 +14,19 @@ import { EnvironmentConfig } from './environment-config';
 
 interface CloudFrontDistributionStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
-  ogpFunctionUrl: lambda.FunctionUrl;
 }
 
 export class CloudFrontDistributionStack extends cdk.Stack {
   public readonly wikiDataBucket: s3.Bucket;
+  public readonly ogpFunction: lambda.Function;
+  public readonly ogpFunctionUrl: lambda.FunctionUrl;
 
 
 
   constructor(scope: Construct, id: string, props: CloudFrontDistributionStackProps) {
     super(scope, id, props);
 
-    const { environmentConfig, ogpFunctionUrl } = props;
+    const { environmentConfig } = props;
 
     // us-east-1に保存されたSSMパラメータから証明書ARNを取得してインポート
     const certificateArnReader = new SsmParameterReader(this, 'CertificateArnParameter', {
@@ -251,6 +252,30 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // LambdaにMODEを環境変数として設定
     workerFunction.addEnvironment('MODE', environmentConfig.mode);
 
+    this.ogpFunction = new lambda.Function(this, 'OGPFunction', {
+      functionName: `ogp-image-generator-${environmentConfig.name}`,
+      runtime: lambda.Runtime.NODEJS_22_X,
+      code: lambda.Code.fromAsset('../ogp/dist'),
+      handler: 'index.default',
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        WIKI_BUCKET_NAME: this.wikiDataBucket.bucketName,
+        MULTITENANT: '1',
+        MODE: environmentConfig.mode,
+      },
+    });
+
+    this.ogpFunctionUrl = this.ogpFunction.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.AWS_IAM,
+    });
+
+    this.wikiDataBucket.grantRead(this.ogpFunction);
+
+    new cdk.CfnOutput(this, 'OGPFunctionUrl', {
+      value: this.ogpFunctionUrl.url,
+    });
+
     const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
       originAccessControlConfig: {
         name: 'OGPLambdaOAC',
@@ -261,7 +286,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       }
     });
 
-    const ogpLambdaOrigin = new origins.FunctionUrlOrigin(ogpFunctionUrl, {
+    const ogpLambdaOrigin = new origins.FunctionUrlOrigin(this.ogpFunctionUrl, {
       originAccessControlId: ogpLambdaOAC.ref,
     });
 
@@ -277,4 +302,4 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       value: this.wikiDataBucket.bucketName,
     });
   }
-}                      
+}                          
