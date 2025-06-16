@@ -37,21 +37,13 @@ const authorizationEdgeFunctionStack = new AuthorizationEdgeFunctionStack(app, `
   environmentConfig,
 });
 
-// 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成
-const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudFrontDistributionStack-${environmentConfig.name}`, {
-  env: { region: 'ap-northeast-1', account: account },
-  environmentConfig,
-});
-
 const ogpLambdaStack = new OGPLambdaStack(app, `OGPLambdaStack-${environmentConfig.name}`, {
   env: { region: 'ap-northeast-1', account: account },
   environmentConfig,
-  wikiDataBucket: cloudFrontDistributionStack.wikiDataBucket,
 });
 
-
-
-const cloudFrontWithOGPStack = new CloudFrontDistributionStack(app, `CloudFrontWithOGPStack-${environmentConfig.name}`, {
+// 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成
+const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudFrontDistributionStack-${environmentConfig.name}`, {
   env: { region: 'ap-northeast-1', account: account },
   environmentConfig,
   ogpFunctionUrl: ogpLambdaStack.ogpFunctionUrl,
@@ -61,9 +53,4 @@ const cloudFrontWithOGPStack = new CloudFrontDistributionStack(app, `CloudFrontW
 cloudFrontDistributionStack.addDependency(certificateStack);
 cloudFrontDistributionStack.addDependency(lambdaEdgeStack);
 cloudFrontDistributionStack.addDependency(authorizationEdgeFunctionStack);
-
-ogpLambdaStack.addDependency(cloudFrontDistributionStack);
-cloudFrontWithOGPStack.addDependency(ogpLambdaStack);
-cloudFrontWithOGPStack.addDependency(certificateStack);
-cloudFrontWithOGPStack.addDependency(lambdaEdgeStack);
-cloudFrontWithOGPStack.addDependency(authorizationEdgeFunctionStack);
+cloudFrontDistributionStack.addDependency(ogpLambdaStack);

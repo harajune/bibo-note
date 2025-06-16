@@ -7,7 +7,6 @@ import { EnvironmentConfig } from './environment-config';
 
 interface OGPLambdaStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
-  wikiDataBucket: s3.IBucket;
 }
 
 export class OGPLambdaStack extends cdk.Stack {
@@ -17,17 +16,16 @@ export class OGPLambdaStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: OGPLambdaStackProps) {
     super(scope, id, props);
 
-    const { environmentConfig, wikiDataBucket } = props;
+    const { environmentConfig } = props;
 
     this.ogpFunction = new lambda.Function(this, 'OGPFunction', {
       functionName: `ogp-image-generator-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset('../ogp/dist'),
-      handler: 'index.handler',
+      handler: 'index.default',
       memorySize: 1024,
       timeout: cdk.Duration.seconds(30),
       environment: {
-        WIKI_BUCKET_NAME: wikiDataBucket.bucketName,
         MULTITENANT: '1',
         MODE: environmentConfig.mode,
       },
@@ -37,7 +35,7 @@ export class OGPLambdaStack extends cdk.Stack {
       authType: lambda.FunctionUrlAuthType.AWS_IAM,
     });
 
-    wikiDataBucket.grantRead(this.ogpFunction);
+
 
     new cdk.CfnOutput(this, 'OGPFunctionUrl', {
       value: this.ogpFunctionUrl.url,
