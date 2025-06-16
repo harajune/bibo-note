@@ -20,6 +20,8 @@ interface CloudFrontDistributionStackProps extends cdk.StackProps {
 export class CloudFrontDistributionStack extends cdk.Stack {
   public readonly wikiDataBucket: s3.Bucket;
 
+
+
   constructor(scope: Construct, id: string, props: CloudFrontDistributionStackProps) {
     super(scope, id, props);
 
@@ -277,4 +279,4 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       value: this.wikiDataBucket.bucketName,
     });
   }
-}      
+}                    

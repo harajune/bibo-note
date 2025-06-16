@@ -1,5 +1,5 @@
-import { Repository } from '../repositories/repository'
-import { WikiData, UUID, S3Repository } from '../repositories/s3-repository'
+import { Repository, WikiData, UUID } from '../repositories/repository'
+import { S3Repository } from '../repositories/s3-repository'
 import { FileRepository } from '../repositories/file-repository'
 
 export class WikiModel {

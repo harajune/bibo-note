@@ -1,5 +1,6 @@
 import { ImageResponse } from '@vercel/og'
-import { WikiData, UUID, S3Repository } from '../repositories/s3-repository'
+import { WikiData, UUID, Repository } from '../repositories/repository'
+import { S3Repository } from '../repositories/s3-repository'
 import { FileRepository } from '../repositories/file-repository'
 import { WikiModel } from '../models/wiki-model'
 import React from 'react'

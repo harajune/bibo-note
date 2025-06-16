@@ -1,26 +1,6 @@
 import * as TOML from 'smol-toml';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { Repository } from './repository';
-
-export type UUID = string;
-
-export class WikiData {
-  readonly uuid: UUID;
-  readonly title: string;
-  readonly content: string;
-  readonly updatedAt: Date;
-  readonly createdAt: Date;
-  readonly isDraft: boolean;
-
-  constructor(uuid: UUID, title: string, content: string, updatedAt: Date, createdAt: Date, isDraft: boolean = false) {
-    this.uuid = uuid;
-    this.title = title;
-    this.content = content;
-    this.updatedAt = updatedAt;
-    this.createdAt = createdAt;
-    this.isDraft = isDraft;
-  }
-}
+import { Repository, WikiData, UUID } from './repository';
 
 export class S3Repository implements Repository {
   private s3Client: S3Client;

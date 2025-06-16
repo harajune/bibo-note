@@ -1,4 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import { CertificateStack } from './certificate-stack';
 import { CloudFrontDistributionStack } from './cloudfront-distribution-stack';
 import { LambdaEdgeStack } from './lambda-edge-stack';
@@ -37,13 +39,19 @@ const authorizationEdgeFunctionStack = new AuthorizationEdgeFunctionStack(app, `
   environmentConfig,
 });
 
-const ogpLambdaStack = new OGPLambdaStack(app, `OGPLambdaStack-${environmentConfig.name}`, {
+// 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成
+const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudFrontDistributionStack-${environmentConfig.name}`, {
   env: { region: 'ap-northeast-1', account: account },
   environmentConfig,
 });
 
-// 東京リージョン(ap-northeast-1)でCloudFrontDistributionStackを作成
-const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudFrontDistributionStack-${environmentConfig.name}`, {
+const ogpLambdaStack = new OGPLambdaStack(app, `OGPLambdaStack-${environmentConfig.name}`, {
+  env: { region: 'ap-northeast-1', account: account },
+  environmentConfig,
+  wikiDataBucket: cloudFrontDistributionStack.wikiDataBucket,
+});
+
+const cloudFrontWithOGP = new CloudFrontDistributionStack(app, `CloudFrontWithOGP-${environmentConfig.name}`, {
   env: { region: 'ap-northeast-1', account: account },
   environmentConfig,
   ogpFunctionUrl: ogpLambdaStack.ogpFunctionUrl,
@@ -53,4 +61,9 @@ const cloudFrontDistributionStack = new CloudFrontDistributionStack(app, `CloudF
 cloudFrontDistributionStack.addDependency(certificateStack);
 cloudFrontDistributionStack.addDependency(lambdaEdgeStack);
 cloudFrontDistributionStack.addDependency(authorizationEdgeFunctionStack);
-cloudFrontDistributionStack.addDependency(ogpLambdaStack);
+
+ogpLambdaStack.addDependency(cloudFrontDistributionStack);
+cloudFrontWithOGP.addDependency(ogpLambdaStack);
+cloudFrontWithOGP.addDependency(certificateStack);
+cloudFrontWithOGP.addDependency(lambdaEdgeStack);
+cloudFrontWithOGP.addDependency(authorizationEdgeFunctionStack);

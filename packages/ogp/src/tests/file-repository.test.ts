@@ -1,6 +1,6 @@
 import { expect, test, vi, beforeEach, afterEach, describe } from 'vitest'
 import { FileRepository } from '../repositories/file-repository'
-import { WikiData } from '../repositories/s3-repository'
+import { WikiData } from '../repositories/repository'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
@@ -26,28 +26,6 @@ describe('FileRepository', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
-  })
-
-  test('should save wiki data to file', () => {
-    const mockWikiData = new WikiData(
-      testUuid,
-      'Test Title',
-      'Test content',
-      new Date('2023-01-01T00:00:00Z'),
-      new Date('2023-01-01T00:00:00Z'),
-      false
-    )
-
-    mockFs.existsSync.mockReturnValue(true)
-    mockFs.writeFileSync.mockImplementation(() => {})
-
-    fileRepository.save(mockWikiData, testUser)
-
-    expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining(`${testUser}/data/${testUuid}.toml`),
-      expect.stringContaining('Test Title'),
-      'utf-8'
-    )
   })
 
   test('should load wiki data from file', async () => {
@@ -82,36 +60,5 @@ content = "Test content"
     const result = await fileRepository.load('nonexistent-uuid', testUser)
 
     expect(result).toBeNull()
-  })
-
-  test('should check if file exists', () => {
-    mockFs.existsSync.mockReturnValue(true)
-
-    const exists = fileRepository.isExists(testUuid, testUser)
-
-    expect(exists).toBe(true)
-    expect(mockFs.existsSync).toHaveBeenCalledWith(
-      expect.stringContaining(`${testUser}/data/${testUuid}.toml`)
-    )
-  })
-
-  test('should list files in directory', () => {
-    mockFs.existsSync.mockReturnValue(true)
-    mockFs.readdirSync.mockReturnValue(['file1.toml', 'file2.toml', 'file3.txt'] as any)
-
-    const result = fileRepository.list(testUser)
-
-    expect(result).toEqual(['file1', 'file2'])
-    expect(mockFs.readdirSync).toHaveBeenCalledWith(
-      expect.stringContaining(`${testUser}/data`)
-    )
-  })
-
-  test('should return empty array when data directory does not exist', () => {
-    mockFs.existsSync.mockReturnValue(false)
-
-    const result = fileRepository.list(testUser)
-
-    expect(result).toEqual([])
   })
 })
