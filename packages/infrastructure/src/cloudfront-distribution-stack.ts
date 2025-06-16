@@ -14,7 +14,7 @@ import { EnvironmentConfig } from './environment-config';
 
 interface CloudFrontDistributionStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
-  ogpFunctionUrl?: lambda.FunctionUrl;
+  ogpFunctionUrl: lambda.FunctionUrl;
 }
 
 export class CloudFrontDistributionStack extends cdk.Stack {
@@ -251,32 +251,30 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // LambdaにMODEを環境変数として設定
     workerFunction.addEnvironment('MODE', environmentConfig.mode);
 
-    if (ogpFunctionUrl) {
-      const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
-        originAccessControlConfig: {
-          name: 'OGPLambdaOAC',
-          description: 'OAC for OGP Lambda function URL',
-          originAccessControlOriginType: 'lambda',
-          signingBehavior: 'always',
-          signingProtocol: 'sigv4'
-        }
-      });
+    const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
+      originAccessControlConfig: {
+        name: 'OGPLambdaOAC',
+        description: 'OAC for OGP Lambda function URL',
+        originAccessControlOriginType: 'lambda',
+        signingBehavior: 'always',
+        signingProtocol: 'sigv4'
+      }
+    });
 
-      const ogpLambdaOrigin = new origins.FunctionUrlOrigin(ogpFunctionUrl, {
-        originAccessControlId: ogpLambdaOAC.ref,
-      });
+    const ogpLambdaOrigin = new origins.FunctionUrlOrigin(ogpFunctionUrl, {
+      originAccessControlId: ogpLambdaOAC.ref,
+    });
 
-      distribution.addBehavior('ogp/*', ogpLambdaOrigin, {
-        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-        cachePolicy: ogpCachePolicy,
-        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-      });
-    }
+    distribution.addBehavior('ogp/*', ogpLambdaOrigin, {
+      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+      cachePolicy: ogpCachePolicy,
+      originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+    });
 
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {
       value: this.wikiDataBucket.bucketName,
     });
   }
-}                    
+}                      
