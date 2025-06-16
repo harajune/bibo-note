@@ -49,6 +49,8 @@ const ogpLambdaStack = new OGPLambdaStack(app, `OGPLambdaStack-${environmentConf
   wikiDataBucket: cloudFrontDistributionStack.wikiDataBucket,
 });
 
+
+
 const cloudFrontWithOGPStack = new CloudFrontDistributionStack(app, `CloudFrontWithOGPStack-${environmentConfig.name}`, {
   env: { region: 'ap-northeast-1', account: account },
   environmentConfig,

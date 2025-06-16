@@ -1,94 +1,25 @@
-import { ImageResponse } from '@vercel/og';
+import { Hono } from 'hono'
+import { handle } from 'hono/aws-lambda'
+import { ImageResponse } from '@vercel/og'
+import { S3Repository, WikiData, UUID } from './repositories/s3-repository'
 
-export type UUID = string;
-
-export class WikiData {
-  readonly uuid: UUID;
-  readonly title: string;
-  readonly content: string;
-  readonly updatedAt: Date;
-  readonly createdAt: Date;
-  readonly isDraft: boolean;
-
-  constructor(uuid: UUID, title: string, content: string, updatedAt: Date, createdAt: Date, isDraft: boolean = false) {
-    this.uuid = uuid;
-    this.title = title;
-    this.content = content;
-    this.updatedAt = updatedAt;
-    this.createdAt = createdAt;
-    this.isDraft = isDraft;
-  }
-}
-
-import * as TOML from 'smol-toml';
-import { S3Client, GetObjectCommand, ListObjectsCommand } from '@aws-sdk/client-s3';
-
-interface OGPResponse {
-  statusCode: number;
-  headers: Record<string, string>;
-  body: string;
-  isBase64Encoded: boolean;
-}
-
-class S3Repository {
-  private s3Client: S3Client;
-  private bucketName: string;
-
-  constructor() {
-    this.s3Client = new S3Client({ region: process.env.AWS_REGION || 'ap-northeast-1' });
-    this.bucketName = process.env.WIKI_BUCKET_NAME || '';
-  }
-
-  async load(uuid: UUID, user: string): Promise<WikiData | null> {
-    try {
-      const objectKey = `${user}/data/${uuid}.toml`;
-      const command = new GetObjectCommand({
-        Bucket: this.bucketName,
-        Key: objectKey,
-      });
-
-      const response = await this.s3Client.send(command);
-      const tomlString = await response.Body?.transformToString();
-
-      if (!tomlString) {
-        return null;
-      }
-
-      const tomlData = TOML.parse(tomlString) as {
-        content: { title: string; content: string };
-        header: { updatedAt: string; createdAt: string; isDraft?: boolean };
-      };
-
-      return new WikiData(
-        uuid,
-        tomlData.content.title,
-        tomlData.content.content,
-        new Date(tomlData.header.updatedAt),
-        new Date(tomlData.header.createdAt),
-        tomlData.header.isDraft || false
-      );
-    } catch (error) {
-      console.error(`Failed to load wiki data for uuid: ${uuid}`, error);
-      return null;
-    }
-  }
-}
+const app = new Hono()
 
 class OGPService {
-  private repository: S3Repository;
+  private repository: S3Repository
 
   constructor() {
-    this.repository = new S3Repository();
+    this.repository = new S3Repository()
   }
 
   async generateOGPImage(uuid: UUID, user: string): Promise<Buffer> {
-    const wikiData = await this.repository.load(uuid, user);
+    const wikiData = await this.repository.load(uuid, user)
     
     if (!wikiData) {
-      throw new Error('Article not found');
+      throw new Error('Article not found')
     }
 
-    const truncatedTitle = this.truncateTitle(wikiData.title);
+    const truncatedTitle = this.truncateTitle(wikiData.title)
 
     const imageResponse = new ImageResponse(
       (
@@ -143,74 +74,50 @@ class OGPService {
         width: 1200,
         height: 630,
       }
-    );
+    )
 
-    return Buffer.from(await imageResponse.arrayBuffer());
+    return Buffer.from(await imageResponse.arrayBuffer())
   }
 
   private truncateTitle(title: string): string {
-    const maxLength = 80;
+    const maxLength = 80
     if (title.length <= maxLength) {
-      return title;
+      return title
     }
-    return title.substring(0, maxLength - 3) + '...';
+    return title.substring(0, maxLength - 3) + '...'
   }
 }
 
-export const handler = async (event: any): Promise<OGPResponse> => {
+app.get('/ogp/:uuid', async (c) => {
   try {
-    const pathParameters = event.pathParameters || {};
-    const uuid = pathParameters.uuid;
-
+    const uuid = c.req.param('uuid')
+    
     if (!uuid) {
-      return {
-        statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ error: 'UUID parameter is required' }),
-        isBase64Encoded: false,
-      };
+      return c.json({ error: 'UUID parameter is required' }, 400)
     }
 
-    const headers = event.headers || {};
-    const host = headers['x-forwarded-host'] || headers['host'] || '';
-    const hostParts = host.split('.');
-    const user = hostParts[0] || 'default';
+    const host = c.req.header('x-forwarded-host') || c.req.header('host') || ''
+    const hostParts = host.split('.')
+    const user = hostParts[0] || 'default'
 
-    const ogpService = new OGPService();
-    const imageBuffer = await ogpService.generateOGPImage(uuid, user);
+    const ogpService = new OGPService()
+    const imageBuffer = await ogpService.generateOGPImage(uuid, user)
 
-    return {
-      statusCode: 200,
+    return new Response(imageBuffer, {
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'public, max-age=3600',
       },
-      body: imageBuffer.toString('base64'),
-      isBase64Encoded: true,
-    };
+    })
   } catch (error) {
-    console.error('Error generating OGP image:', error);
+    console.error('Error generating OGP image:', error)
     
     if (error instanceof Error && error.message === 'Article not found') {
-      return {
-        statusCode: 404,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ error: 'Article not found' }),
-        isBase64Encoded: false,
-      };
+      return c.json({ error: 'Article not found' }, 404)
     }
 
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ error: 'Internal server error' }),
-      isBase64Encoded: false,
-    };
+    return c.json({ error: 'Internal server error' }, 500)
   }
-};
+})
+
+export default handle(app)
