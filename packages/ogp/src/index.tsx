@@ -36,5 +36,4 @@ app.get('/ogp/:uuid', async (c) => {
   }
 })
 
-export { app }
-export default handle(app)
+export default app

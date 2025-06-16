@@ -45,6 +45,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.828.0
         version: 3.828.0
+      '@hono/vite-build':
+        specifier: https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge
+        version: https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge(hono@4.7.11)
       '@vercel/og':
         specifier: ^0.6.3
         version: 0.6.8
