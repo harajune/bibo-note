@@ -1,0 +1,22 @@
+import { Repository } from '../repositories/repository'
+import { WikiData, UUID, S3Repository } from '../repositories/s3-repository'
+import { FileRepository } from '../repositories/file-repository'
+
+export class WikiModel {
+  private repository: Repository
+
+  constructor(repository?: Repository) {
+    if (repository) {
+      this.repository = repository
+    } else {
+      const mode = process.env.MODE || 'development'
+      this.repository = mode === 'production' 
+        ? new S3Repository() 
+        : new FileRepository()
+    }
+  }
+
+  async load(uuid: UUID, user: string): Promise<WikiData | null> {
+    return await this.repository.load(uuid, user)
+  }
+}

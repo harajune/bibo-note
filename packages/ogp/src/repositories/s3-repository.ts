@@ -1,5 +1,6 @@
 import * as TOML from 'smol-toml';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { Repository } from './repository';
 
 export type UUID = string;
 
@@ -21,7 +22,7 @@ export class WikiData {
   }
 }
 
-export class S3Repository {
+export class S3Repository implements Repository {
   private s3Client: S3Client;
   private bucketName: string;
 

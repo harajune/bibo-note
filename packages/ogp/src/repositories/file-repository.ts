@@ -1,9 +1,10 @@
 import { WikiData, UUID } from './s3-repository'
+import { Repository } from './repository'
 import * as TOML from 'smol-toml'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
-export class FileRepository {
+export class FileRepository implements Repository {
   private readonly filePath: string
 
   constructor(filePath: string = './data') {
