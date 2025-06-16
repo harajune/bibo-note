@@ -5,8 +5,4 @@ export default defineConfig({
     environment: 'node',
     globals: true,
   },
-  esbuild: {
-    jsx: 'automatic',
-    jsxImportSource: 'react',
-  },
 })

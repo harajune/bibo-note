@@ -1,28 +1,10 @@
-import { expect, test, vi, beforeEach, describe } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { OGPService } from '../services/ogp-service'
-import { WikiData } from '../repositories/s3-repository'
+import { S3Repository } from '../repositories/s3-repository'
+import { FileRepository } from '../repositories/file-repository'
 
-vi.mock('../repositories/s3-repository', () => ({
-  S3Repository: vi.fn().mockImplementation(() => ({
-    load: vi.fn(),
-  })),
-  WikiData: class {
-    constructor(
-      public uuid: string,
-      public title: string,
-      public content: string,
-      public updatedAt: Date,
-      public createdAt: Date,
-      public isDraft: boolean = false
-    ) {}
-  },
-}))
-
-vi.mock('../repositories/file-repository', () => ({
-  FileRepository: vi.fn().mockImplementation(() => ({
-    load: vi.fn(),
-  })),
-}))
+vi.mock('../repositories/s3-repository')
+vi.mock('../repositories/file-repository')
 
 vi.mock('@vercel/og', () => ({
   ImageResponse: vi.fn().mockImplementation(() => ({
@@ -37,73 +19,109 @@ describe('OGPService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    delete process.env.MODE
+    
+    mockS3Repository = {
+      load: vi.fn()
+    }
+    
+    mockFileRepository = {
+      load: vi.fn()
+    }
+    
+    vi.mocked(S3Repository).mockImplementation(() => mockS3Repository)
+    vi.mocked(FileRepository).mockImplementation(() => mockFileRepository)
+    
     ogpService = new OGPService()
-    mockS3Repository = (ogpService as any).s3Repository
-    mockFileRepository = (ogpService as any).fileRepository
   })
 
-  test('should generate OGP image successfully with S3 repository', async () => {
-    const mockWikiData = new WikiData(
-      'test-uuid',
-      'Test Article Title',
-      'Test content',
-      new Date('2023-01-01'),
-      new Date('2023-01-01'),
-      false
-    )
+  describe('generateOGPImage', () => {
+    it('should generate OGP image with article title and user', async () => {
+      const mockWikiData = {
+        uuid: 'test-uuid',
+        title: 'Test Article Title',
+        content: 'Test content',
+        updatedAt: new Date(),
+        createdAt: new Date(),
+        isDraft: false
+      }
 
-    mockS3Repository.load.mockResolvedValue(mockWikiData)
+      mockFileRepository.load.mockResolvedValue(mockWikiData)
 
-    const result = await ogpService.generateOGPImage('test-uuid', 'testuser')
+      const result = await ogpService.generateOGPImage('test-uuid', 'testuser')
 
-    expect(result).toBeInstanceOf(Buffer)
-    expect(mockS3Repository.load).toHaveBeenCalledWith('test-uuid', 'testuser')
+      expect(result).toBeInstanceOf(Buffer)
+      expect(mockFileRepository.load).toHaveBeenCalledWith('test-uuid', 'testuser')
+    })
+
+    it('should throw error when article is not found', async () => {
+      mockFileRepository.load.mockResolvedValue(null)
+
+      await expect(ogpService.generateOGPImage('test-uuid', 'testuser')).rejects.toThrow('Article not found')
+    })
+
+    it('should truncate long titles', async () => {
+      const longTitle = 'This is a very long title that should be truncated because it exceeds the maximum length limit'
+      const mockWikiData = {
+        uuid: 'test-uuid',
+        title: longTitle,
+        content: 'Test content',
+        updatedAt: new Date(),
+        createdAt: new Date(),
+        isDraft: false
+      }
+
+      mockFileRepository.load.mockResolvedValue(mockWikiData)
+
+      const result = await ogpService.generateOGPImage('test-uuid', 'testuser')
+
+      expect(result).toBeInstanceOf(Buffer)
+    })
+
+    it('should use production repository when MODE is production', async () => {
+      const originalEnv = process.env.MODE
+      process.env.MODE = 'production'
+
+      const service = new OGPService()
+      expect(S3Repository).toHaveBeenCalled()
+
+      process.env.MODE = originalEnv
+    })
+
+    it('should use development repository when MODE is development', async () => {
+      const originalEnv = process.env.MODE
+      process.env.MODE = 'development'
+
+      const service = new OGPService()
+      expect(FileRepository).toHaveBeenCalled()
+
+      process.env.MODE = originalEnv
+    })
   })
 
-  test('should fallback to file repository when S3 fails', async () => {
-    const mockWikiData = new WikiData(
-      'test-uuid',
-      'Test Article Title',
-      'Test content',
-      new Date('2023-01-01'),
-      new Date('2023-01-01'),
-      false
-    )
+  describe('environment-based repository switching', () => {
+    it('should create S3Repository in production mode', () => {
+      vi.clearAllMocks()
+      const originalEnv = process.env.MODE
+      process.env.MODE = 'production'
 
-    mockS3Repository.load.mockRejectedValue(new Error('S3 error'))
-    mockFileRepository.load.mockResolvedValue(mockWikiData)
+      const service = new OGPService()
+      expect(S3Repository).toHaveBeenCalledTimes(1)
+      expect(FileRepository).not.toHaveBeenCalled()
 
-    const result = await ogpService.generateOGPImage('test-uuid', 'testuser')
+      process.env.MODE = originalEnv
+    })
 
-    expect(result).toBeInstanceOf(Buffer)
-    expect(mockS3Repository.load).toHaveBeenCalledWith('test-uuid', 'testuser')
-    expect(mockFileRepository.load).toHaveBeenCalledWith('test-uuid', 'testuser')
-  })
+    it('should create FileRepository in development mode', () => {
+      vi.clearAllMocks()
+      const originalEnv = process.env.MODE
+      process.env.MODE = 'development'
 
-  test('should throw error when article not found', async () => {
-    mockS3Repository.load.mockResolvedValue(null)
-    mockFileRepository.load.mockResolvedValue(null)
+      const service = new OGPService()
+      expect(FileRepository).toHaveBeenCalledTimes(1)
+      expect(S3Repository).not.toHaveBeenCalled()
 
-    await expect(
-      ogpService.generateOGPImage('nonexistent-uuid', 'testuser')
-    ).rejects.toThrow('Article not found')
-  })
-
-  test('should truncate long titles', async () => {
-    const longTitle = 'A'.repeat(100)
-    const mockWikiData = new WikiData(
-      'test-uuid',
-      longTitle,
-      'Test content',
-      new Date('2023-01-01'),
-      new Date('2023-01-01'),
-      false
-    )
-
-    mockS3Repository.load.mockResolvedValue(mockWikiData)
-
-    await ogpService.generateOGPImage('test-uuid', 'testuser')
-
-    expect(mockS3Repository.load).toHaveBeenCalledWith('test-uuid', 'testuser')
+      process.env.MODE = originalEnv
+    })
   })
 })

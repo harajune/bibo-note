@@ -9,11 +9,7 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: ['@aws-sdk/client-s3', 'react', '@vercel/og', 'node:fs', 'node:path'],
+      external: ['@aws-sdk/client-s3', '@vercel/og', 'node:fs', 'node:path', 'smol-toml', 'uuid', 'react'],
     },
-  },
-  esbuild: {
-    jsx: 'automatic',
-    jsxImportSource: 'react',
   },
 })
