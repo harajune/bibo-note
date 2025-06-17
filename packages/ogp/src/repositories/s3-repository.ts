@@ -1,14 +1,33 @@
 import * as TOML from 'smol-toml';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Repository, WikiData, UUID } from './repository';
+import { env } from 'hono/adapter';
+import { getContext } from 'hono/context-storage';
 
 export class S3Repository implements Repository {
   private s3Client: S3Client;
   private bucketName: string;
 
   constructor() {
-    this.s3Client = new S3Client({ region: process.env.AWS_REGION || 'ap-northeast-1' });
-    this.bucketName = process.env.WIKI_BUCKET_NAME || '';
+    const context = getContext();
+    const enviromentVariables = env<{
+      WIKI_BUCKET_NAME: string,
+      AWS_REGION: string,
+      AWS_ACCESS_KEY_ID: string,
+      AWS_SECRET_ACCESS_KEY: string,
+      AWS_SESSION_TOKEN: string,
+      MULTITENANT: string
+    }>(context);
+
+    this.s3Client = new S3Client({
+      region: enviromentVariables.AWS_REGION,
+      credentials: {
+        accessKeyId: enviromentVariables.AWS_ACCESS_KEY_ID,
+        secretAccessKey: enviromentVariables.AWS_SECRET_ACCESS_KEY,
+        sessionToken: enviromentVariables.AWS_SESSION_TOKEN,
+      },
+    });
+    this.bucketName = enviromentVariables.WIKI_BUCKET_NAME;
   }
 
   async load(uuid: UUID, user: string): Promise<WikiData | null> {
