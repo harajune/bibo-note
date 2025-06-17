@@ -17,7 +17,8 @@ export class WikiModel {
       }>(context);
       
       const mode = envVariables.MODE || 'development';
-        this.repository = mode === 'production' 
+      console.log(mode)
+      this.repository = mode === 'production' 
         ? new S3Repository() 
         : new FileRepository()
     }
