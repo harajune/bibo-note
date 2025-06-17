@@ -28,6 +28,7 @@ export default defineConfig({
           if (!id.match(/.*\.wasm(?:\?.*)?$/)) return
           console.log(id)
           const base64 = Buffer.from(source).toString('base64');
+          const code = `data:application/wasm;base64,${base64}";`
           return dataToEsm(base64)
       },
     },
