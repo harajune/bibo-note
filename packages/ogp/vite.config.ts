@@ -26,8 +26,9 @@ export default defineConfig({
       async transform(source, id) {
           if (!id.match(/.*\.wasm(?:\?.*)?$/)) return
           const base64 = Buffer.from(source).toString('base64');
+          const code = createCode(base64);
           return {
-              code: `export default "data:application/wasm;base64,${base64}"`,
+              code: code,
               map: null
           }
       },
@@ -35,3 +36,11 @@ export default defineConfig({
     wasm()
   ],
 })
+
+function createCode(base64: string) {
+  return `
+  const base64 = "${base64}";
+  const binaryBuffer = Buffer.from(base64, 'base64');
+  export default binaryBuffer;
+`
+}
