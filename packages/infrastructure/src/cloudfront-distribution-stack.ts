@@ -147,8 +147,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
       defaultTtl: cdk.Duration.hours(1),
-      maxTtl: cdk.Duration.hours(24),
-      minTtl: cdk.Duration.seconds(0),
+      maxTtl: cdk.Duration.hours(1),
+      minTtl: cdk.Duration.seconds(1),
     });
 
     // CloudFrontディストリビューションを作成
@@ -256,7 +256,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       functionName: `ogp-image-generator-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset('../ogp/dist'),
-      handler: 'index.default',
+      handler: 'index.handler',
       memorySize: 1024,
       timeout: cdk.Duration.seconds(30),
       environment: {
