@@ -255,8 +255,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     this.ogpFunction = new lambda.Function(this, 'OGPFunction', {
       functionName: `ogp-image-generator-${environmentConfig.name}`,
       runtime: lambda.Runtime.NODEJS_22_X,
-      code: lambda.Code.fromAsset('../ogp/dist'),
-      handler: 'index.handler',
+      code: lambda.Code.fromAsset('../ogp/dist/worker'),
+      handler: 'worker.handler',
       memorySize: 1024,
       timeout: cdk.Duration.seconds(30),
       environment: {
