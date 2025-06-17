@@ -44,10 +44,10 @@ jobs:
         run: pnpm install --frozen-lockfile --recursive
       
       - name: Run tests
-        run: pnpm web test
+        run: pnpm test
       
       - name: Build
-        run: pnpm web build
+        run: pnpm build
   
   deploy-dev:
     needs: build-and-test
@@ -85,7 +85,7 @@ jobs:
         run: pnpm install --frozen-lockfile --recursive
       
       - name: Build
-        run: pnpm web build
+        run: pnpm build
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
