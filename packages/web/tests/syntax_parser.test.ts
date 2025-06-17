@@ -16,10 +16,8 @@ const parser = new SyntaxParser();
 
 test("debug JSX structure", () => {
   const h1Result = parser.parse("# Heading 1");
-  console.log("h1Result:", JSON.stringify(h1Result, null, 2));
   
   const boldResult = parser.parse("**bold**");
-  console.log("boldResult:", JSON.stringify(boldResult, null, 2));
 });
 
 test("heading parsing", () => {

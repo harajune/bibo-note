@@ -29,7 +29,6 @@ export default defineConfig({
     {
       name: 'vite-plugin-base64',
       async transform(source, id) {
-          console.log('transform', id)
           if (!id.match(/.*\.wasm(?:\?.*)?$/)) return
           const base64 = Buffer.from(source).toString('base64');
           return {
