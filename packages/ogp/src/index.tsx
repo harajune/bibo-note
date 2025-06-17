@@ -1,7 +1,9 @@
 import { Hono } from 'hono'
 import { OGPService } from './services/ogp-service'
+import { contextStorage } from 'hono/context-storage'
 
 const app = new Hono()
+app.use(contextStorage())
 
 app.get('/ogp/:uuid', async (c) => {
   try {
