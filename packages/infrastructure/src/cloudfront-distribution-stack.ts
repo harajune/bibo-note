@@ -297,6 +297,14 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
     });
 
+    // CloudFrontからのアクセスのみ許可するため、ogpFunctionにリソースポリシーを追加
+    this.ogpFunction.addPermission('AllowCloudFrontAccessOGP', {
+      principal: new iam.ServicePrincipal('cloudfront.amazonaws.com'),
+      action: 'lambda:InvokeFunctionUrl',
+      functionUrlAuthType: lambda.FunctionUrlAuthType.AWS_IAM,
+      sourceArn: distribution.distributionArn,
+    });
+
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {
       value: this.wikiDataBucket.bucketName,
