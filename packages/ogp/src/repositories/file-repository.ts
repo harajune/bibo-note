@@ -11,11 +11,13 @@ export class FileRepository implements Repository {
   }
 
   private getUserBasePath(user: string): string {
-    const userPath = path.join(this.filePath, user)
-    if (!fs.existsSync(userPath)) {
-      fs.mkdirSync(userPath, { recursive: true })
+    const mode = process.env.MODE || 'development'
+    const basePath = mode === 'development' ? this.filePath : path.join(this.filePath, user)
+    
+    if (!fs.existsSync(basePath)) {
+      fs.mkdirSync(basePath, { recursive: true })
     }
-    return userPath
+    return basePath
   }
 
   public async load(uuid: UUID, user: string): Promise<WikiData | null> {
@@ -43,16 +45,13 @@ export class FileRepository implements Repository {
     }
   }
 
-
-
   private getFilePath(uuid: UUID, user: string): string {
     const basePath = this.getUserBasePath(user)
-    const dataDir = path.join(basePath, 'data')
     
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
+    if (!fs.existsSync(basePath)) {
+      fs.mkdirSync(basePath, { recursive: true })
     }
     
-    return path.join(dataDir, `${uuid}.toml`)
+    return path.join(basePath, `${uuid}.toml`)
   }
 }

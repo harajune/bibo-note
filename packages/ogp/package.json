@@ -2,7 +2,7 @@
   "name": "ogp",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "MODE=development vite dev",
     "build": "vite build",
     "deploy": "pnpm run build",
     "test": "vitest run"
