@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import build from '@hono/vite-build/aws-lambda'
 import devServer from '@hono/vite-dev-server'
 import wasm from 'vite-plugin-wasm'
+import {dataToEsm} from '@rollup/pluginutils'
 
 export default defineConfig({
   build: {
@@ -25,12 +26,9 @@ export default defineConfig({
       name: 'vite-plugin-base64',
       async transform(source, id) {
           if (!id.match(/.*\.wasm(?:\?.*)?$/)) return
+          console.log(id)
           const base64 = Buffer.from(source).toString('base64');
-          const code = createCode(base64);
-          return {
-              code: code,
-              map: null
-          }
+          return dataToEsm(base64)
       },
     },
     wasm()
