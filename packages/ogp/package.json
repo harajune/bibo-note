@@ -5,12 +5,12 @@
     "dev": "MODE=development vite dev",
     "build": "vite build",
     "deploy": "pnpm run build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "preview": "vite preview"
   },
   "private": true,
   "dependencies": {
     "@aws-sdk/client-s3": "^3.828.0",
-    "@hono/vite-build": "https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge",
     "@vercel/og": "^0.6.3",
     "hono": "^4.7.11",
     "react": "^18.2.0",
@@ -19,12 +19,15 @@
   },
   "devDependencies": {
     "@hono/node-server": "^1.13.7",
+    "@hono/vite-build": "https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge",
     "@hono/vite-dev-server": "^0.18.2",
+    "@rollup/pluginutils": "^5.1.4",
     "@types/node": "^24.0.1",
     "@types/react": "^18.2.0",
     "@types/uuid": "^10.0.0",
     "tsx": "^4.19.2",
     "vite": "^6.3.5",
+    "vite-plugin-wasm": "^3.4.1",
     "vitest": "^3.2.3"
   }
 }
