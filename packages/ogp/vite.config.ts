@@ -32,18 +32,20 @@ export default defineConfig({
           console.log(filename)
           const file = readFileSync(filename)
           const base64 = file.toString('base64')
-          const code = `data:application/wasm;base64,${base64}";`
-          return dataToEsm(code)
+          return createCode(base64)
       },
     },
-    wasm()
   ],
 })
 
 function createCode(base64: string) {
   return `
-  const base64 = "${base64}";
-  const binaryBuffer = Buffer.from(base64, 'base64');
-  export default binaryBuffer;
+  const base64String = "${base64}";
+  const binaryString = atob(base64String)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  export default bytes;
 `
 }
