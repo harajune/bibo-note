@@ -8,11 +8,7 @@ export class OGPService {
   private wikiModel: WikiModel
 
   constructor() {
-    const mode = process.env.MODE || 'development'
-    const repository = mode === 'production' 
-      ? new S3Repository() 
-      : new FileRepository()
-    this.wikiModel = new WikiModel(repository)
+    this.wikiModel = new WikiModel()
   }
 
   async generateOGPImage(uuid: UUID, user: string): Promise<Buffer> {

@@ -7,21 +7,17 @@ import { env } from 'hono/adapter'
 export class WikiModel {
   private repository: Repository
 
-  constructor(repository?: Repository) {
-    if (repository) {
-      this.repository = repository
-    } else {
-      const context = getContext();
-      const envVariables = env<{
-        MODE: string
-      }>(context);
-      
-      const mode = envVariables.MODE || 'development';
-      console.log(mode)
-      this.repository = mode === 'production' 
-        ? new S3Repository() 
-        : new FileRepository()
-    }
+  constructor() {
+    const context = getContext();
+    const envVariables = env<{
+      MODE: string
+    }>(context);
+    
+    const mode = envVariables.MODE || 'development';
+    this.repository = mode === 'production' 
+      ? new S3Repository() 
+      : new FileRepository()
+  
   }
 
   async load(uuid: UUID, user: string): Promise<WikiData | null> {
