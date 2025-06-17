@@ -96,6 +96,6 @@ jobs:
       - name: Deploy to AWS using CDK
         run: |
           cd packages/infrastructure
-          pnpm exec cdk deploy --all --context environment=production
+          pnpm exec cdk deploy --all --context environment=production --require-approval never
         env:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
