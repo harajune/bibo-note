@@ -3,6 +3,7 @@ import build from '@hono/vite-build/aws-lambda'
 import devServer from '@hono/vite-dev-server'
 import wasm from 'vite-plugin-wasm'
 import {dataToEsm} from '@rollup/pluginutils'
+import { readFileSync } from 'node:fs'
 
 export default defineConfig({
   build: {
@@ -27,7 +28,10 @@ export default defineConfig({
       async transform(source, id) {
           if (!id.match(/.*\.wasm(?:\?.*)?$/)) return
           console.log(id)
-          const base64 = Buffer.from(source).toString('base64');
+          const filename = id.replace(/\?.*$/, '')
+          console.log(filename)
+          const file = readFileSync(filename)
+          const base64 = file.toString('base64')
           const code = `data:application/wasm;base64,${base64}";`
           return dataToEsm(code)
       },
