@@ -151,18 +151,6 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       minTtl: cdk.Duration.seconds(1),
     });
 
-    // CloudFrontのログを保存するためのS3バケットを作成
-    const cloudFrontLogBucket = new s3.Bucket(this, 'CloudFrontLogBucket', {
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      publicReadAccess: false,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
-      enforceSSL: true,
-      versioned: true,
-      accessControl: s3.BucketAccessControl.LOG_DELIVERY_WRITE,
-    });
-
     // CloudFrontディストリビューションを作成
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -203,10 +191,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
         },
       },
       domainNames: [environmentConfig.domainName, `*.${environmentConfig.domainName}`],
-      certificate: certificate,
-      logBucket: cloudFrontLogBucket,
-      logFilePrefix: 'cloudfront-logs/',
-      logIncludesCookies: true,
+      certificate: certificate
     });
 
     // CloudFrontからのアクセスのみ許可するため、workerFunctionにリソースポリシーを追加
@@ -310,6 +295,11 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       cachePolicy: ogpCachePolicy,
       originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      edgeLambdas: [{
+        eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+        functionVersion: authorizationEdgeFunctionVersion,
+        includeBody: true,
+      }],
     });
 
     // CloudFrontからのアクセスのみ許可するため、ogpFunctionにリソースポリシーを追加
