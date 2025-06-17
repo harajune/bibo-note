@@ -157,6 +157,10 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       publicReadAccess: false,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
+      enforceSSL: true,
+      versioned: true,
+      accessControl: s3.BucketAccessControl.LOG_DELIVERY_WRITE,
     });
 
     // CloudFrontディストリビューションを作成
