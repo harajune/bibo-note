@@ -2,14 +2,8 @@ import { defineConfig } from 'vite'
 import build from '@hono/vite-build/aws-lambda'
 import devServer from '@hono/vite-dev-server'
 import wasm from 'vite-plugin-wasm'
-import { dataToEsm } from '@rollup/pluginutils'
-import { readFileSync } from 'fs';
-
 
 export default defineConfig({
-  optimizeDeps: {
-    exclude: ['@vercel/og'],
-  },
   build: {
     copyPublicDir: false,
 /*    lib: {
@@ -25,6 +19,7 @@ export default defineConfig({
     build({
       outputDir: 'dist/worker',
       entry: 'src/index.tsx',
+      minify: false,
     }),
     {
       name: 'vite-plugin-base64',

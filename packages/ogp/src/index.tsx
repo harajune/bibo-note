@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { handle } from 'hono/aws-lambda'
 import { OGPService } from './services/ogp-service'
 
 const app = new Hono()

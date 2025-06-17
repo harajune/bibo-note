@@ -151,6 +151,14 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       minTtl: cdk.Duration.seconds(1),
     });
 
+    // CloudFrontのログを保存するためのS3バケットを作成
+    const cloudFrontLogBucket = new s3.Bucket(this, 'CloudFrontLogBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
     // CloudFrontディストリビューションを作成
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -192,6 +200,9 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       },
       domainNames: [environmentConfig.domainName, `*.${environmentConfig.domainName}`],
       certificate: certificate,
+      logBucket: cloudFrontLogBucket,
+      logFilePrefix: 'cloudfront-logs/',
+      logIncludesCookies: true,
     });
 
     // CloudFrontからのアクセスのみ許可するため、workerFunctionにリソースポリシーを追加
