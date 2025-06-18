@@ -41,8 +41,7 @@ export default defineConfig({
 
 function createCode(base64: string) {
   return `
-  const base64String = "${base64}";
-  const binaryString = Buffer.from(base64String, 'base64')
-  export default binaryString;
+  const base64String = "data:application/wasm;base64,${base64}";
+  export default base64String;
 `
 }
