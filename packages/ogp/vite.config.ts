@@ -35,17 +35,14 @@ export default defineConfig({
           return createCode(base64)
       },
     },
+    wasm()
   ],
 })
 
 function createCode(base64: string) {
   return `
   const base64String = "${base64}";
-  const binaryString = atob(base64String)
-  const bytes = new Uint8Array(binaryString.length)
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i)
-  }
-  export default bytes;
+  const binaryString = Buffer.from(base64String, 'base64')
+  export default binaryString;
 `
 }
