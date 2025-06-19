@@ -22,68 +22,55 @@ const wasmPlugin = () => {
       // WASMファイルのパスを取得
       const wasmFileName = path.basename(cleanId)
       
+      // WASMファイルをBase64エンコードしてインライン化
+      const wasmContent = fs.readFileSync(cleanId)
+      const base64Content = wasmContent.toString('base64')
+      
       // WASMファイルをランタイムで読み込むためのコードを生成
       const transformedCode = `
-        import { readFileSync } from 'node:fs';
-        import { fileURLToPath } from 'node:url';
-        import { dirname, join } from 'node:path';
+        // WASMファイルをBase64からデコード
+        const base64 = "${base64Content}";
         
-        const __filename = fileURLToPath(import.meta.url);
-        const __dirname = dirname(__filename);
+        // Base64をArrayBufferに変換
+        function base64ToArrayBuffer(base64) {
+          const binaryString = atob(base64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          return bytes.buffer;
+        }
         
-        // WASMファイルを同じディレクトリから読み込む
-        const wasmPath = join(__dirname, '${wasmFileName}');
-        const wasmBuffer = readFileSync(wasmPath);
+        // AWS Lambda環境でのfetch回避のための実装
+        if (typeof global !== 'undefined' && !global.fetch_original) {
+          global.fetch_original = global.fetch || fetch;
+          global.fetch = function(input, init) {
+            const url = typeof input === 'string' ? input : input.url;
+            
+            // WASMファイルへのfetchをインターセプト
+            if (url && url.includes('${wasmFileName}')) {
+              return Promise.resolve({
+                ok: true,
+                arrayBuffer: () => Promise.resolve(base64ToArrayBuffer(base64)),
+                headers: new Headers({
+                  'content-type': 'application/wasm'
+                })
+              });
+            }
+            
+            // その他のfetchは通常通り処理
+            return global.fetch_original(input, init);
+          };
+        }
         
+        // Node.js環境でのreadFileSync対応
+        const wasmBuffer = Buffer.from(base64, 'base64');
         export default wasmBuffer;
       `;
       
       return {
         code: transformedCode,
         map: null
-      }
-    },
-    
-    // ビルド後にWASMファイルをコピー
-    async writeBundle(options, bundle) {
-      const outputDir = options.dir || path.dirname(options.file)
-      
-      // node_modules内のWASMファイルを探す
-      const wasmFiles: string[] = []
-      const searchDir = path.join(process.cwd(), 'node_modules/@vercel/og')
-      
-      const findWasmFiles = (dir: string): void => {
-        try {
-          const files = fs.readdirSync(dir) as string[]
-          for (const file of files) {
-            const filePath = path.join(dir, file)
-            const stat = fs.statSync(filePath)
-            if (stat.isDirectory()) {
-              findWasmFiles(filePath)
-            } else if (file.endsWith('.wasm')) {
-              wasmFiles.push(filePath)
-            }
-          }
-        } catch (error) {
-          // ディレクトリが読めない場合は無視
-        }
-      }
-      
-      findWasmFiles(searchDir)
-      
-      // WASMファイルを出力ディレクトリにコピー
-      for (const wasmFile of wasmFiles) {
-        const fileName = path.basename(wasmFile)
-        const destPath = path.join(outputDir, fileName)
-        
-        // ディレクトリが存在しない場合は作成
-        if (!fs.existsSync(outputDir)) {
-          fs.mkdirSync(outputDir, { recursive: true })
-        }
-        
-        // WASMファイルをコピー
-        fs.copyFileSync(wasmFile, destPath)
-        console.log(`Copied WASM file: ${fileName} to ${outputDir}`)
       }
     }
   }
