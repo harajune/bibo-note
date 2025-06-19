@@ -1,114 +1,90 @@
 import { defineConfig } from 'vite'
 import build from '@hono/vite-build/aws-lambda'
 import devServer from '@hono/vite-dev-server'
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { createFilter } from '@rollup/pluginutils'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 
-// WASMファイルをインライン化するプラグイン
-function wasmInlinePlugin() {
+// @vercel/ogのWASMファイルを適切に処理するプラグイン
+const wasmPlugin = () => {
+  const filter = createFilter('**/*.wasm')
+  
   return {
-    name: 'wasm-inline',
-    enforce: 'pre' as const,
+    name: 'vite-plugin-wasm-files',
+    enforce: 'pre' as const, // 他のプラグインより先に処理
     
-    config(config) {
-      // Viteのデフォルトの.wasm処理を無効化
-      config.assetsInclude = config.assetsInclude || []
-      if (Array.isArray(config.assetsInclude)) {
-        config.assetsInclude = config.assetsInclude.filter(pattern => !pattern.includes('.wasm'))
+    // ビルド時の処理
+    async transform(code, id) {
+      // URLパラメータを除去してファイルパスを取得
+      const cleanId = id.split('?')[0]
+      if (!filter(cleanId)) return null
+      
+      // WASMファイルのパスを取得
+      const wasmFileName = path.basename(cleanId)
+      
+      // WASMファイルをランタイムで読み込むためのコードを生成
+      const transformedCode = `
+        import { readFileSync } from 'node:fs';
+        import { fileURLToPath } from 'node:url';
+        import { dirname, join } from 'node:path';
+        
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
+        
+        // WASMファイルを同じディレクトリから読み込む
+        const wasmPath = join(__dirname, '${wasmFileName}');
+        const wasmBuffer = readFileSync(wasmPath);
+        
+        export default wasmBuffer;
+      `;
+      
+      return {
+        code: transformedCode,
+        map: null
       }
     },
     
-    async resolveId(source, importer, options) {
-      // .wasmファイルのインポートを検出
-      if (source.includes('.wasm')) {
-        // ?module, ?init, ?url などのクエリを除去
-        const cleanPath = source.split('?')[0]
-        const resolved = await this.resolve(cleanPath, importer, { ...options, skipSelf: true })
-        
-        if (resolved && resolved.id.endsWith('.wasm')) {
-          // 常に?wasm-inlineクエリを付与
-          return resolved.id + '?wasm-inline'
-        }
-      }
-      return null
-    },
-    
-    async load(id) {
-      // ?wasm-inlineクエリパラメータを持つファイルを処理
-      if (id.includes('?wasm-inline')) {
-        const actualId = id.split('?')[0]
-        
+    // ビルド後にWASMファイルをコピー
+    async writeBundle(options, bundle) {
+      const outputDir = options.dir || path.dirname(options.file)
+      
+      // node_modules内のWASMファイルを探す
+      const wasmFiles: string[] = []
+      const searchDir = path.join(process.cwd(), 'node_modules/@vercel/og')
+      
+      const findWasmFiles = (dir: string): void => {
         try {
-          const wasmBuffer = readFileSync(actualId)
-          const base64 = wasmBuffer.toString('base64')
-          
-          // 複数の形式でエクスポート
-          return `
-            const wasmBase64 = "${base64}";
-            const wasmBytes = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0));
-            
-            // デフォルトエクスポート（Viteの?module形式）
-            export default function() {
-              return WebAssembly.compile(wasmBytes);
+          const files = fs.readdirSync(dir) as string[]
+          for (const file of files) {
+            const filePath = path.join(dir, file)
+            const stat = fs.statSync(filePath)
+            if (stat.isDirectory()) {
+              findWasmFiles(filePath)
+            } else if (file.endsWith('.wasm')) {
+              wasmFiles.push(filePath)
             }
-            
-            // 名前付きエクスポート
-            export const initWasm = () => WebAssembly.compile(wasmBytes);
-            export const wasmBuffer = wasmBytes;
-            
-            // fetchのレスポンスをエミュレート
-            export const wasmResponse = {
-              arrayBuffer: async () => wasmBytes.buffer,
-              bytes: async () => wasmBytes,
-            };
-            
-            // グローバル変数として公開（一部のライブラリ用）
-            if (typeof globalThis !== 'undefined') {
-              globalThis.__wasmBytes = wasmBytes;
-            }
-          `
+          }
         } catch (error) {
-          console.error(`Failed to load WASM file: ${actualId}`, error)
-          throw error
+          // ディレクトリが読めない場合は無視
         }
       }
-    },
-    
-    transform(code, id) {
-      // @vercel/ogやyoga関連のファイルを変換
-      if (id.includes('@vercel/og') || id.includes('yoga')) {
-        let transformedCode = code
+      
+      findWasmFiles(searchDir)
+      
+      // WASMファイルを出力ディレクトリにコピー
+      for (const wasmFile of wasmFiles) {
+        const fileName = path.basename(wasmFile)
+        const destPath = path.join(outputDir, fileName)
         
-        // import文とdynamic importの変換
-        transformedCode = transformedCode
-          // import wasmModule from './yoga.wasm?module' 形式
-          .replace(
-            /import\s+(\w+)\s+from\s+['"](\.\/)?([^'"]*\.wasm)(\?[^'"]*)?['"]/g,
-            `import $1 from '$2$3?wasm-inline'`
-          )
-          // import('./yoga.wasm?module') 形式
-          .replace(
-            /import\s*\(\s*['"](\.\/)?([^'"]*\.wasm)(\?[^'"]*)?['"]\s*\)/g,
-            `import('$1$2?wasm-inline')`
-          )
-          // new URL('./yoga.wasm', import.meta.url) 形式
-          .replace(
-            /new\s+URL\s*\(\s*['"](\.\/)?([^'"]*\.wasm)['"]\s*,\s*import\.meta\.url\s*\)/g,
-            `'$1$2?wasm-inline'`
-          )
-        
-        // fetch()によるWASMロードの変換
-        if (transformedCode.includes('fetch') && transformedCode.includes('.wasm')) {
-          transformedCode = transformedCode
-            .replace(
-              /fetch\s*\(\s*[^)]*\.wasm[^)]*\)/g,
-              'Promise.resolve(wasmResponse)'
-            )
+        // ディレクトリが存在しない場合は作成
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true })
         }
         
-        return transformedCode !== code ? transformedCode : null
+        // WASMファイルをコピー
+        fs.copyFileSync(wasmFile, destPath)
+        console.log(`Copied WASM file: ${fileName} to ${outputDir}`)
       }
-      return null
     }
   }
 }
@@ -116,31 +92,12 @@ function wasmInlinePlugin() {
 export default defineConfig({
   build: {
     copyPublicDir: false,
-    rollupOptions: {
-      external: [],
-    },
-    assetsInlineLimit: 10 * 1024 * 1024, // 10MBまでインライン化
-  },
-  assetsInclude: ['**/*.wasm'],
-  resolve: {
-    alias: {
-      // yoga-wasmのパスを解決
-      'yoga-wasm-web': resolve(__dirname, 'node_modules/yoga-wasm-web')
-    }
-  },
-  optimizeDeps: {
-    exclude: ['@vercel/og'],
-    esbuildOptions: {
-      loader: {
-        '.wasm': 'file'
-      }
-    }
   },
   plugins: [
     devServer({
       entry: 'src/index.tsx',
     }),
-    wasmInlinePlugin(),
+    wasmPlugin(),
     build({
       outputDir: 'dist/worker',
       entry: 'src/index.tsx',
