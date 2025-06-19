@@ -88,9 +88,6 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
-      vite-plugin-wasm:
-        specifier: github:harajune/vite-plugin-wasm#feature/module
-        version: https://codeload.github.com/harajune/vite-plugin-wasm/tar.gz/5d46d21648767ae7a6ffa85cbfe0d07a5371e1f2(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3))
       vitest:
         specifier: ^3.2.3
         version: 3.2.3(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
@@ -2369,12 +2366,6 @@ packages:
     resolution: {integrity: sha512-gc8aAifGuDIpZHrPjuHyP4dpQmYXqWw7D1GmDnWeNWP654UEXzVfQ5IHPSK5HaHkwB/+p1atpYpSdw/2kOv8iQ==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
-
-  vite-plugin-wasm@https://codeload.github.com/harajune/vite-plugin-wasm/tar.gz/5d46d21648767ae7a6ffa85cbfe0d07a5371e1f2:
-    resolution: {tarball: https://codeload.github.com/harajune/vite-plugin-wasm/tar.gz/5d46d21648767ae7a6ffa85cbfe0d07a5371e1f2}
-    version: 3.4.1
-    peerDependencies:
-      vite: ^2 || ^3 || ^4 || ^5 || ^6
 
   vite@6.3.5:
     resolution: {integrity: sha512-cZn6NDFE7wdTpINgs++ZJ4N49W2vRp8LCKrn3Ob1kYNtOo21vfDoaV5GzBfLU4MovSAB8uNRm4jgzVQZ+mBzPQ==}
@@ -4986,10 +4977,6 @@ snapshots:
       - terser
       - tsx
       - yaml
-
-  vite-plugin-wasm@https://codeload.github.com/harajune/vite-plugin-wasm/tar.gz/5d46d21648767ae7a6ffa85cbfe0d07a5371e1f2(vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)):
-    dependencies:
-      vite: 6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
 
   vite@6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3):
     dependencies:
