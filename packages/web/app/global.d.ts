@@ -3,6 +3,7 @@ import {} from 'hono'
 type Head = {
   title?: string
   ogp?: string
+  url?: string
 }
 
 declare module 'hono' {

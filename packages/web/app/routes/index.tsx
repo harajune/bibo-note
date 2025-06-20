@@ -16,9 +16,12 @@ export default createRoute(async (c) => {
   if (!newestArticle) {
     return c.notFound();
   }
+
+  const ogp = `https://${c.req.header('host')}/ogp/${newestArticle.uuid}`;
+  const url = `https://${c.req.header('host')}/v/${newestArticle.uuid}`;
   
   return c.render(
     <Viewer wikiData={newestArticle} articles={latestArticles} />,
-    { title: newestArticle.title }
+    { title: newestArticle.title, ogp: ogp, url: url }
   );
 });

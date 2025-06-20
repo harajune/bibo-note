@@ -1,7 +1,7 @@
 import { jsxRenderer } from 'hono/jsx-renderer'
 import { Link, Script } from 'honox/server'
 
-export default jsxRenderer(({ children, title, ogp }) => {
+export default jsxRenderer(({ children, title, ogp, url }) => {
   return (
     <html lang="en">
       <head>
@@ -12,6 +12,7 @@ export default jsxRenderer(({ children, title, ogp }) => {
         <meta property="og:title" content={title ? `${title} - Bibo Note` : 'Bibo Note'} />
         <meta property="og:type" content="website" />
         {ogp && <meta property="og:image" content={ogp} />}
+        {url && <meta property="og:url" content={url} />}
         <title>{title ? `${title} - Bibo Note` : 'Bibo Note'}</title>
         <Script src="/app/client.ts" async />
       </head>
