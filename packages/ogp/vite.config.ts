@@ -77,10 +77,7 @@ const fontPlugin = (): Plugin => {
     
     async transform(code, id) {
       // @vercel/ogのfallbackFont変数を書き換え
-      if (id.includes('@vercel/og') && code.includes('fallbackFont')) {
-        const fontPath = path.join(process.cwd(), 'fonts', fontFileName)
-        const fontContent = await fs.readFile(fontPath)
-        
+      if (id.includes('@vercel/og') && code.includes('fallbackFont')) {        
         // fallbackFont変数をfs.readFileSyncを使用した形に置き換え
         const newCode = code.replace(
           /var fallbackFont =[^;]+;/,
@@ -107,7 +104,7 @@ const fontPlugin = (): Plugin => {
     
     async generateBundle() {
       // distディレクトリにフォントファイルをコピー
-      const fontPath = path.join(process.cwd(), 'fonts', fontFileName)
+      const fontPath = path.join(process.cwd(), 'assets', fontFileName)
       const fontContent = await fs.readFile(fontPath)
       const outputPath = path.join(config.build.outDir, fontFileName)
       
@@ -124,6 +121,7 @@ export default defineConfig({
   build: {
     copyPublicDir: false,
   },
+  assetsInclude: ['**/*.png'],
   plugins: [
     devServer({
       entry: 'src/index.tsx',

@@ -1,8 +1,7 @@
 import { ImageResponse } from '@vercel/og'
 import { UUID } from '../repositories/repository'
-import { S3Repository } from '../repositories/s3-repository'
-import { FileRepository } from '../repositories/file-repository'
 import { WikiModel } from '../models/wiki-model'
+import BackgroundImage from '../../assets/background.png'
 
 export class OGPService {
   private wikiModel: WikiModel
@@ -29,10 +28,12 @@ export class OGPService {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#ffffff',
           fontSize: 32,
           fontWeight: 600,
           padding: '40px',
+          backgroundImage: `url(${BackgroundImage})`,
+          backgroundBlendMode: 'lighten',
+          backgroundColor: 'rgba(255,255,255,0.8)',
         }}
       >
         <div
@@ -48,7 +49,7 @@ export class OGPService {
           <div
             style={{
               display: 'flex',
-              fontSize: 48,
+              fontSize: 52,
               fontWeight: 700,
               color: '#1f2937',
               marginBottom: '20px',
