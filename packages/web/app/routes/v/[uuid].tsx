@@ -6,8 +6,8 @@ export default createRoute(async (c) => {
   const uuid = c.req.param("uuid");
   const wikiModel = new WikiModel();
   const wikiData = await wikiModel.load(uuid);
-  const ogp = `https://${c.req.header('host')}/ogp/${uuid}`;
-  const url = `https://${c.req.header('host')}/v/${uuid}`;
+  const ogp = `https://${c.req.header('x-forwarded-host')}/ogp/${uuid}`;
+  const url = `https://${c.req.header('x-forwarded-host')}/v/${uuid}`;
 
   if (!wikiData) {
     return c.notFound();

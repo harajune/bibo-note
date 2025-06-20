@@ -17,8 +17,8 @@ export default createRoute(async (c) => {
     return c.notFound();
   }
 
-  const ogp = `https://${c.req.header('host')}/ogp/${newestArticle.uuid}`;
-  const url = `https://${c.req.header('host')}/v/${newestArticle.uuid}`;
+  const ogp = `https://${c.req.header('x-forwarded-host')}/ogp/${newestArticle.uuid}`;
+  const url = `https://${c.req.header('x-forwarded-host')}/v/${newestArticle.uuid}`;
   
   return c.render(
     <Viewer wikiData={newestArticle} articles={latestArticles} />,
