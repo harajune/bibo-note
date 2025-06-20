@@ -26,9 +26,6 @@ const functionName = process.env.AWS_LAMBDA_FUNCTION_NAME || '';
 const isDevelopment = functionName.includes('-development');
 const isSecureEntireEnvironment = isDevelopment;
 
-// Handle all requests
-app.use(handleRequest);
-
 // Apply basic auth to all routes in development environment
 if (isSecureEntireEnvironment) {
   app.use(basicAuthMiddleware);
@@ -36,5 +33,8 @@ if (isSecureEntireEnvironment) {
   app.use('/e/*', basicAuthMiddleware);
   app.use('/new', basicAuthMiddleware);
 }
+
+// Handle all requests
+app.use(handleRequest);
 
 export const handler = handle(app);
