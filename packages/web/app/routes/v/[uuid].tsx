@@ -19,6 +19,6 @@ export default createRoute(async (c) => {
 
   return c.render(
     <Viewer wikiData={wikiData} articles={articles} />,
-    { title: wikiData.title }
+    { title: wikiData.title, ogp: wikiData.uuid }
   );
 });
