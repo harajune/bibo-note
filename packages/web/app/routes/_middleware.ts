@@ -22,6 +22,9 @@ const multitenant = (): MiddlewareHandler => {
         // subdomain.bibo-note.jpの形式からsubdomainを取得
         const hostParts = host.split('.');
         const user = hostParts[0];
+        if (user != 'harajune') {
+          return c.redirect('https://harajune.bibo-note.jp');
+        }
         c.set('user', user);
       } else {
         //FIXME: 将来的にマルチテナントが正式になった場合、ここをwwwに書き換える
