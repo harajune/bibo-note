@@ -146,8 +146,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       ),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      defaultTtl: cdk.Duration.hours(1),
-      maxTtl: cdk.Duration.hours(1),
+      defaultTtl: cdk.Duration.seconds(1),
+      maxTtl: cdk.Duration.seconds(1),
       minTtl: cdk.Duration.seconds(1),
     });
 
