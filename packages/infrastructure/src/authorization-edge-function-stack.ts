@@ -23,7 +23,7 @@ export class AuthorizationEdgeFunctionStack extends cdk.Stack {
       entry: 'src/lambdaedge/authorization.ts',
       handler: 'handler',
       memorySize: 128,
-      timeout: cdk.Duration.seconds(5),
+      timeout: cdk.Duration.seconds(30),
       role: new iam.Role(this, 'AuthorizationEdgeFunctionRole', {
         assumedBy: new iam.CompositePrincipal(
           new iam.ServicePrincipal('lambda.amazonaws.com'),

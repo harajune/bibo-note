@@ -22,7 +22,7 @@ export class LambdaEdgeStack extends cdk.Stack {
       entry: 'src/lambdaedge/computeSha256.ts',
       handler: 'handler',
       memorySize: 1769,
-      timeout: cdk.Duration.seconds(5),
+      timeout: cdk.Duration.seconds(30),
       role: new iam.Role(this, 'EdgeFunctionRole', {
         assumedBy: new iam.CompositePrincipal(
           new iam.ServicePrincipal('lambda.amazonaws.com'),
