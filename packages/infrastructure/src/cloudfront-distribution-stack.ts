@@ -71,6 +71,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset('../web/dist/worker'),
       handler: 'worker.handler',
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(30),
     });
 
     // Lambda Function URLを作成（AWS_IAM認証を利用して直接の呼び出しを防止）

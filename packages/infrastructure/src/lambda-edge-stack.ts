@@ -21,7 +21,7 @@ export class LambdaEdgeStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: 'src/lambdaedge/computeSha256.ts',
       handler: 'handler',
-      memorySize: 1769,
+      memorySize: 128,
       timeout: cdk.Duration.seconds(30),
       role: new iam.Role(this, 'EdgeFunctionRole', {
         assumedBy: new iam.CompositePrincipal(
