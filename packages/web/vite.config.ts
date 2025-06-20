@@ -1,6 +1,6 @@
 import build from '@hono/vite-build/aws-lambda'
 import tailwindcss from '@tailwindcss/vite'
-import honox, { devServerDefaultOptions } from 'honox/vite'
+import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
