@@ -6,6 +6,7 @@ export default createRoute(async (c) => {
   const uuid = c.req.param("uuid");
   const wikiModel = new WikiModel();
   const wikiData = await wikiModel.load(uuid);
+  const ogp = `https://${c.req.header('host')}/ogp/${uuid}`;
   
   if (!wikiData) {
     return c.notFound();
@@ -19,6 +20,6 @@ export default createRoute(async (c) => {
 
   return c.render(
     <Viewer wikiData={wikiData} articles={articles} />,
-    { title: wikiData.title, ogp: wikiData.uuid }
+    { title: wikiData.title, ogp: ogp }
   );
 });

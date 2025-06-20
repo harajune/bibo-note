@@ -11,7 +11,7 @@ export default jsxRenderer(({ children, title, ogp }) => {
         <Link href="/app/assets/favicon.ico" rel="icon" />
         <meta property="og:title" content={title ? `${title} - Bibo Note` : 'Bibo Note'} />
         <meta property="og:type" content="website" />
-        {ogp && <meta property="og:image" content={`/ogp/${ogp}`} />}
+        {ogp && <meta property="og:image" content={ogp} />}
         <title>{title ? `${title} - Bibo Note` : 'Bibo Note'}</title>
         <Script src="/app/client.ts" async />
       </head>
