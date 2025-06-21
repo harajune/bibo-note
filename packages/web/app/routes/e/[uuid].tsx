@@ -3,6 +3,8 @@ import { Editor } from "../../wiki/screens/editor";
 import { WikiModel } from "../../wiki/models/wiki_model";
 import { createImmutable } from "../../libs/immutable/immutable";
 import { logger } from "../../libs/logger/logger";
+import { CloudFrontCacheModel } from "../../wiki/models/cloudfront_cache_model";
+
 export default createRoute(async (c) => {
   const uuid = c.req.param("uuid");
   const wikiModel = new WikiModel();
@@ -35,6 +37,11 @@ export const POST = createRoute(async (c) => {
       updatedAt: new Date()
     });
     await wikiModel.save(updatedWikiData);
+
+    const cloudfrontCacheModel = new CloudFrontCacheModel();
+    cloudfrontCacheModel.invalidateArticle(uuid);
+    cloudfrontCacheModel.invalidateHomePage();
+
     return c.redirect(`/v/${uuid}`);
   } catch (e) {
     logger.error('Error saving wiki data:', e);

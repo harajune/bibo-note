@@ -4,6 +4,8 @@ let PutObjectCommand: any;
 let GetObjectCommand: any;
 let ListObjectsCommand: any;
 let HeadObjectCommand: any;
+let CloudFrontClient: any;
+let CreateInvalidationCommand: any;
 let isLoaded = false;
 
 // Lazy load AWS SDK on first use
@@ -14,11 +16,14 @@ async function ensureAwsSdkLoaded() {
   
   try {
     const awsSdk = await import('@aws-sdk/client-s3');
+    const cloudFrontSdk = await import('@aws-sdk/client-cloudfront');
     S3Client = awsSdk.S3Client;
     PutObjectCommand = awsSdk.PutObjectCommand;
     GetObjectCommand = awsSdk.GetObjectCommand;
     ListObjectsCommand = awsSdk.ListObjectsCommand;
     HeadObjectCommand = awsSdk.HeadObjectCommand;
+    CloudFrontClient = cloudFrontSdk.CloudFrontClient;
+    CreateInvalidationCommand = cloudFrontSdk.CreateInvalidationCommand;
     isLoaded = true;
   } catch (error) {
     console.error('Failed to load AWS SDK:', error);
@@ -52,10 +57,22 @@ const getHeadObjectCommand = async () => {
   return HeadObjectCommand;
 };
 
+const getCloudFrontClient = async () => {
+  await ensureAwsSdkLoaded();
+  return CloudFrontClient;
+};
+
+const getCreateInvalidationCommand = async () => {
+  await ensureAwsSdkLoaded();
+  return CreateInvalidationCommand;
+};
+
 export { 
   getS3Client as S3Client,
   getPutObjectCommand as PutObjectCommand,
   getGetObjectCommand as GetObjectCommand,
   getListObjectsCommand as ListObjectsCommand,
-  getHeadObjectCommand as HeadObjectCommand
+  getHeadObjectCommand as HeadObjectCommand,
+  getCloudFrontClient as CloudFrontClient,
+  getCreateInvalidationCommand as CreateInvalidationCommand
 }; 

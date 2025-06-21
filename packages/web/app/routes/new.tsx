@@ -5,6 +5,8 @@ import { createImmutable } from "../libs/immutable/immutable";
 import { v7 as uuidv7 } from "uuid";
 import { WikiData } from "../wiki/models/wiki_data";
 import { logger } from "../libs/logger/logger";
+import { CloudFrontCacheModel } from "../wiki/models/cloudfront_cache_model";
+
 export default createRoute(async (c) => {
   const wikiModel = new WikiModel();
   const blankWikiData = new WikiData(
@@ -37,6 +39,10 @@ export const POST = createRoute(async (c) => {
     ));
     
     await wikiModel.save(newArticle);
+
+    const cloudfrontCacheModel = new CloudFrontCacheModel();
+    cloudfrontCacheModel.invalidateHomePage();
+
     return c.redirect(`/v/${newUuid}`);
   } catch (e) {
     logger.error(e);
