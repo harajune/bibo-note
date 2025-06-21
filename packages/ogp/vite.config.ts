@@ -20,7 +20,6 @@ const wasmPlugin = (): Plugin => {
     async load(id) {
       if (id.endsWith('.wasm') || id.endsWith('.wasm?module')) {
         const cleanId = id.replace(/\?.*$/, '')
-        const wasmContent = await fs.readFile(cleanId)
         const wasmFileName = path.basename(cleanId)
         
         // WASMファイルを記録
@@ -131,7 +130,7 @@ export default defineConfig({
     build({
       outputDir: 'dist/worker',
       entry: 'src/index.tsx',
-      minify: false,
+      minify: true,
     })
   ],
 })
