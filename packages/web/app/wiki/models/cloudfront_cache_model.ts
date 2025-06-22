@@ -73,9 +73,6 @@ export class CloudFrontCacheModel {
   };
 
   constructor() {
-    // start to get distribution id here because context is not available until the _middleware.ts is called
-    getDistributionId();
-
     this.context = getContext();
     this.envVars = env<{
       MODE: string,
@@ -84,6 +81,12 @@ export class CloudFrontCacheModel {
       AWS_SECRET_ACCESS_KEY: string,
       AWS_SESSION_TOKEN: string
     }>(this.context);
+
+    // start to get distribution id here because context is not available until the _middleware.ts is called
+    if (this.envVars.MODE === 'production') {
+      getDistributionId();
+    }
+
   }
 
   /**
@@ -92,6 +95,16 @@ export class CloudFrontCacheModel {
    * @returns Promise<CacheInvalidationResult>
    */
   public async invalidatePaths(paths: string[]): Promise<CacheInvalidationResult> {
+
+    // skip invalidation in development mode
+    if (this.envVars.MODE !== 'production') {
+      return {
+        invalidationId: '',
+        status: 'Completed',
+        createTime: new Date()
+      };
+    }
+
     try {
       const distributionId = await getDistributionId();
       const client = new CloudFrontClient({
