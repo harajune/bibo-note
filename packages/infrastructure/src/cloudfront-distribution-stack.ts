@@ -8,6 +8,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { SsmParameterReader } from './ssm-parameter-reader';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { EnvironmentConfig } from './environment-config';
@@ -123,9 +124,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       ),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      defaultTtl: cdk.Duration.seconds(1), //TODO: デバッグ用にキャッシュを無効化
-      maxTtl: cdk.Duration.seconds(1),
-      minTtl: cdk.Duration.seconds(1),
+      defaultTtl: cdk.Duration.days(365),
+      maxTtl: cdk.Duration.days(365),
     });
 
     // 静的ファイル用のキャッシュポリシー
@@ -134,9 +134,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       comment: 'Cache policy for static files',
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      defaultTtl: cdk.Duration.seconds(1), //TODO: デバッグ用にキャッシュを無効化 
-      maxTtl: cdk.Duration.seconds(1),
-      minTtl: cdk.Duration.seconds(1),
+      defaultTtl: cdk.Duration.hours(1),
+      maxTtl: cdk.Duration.hours(1),
     });
 
     // OGP画像用のキャッシュポリシー
@@ -148,9 +147,8 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       ),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      defaultTtl: cdk.Duration.seconds(1),
-      maxTtl: cdk.Duration.seconds(1),
-      minTtl: cdk.Duration.seconds(1),
+      defaultTtl: cdk.Duration.days(365),
+      maxTtl: cdk.Duration.days(365),
     });
 
     // CloudFrontディストリビューションを作成
@@ -209,6 +207,14 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       value: distribution.distributionDomainName,
     });
 
+    // SSMパラメータにCloudFrontディストリビューションIDを保存
+    new ssm.StringParameter(this, 'CloudFrontDistributionIdParameter', {
+      description: `The CloudFront distribution ID for ${environmentConfig.mode}`,
+      parameterName: `/bibo-note/${environmentConfig.mode}/cloudfront_distribution_id`,
+      stringValue: distribution.distributionId,
+      tier: ssm.ParameterTier.STANDARD,
+    });
+
     // Create Route53 A records for both the apex and wildcard domains
     const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName: environmentConfig.domainName });
     new route53.ARecord(this, 'AliasRecordApex', {
@@ -254,8 +260,23 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // LambdaにMODEを環境変数として設定
     workerFunction.addEnvironment('MODE', environmentConfig.mode);
 
-    // LambdaにCloudFrontディストリビューションIDを環境変数として設定
-    //workerFunction.addEnvironment('CLOUDFRONT_DISTRIBUTION_ID', distribution.distributionId);
+    // LambdaにSSMパラメータ読み取り権限を追加
+    workerFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['ssm:GetParameter'],
+      resources: [
+        // don't use ssm.StringParameter.parameterArn because it will cause the circular dependency error
+        `arn:aws:ssm:${this.region}:${this.account}:parameter/bibo-note/${environmentConfig.mode}/cloudfront_distribution_id`,
+      ],
+    }));
+
+    // LambdaにCloudFrontキャッシュ無効化権限を追加
+    workerFunction.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['cloudfront:CreateInvalidation'],
+      // don't use distribution.distributionArn because it will cause the circular dependency error
+      resources: [`arn:aws:cloudfront::${this.account}:distribution/*`],
+    }));
 
     this.ogpFunction = new lambda.Function(this, 'OGPFunction', {
       functionName: `ogp-image-generator-${environmentConfig.name}`,

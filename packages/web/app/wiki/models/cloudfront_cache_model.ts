@@ -1,6 +1,8 @@
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
 import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+import { v7 as uuidv7 } from "uuid";
 
 export interface CacheInvalidationResult {
   invalidationId: string;
@@ -8,21 +10,80 @@ export interface CacheInvalidationResult {
   createTime: Date;
 }
 
+// promise singleton
+var distributionIdPromise: Promise<string> | null = null;
+
+async function getDistributionId(): Promise<string> {
+  if (distributionIdPromise) {
+    return distributionIdPromise;
+  }
+  distributionIdPromise = getDistributionIdFromSSM();
+  return distributionIdPromise;
+}
+
+/**
+ * Get CloudFront distribution ID from SSM
+ * @returns Promise<string>
+ */
+async function getDistributionIdFromSSM(): Promise<string> {
+
+  const context = getContext();
+  const envVars = env<{
+    MODE: string,
+    AWS_REGION: string,
+    AWS_ACCESS_KEY_ID: string,
+    AWS_SECRET_ACCESS_KEY: string,
+    AWS_SESSION_TOKEN: string
+  }>(context);
+
+  try {
+    const client = new SSMClient({ region: envVars.AWS_REGION,
+      credentials: {
+        accessKeyId: envVars.AWS_ACCESS_KEY_ID,
+        secretAccessKey: envVars.AWS_SECRET_ACCESS_KEY,
+        sessionToken: envVars.AWS_SESSION_TOKEN
+      }
+      });
+    const command = new GetParameterCommand({
+      Name: `/bibo-note/${envVars.MODE}/cloudfront_distribution_id`
+    });
+
+    const response = await client.send(command);
+    const distributionId = response.Parameter?.Value || '';
+    
+    if (!distributionId) {
+      throw new Error('Failed to retrieve CloudFront distribution ID from SSM');
+    }
+    
+    return distributionId;
+  } catch (error) {
+    console.error('Failed to get CloudFront distribution ID from SSM:', error);
+    throw new Error(`SSM parameter retrieval failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 export class CloudFrontCacheModel {
   private readonly context: any;
-  private readonly distributionId: string;
+  private readonly envVars: {
+    MODE: string;
+    AWS_REGION: string;
+    AWS_ACCESS_KEY_ID: string;
+    AWS_SECRET_ACCESS_KEY: string;
+    AWS_SESSION_TOKEN: string;
+  };
 
   constructor() {
+    // start to get distribution id here because context is not available until the _middleware.ts is called
+    getDistributionId();
+
     this.context = getContext();
-    const envVariables = env<{
-      CLOUDFRONT_DISTRIBUTION_ID: string
+    this.envVars = env<{
+      MODE: string,
+      AWS_REGION: string,
+      AWS_ACCESS_KEY_ID: string,
+      AWS_SECRET_ACCESS_KEY: string,
+      AWS_SESSION_TOKEN: string
     }>(this.context);
-    
-    this.distributionId = envVariables.CLOUDFRONT_DISTRIBUTION_ID;
-    
-    if (!this.distributionId) {
-      throw new Error('CLOUDFRONT_DISTRIBUTION_ID environment variable is required');
-    }
   }
 
   /**
@@ -32,17 +93,23 @@ export class CloudFrontCacheModel {
    */
   public async invalidatePaths(paths: string[]): Promise<CacheInvalidationResult> {
     try {
+      const distributionId = await getDistributionId();
       const client = new CloudFrontClient({
-        region: 'us-east-1' // CloudFront is always in us-east-1
+        region: this.envVars.AWS_REGION,
+        credentials: {
+          accessKeyId: this.envVars.AWS_ACCESS_KEY_ID,
+          secretAccessKey: this.envVars.AWS_SECRET_ACCESS_KEY,
+          sessionToken: this.envVars.AWS_SESSION_TOKEN
+        }
       });
       const command = new CreateInvalidationCommand({
-        DistributionId: this.distributionId,
+        DistributionId: distributionId,
         InvalidationBatch: {
           Paths: {
             Quantity: paths.length,
             Items: paths
           },
-          CallerReference: `invalidation-${Date.now()}`
+          CallerReference: uuidv7()
         }
       });
 
@@ -75,7 +142,8 @@ export class CloudFrontCacheModel {
   public async invalidateArticle(uuid: string): Promise<CacheInvalidationResult> {
     const paths = [
       `/e/${uuid}`,
-      `/v/${uuid}`
+      `/v/${uuid}`,
+      `/ogp/${uuid}`
     ];
     
     return await this.invalidatePaths(paths);

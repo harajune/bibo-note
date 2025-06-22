@@ -229,14 +229,8 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
 
 export class S3Repository implements Repository {
   private readonly bucketName: string;
-  private s3Client: any | null = null;
+  private readonly s3Client: S3Client;
   private readonly context: any;
-  private readonly envVars: {
-    AWS_REGION: string;
-    AWS_ACCESS_KEY_ID: string;
-    AWS_SECRET_ACCESS_KEY: string;
-    AWS_SESSION_TOKEN: string;
-  };
 
   constructor() {
     // get environment variables from context
@@ -256,26 +250,14 @@ export class S3Repository implements Repository {
       throw new Error('WIKI_BUCKET_NAME environment variable is not set.');
     }
     this.bucketName = bucketName;
-    this.envVars = {
-      AWS_REGION: enviromentVariables.AWS_REGION,
-      AWS_ACCESS_KEY_ID: enviromentVariables.AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY: enviromentVariables.AWS_SECRET_ACCESS_KEY,
-      AWS_SESSION_TOKEN: enviromentVariables.AWS_SESSION_TOKEN,
-    };
-  }
-
-  private async ensureClient() {
-    if (!this.s3Client) {
-      // Get S3Client constructor from wrapper
-      this.s3Client = new S3Client({
-        region: this.envVars.AWS_REGION,
-        credentials: {
-          accessKeyId: this.envVars.AWS_ACCESS_KEY_ID,
-          secretAccessKey: this.envVars.AWS_SECRET_ACCESS_KEY,
-          sessionToken: this.envVars.AWS_SESSION_TOKEN,
-        },
-      });
-    }
+    this.s3Client = new S3Client({
+      region: enviromentVariables.AWS_REGION,
+      credentials: {
+        accessKeyId: enviromentVariables.AWS_ACCESS_KEY_ID,
+        secretAccessKey: enviromentVariables.AWS_SECRET_ACCESS_KEY,
+        sessionToken: enviromentVariables.AWS_SESSION_TOKEN,
+      },
+    });
   }
 
   private getObjectKey(uuid: UUID): string {
@@ -289,7 +271,6 @@ export class S3Repository implements Repository {
   }
 
   public async save(data: WikiData): Promise<void> {
-    await this.ensureClient();
     // Get PutObjectCommand constructor
     const tomlData = {
       header: {
@@ -313,7 +294,6 @@ export class S3Repository implements Repository {
   }
 
   public async load(uuid: UUID): Promise<WikiData | null> {
-    await this.ensureClient();
     // Get GetObjectCommand constructor
     const objectKey = this.getObjectKey(uuid);
     try {
@@ -344,7 +324,6 @@ export class S3Repository implements Repository {
   }
 
   public async list(): Promise<UUID[]> {
-    await this.ensureClient();
     // Get ListObjectsCommand constructor
     const envVariables = env<{ MULTITENANT: string }>(this.context);
     const user = this.context.get('user');
@@ -364,7 +343,6 @@ export class S3Repository implements Repository {
   }
 
   public async isExists(uuid: UUID): Promise<boolean> {
-    await this.ensureClient();
     // Get HeadObjectCommand constructor
     try {
       await this.s3Client!.send(new HeadObjectCommand({
@@ -388,7 +366,6 @@ export class S3Repository implements Repository {
   }
   
   public async saveArticleListCache(articles: ArticleListItem[]): Promise<void> {
-    await this.ensureClient();
     await this.s3Client!.send(new PutObjectCommand({
       Bucket: this.bucketName,
       Key: this.getCacheFilePath(),
@@ -397,7 +374,6 @@ export class S3Repository implements Repository {
   }
   
   public async loadArticleListCache(): Promise<ArticleListItem[] | null> {
-    await this.ensureClient();
     try {
       const response = await this.s3Client!.send(new GetObjectCommand({
         Bucket: this.bucketName,
