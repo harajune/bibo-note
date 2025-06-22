@@ -34,5 +34,5 @@ lerna-debug.log*
 .DS_Store
 .vscode/
 .cursor/
-.cdk.out/
+cdk.out/
 data/
