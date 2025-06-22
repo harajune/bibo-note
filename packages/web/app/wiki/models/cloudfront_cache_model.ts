@@ -1,6 +1,6 @@
-import { CloudFrontClient, CreateInvalidationCommand } from "../../libs/aws-sdk-wrapper";
 import { getContext } from "hono/context-storage";
 import { env } from "hono/adapter";
+import { CloudFrontClient, CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
 
 export interface CacheInvalidationResult {
   invalidationId: string;
@@ -32,14 +32,10 @@ export class CloudFrontCacheModel {
    */
   public async invalidatePaths(paths: string[]): Promise<CacheInvalidationResult> {
     try {
-      const CloudFront = await CloudFrontClient();
-      const CreateInvalidation = await CreateInvalidationCommand();
-      
-      const client = new CloudFront({
+      const client = new CloudFrontClient({
         region: 'us-east-1' // CloudFront is always in us-east-1
       });
-
-      const command = new CreateInvalidation({
+      const command = new CreateInvalidationCommand({
         DistributionId: this.distributionId,
         InvalidationBatch: {
           Paths: {

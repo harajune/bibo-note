@@ -255,7 +255,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     workerFunction.addEnvironment('MODE', environmentConfig.mode);
 
     // LambdaにCloudFrontディストリビューションIDを環境変数として設定
-    workerFunction.addEnvironment('CLOUDFRONT_DISTRIBUTION_ID', distribution.distributionId);
+    //workerFunction.addEnvironment('CLOUDFRONT_DISTRIBUTION_ID', distribution.distributionId);
 
     this.ogpFunction = new lambda.Function(this, 'OGPFunction', {
       functionName: `ogp-image-generator-${environmentConfig.name}`,

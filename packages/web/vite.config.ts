@@ -3,9 +3,13 @@ import tailwindcss from '@tailwindcss/vite'
 import honox from 'honox/vite'
 import { defineConfig } from 'vite'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   build: {
     copyPublicDir: false,
+  },
+  ssr: {
+    // fast-xml-parser can't be bundled in dev mode beucause it's common js module
+    external: mode === 'production' ? [] : ['fast-xml-parser'],
   },
   plugins: [
     honox({
@@ -26,11 +30,10 @@ export default defineConfig({
         ]
        },
       client: { input: ['./app/style.css'] }
-
     }),
     tailwindcss(),
     build({
       outputDir: 'dist/worker',
     })
   ]
-})
+}))
