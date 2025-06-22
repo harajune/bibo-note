@@ -87,6 +87,8 @@ export class CloudFrontCacheModel {
       getDistributionId();
     }
 
+    console.log(this.envVars.MODE);
+
   }
 
   /**
