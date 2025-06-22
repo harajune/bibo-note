@@ -141,8 +141,7 @@ export class CloudFrontCacheModel {
    */
   public async invalidateArticle(uuid: string): Promise<CacheInvalidationResult> {
     const paths = [
-      `/e/${uuid}`,
-      `/v/${uuid}`,
+      `/v/*`, // invalidate all article pages because the each page has the sidebar changed by editing
       `/ogp/${uuid}`
     ];
     
