@@ -83,7 +83,7 @@ export class CloudFrontCacheModel {
     }>(this.context);
 
     // start to get distribution id here because context is not available until the _middleware.ts is called
-    if (this.envVars.MODE === 'production') {
+    if (this.envVars.MODE == 'production') {
       getDistributionId();
     }
 
@@ -99,7 +99,7 @@ export class CloudFrontCacheModel {
   public async invalidatePaths(paths: string[]): Promise<CacheInvalidationResult> {
 
     // skip invalidation in development mode
-    if (this.envVars.MODE !== 'production') {
+    if (this.envVars.MODE == 'production') {
       return {
         invalidationId: '',
         status: 'Completed',
