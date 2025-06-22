@@ -1,7 +1,7 @@
 @import 'tailwindcss' source('../app');
 
 #wiki-content {
-  font-family: "Helvetica Neue", "Helvetica", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Arial", "Yu Gothic", "Meiryo", sans-serif;
+  font-family: "Helvetica Neue", "Helvetica", "Hiragino Sans", "Arial", "Yu Gothic", "Meiryo", sans-serif;
 
   h1 {
     @apply mt-2 text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl;
