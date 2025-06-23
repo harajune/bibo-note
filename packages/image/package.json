@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "MODE=development vite dev",
     "build": "vite build",
-    "deploy": "pnpm run build",
+    "upload-test": "./scripts/upload-test.sh scripts/IMG_9497.jpg",
     "test": "vitest run",
     "preview": "vite preview"
   },
