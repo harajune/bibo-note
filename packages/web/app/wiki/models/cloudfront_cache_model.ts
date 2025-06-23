@@ -87,8 +87,6 @@ export class CloudFrontCacheModel {
       getDistributionId();
     }
 
-    console.log(this.envVars.MODE);
-
   }
 
   /**
@@ -99,7 +97,7 @@ export class CloudFrontCacheModel {
   public async invalidatePaths(paths: string[]): Promise<CacheInvalidationResult> {
 
     // skip invalidation in development mode
-    if (this.envVars.MODE == 'production') {
+    if (this.envVars.MODE != 'production') {
       return {
         invalidationId: '',
         status: 'Completed',
