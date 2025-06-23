@@ -15,6 +15,46 @@ importers:
         specifier: ^0.25.5
         version: 0.25.5
 
+  packages/image:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.828.0
+        version: 3.830.0
+      hono:
+        specifier: ^4.7.11
+        version: 4.7.11
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
+    devDependencies:
+      '@hono/node-server':
+        specifier: ^1.13.7
+        version: 1.14.4(hono@4.7.11)
+      '@hono/vite-build':
+        specifier: https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge
+        version: https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge(hono@4.7.11)
+      '@hono/vite-dev-server':
+        specifier: ^0.18.2
+        version: 0.18.3(hono@4.7.11)(miniflare@4.20250604.1)(wrangler@4.20.0(@cloudflare/workers-types@4.20250617.0))
+      '@rollup/pluginutils':
+        specifier: ^5.1.4
+        version: 5.1.4(rollup@4.44.0)
+      '@types/node':
+        specifier: ^24.0.1
+        version: 24.0.3
+      tsx:
+        specifier: ^4.19.2
+        version: 4.20.3
+      vite:
+        specifier: ^6.3.5
+        version: 6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.3(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
+
   packages/infrastructure:
     dependencies:
       aws-lambda:
@@ -3610,7 +3650,7 @@ snapshots:
 
   '@rollup/pluginutils@5.1.4(rollup@4.44.0)':
     dependencies:
-      '@types/estree': 1.0.7
+      '@types/estree': 1.0.8
       estree-walker: 2.0.2
       picomatch: 4.0.2
     optionalDependencies:
@@ -4161,8 +4201,7 @@ snapshots:
 
   '@types/estree@1.0.7': {}
 
-  '@types/estree@1.0.8':
-    optional: true
+  '@types/estree@1.0.8': {}
 
   '@types/node@24.0.3':
     dependencies:
@@ -4659,7 +4698,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.7
+      '@types/estree': 1.0.8
 
   esutils@2.0.3: {}
 

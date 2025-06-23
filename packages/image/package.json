@@ -1,0 +1,28 @@
+{
+  "name": "image",
+  "type": "module",
+  "scripts": {
+    "dev": "MODE=development vite dev",
+    "build": "vite build",
+    "deploy": "pnpm run build",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "private": true,
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.828.0",
+    "hono": "^4.7.11",
+    "sharp": "^0.33.5",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@hono/vite-build": "https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge",
+    "@hono/vite-dev-server": "^0.18.2",
+    "@rollup/pluginutils": "^5.1.4",
+    "@types/node": "^24.0.1",
+    "tsx": "^4.19.2",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
+  }
+}
