@@ -18,8 +18,8 @@ importers:
   packages/image:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.828.0
-        version: 3.830.0
+        specifier: ^3.835.0
+        version: 3.835.0
       '@aws-sdk/s3-presigned-post':
         specifier: ^3.835.0
         version: 3.835.0
@@ -61,7 +61,7 @@ importers:
   packages/image-processor:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.828.0
+        specifier: ^3.835.0
         version: 3.835.0
       sharp:
         specifier: ^0.33.5
