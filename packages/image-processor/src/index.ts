@@ -73,8 +73,7 @@ async function processImage(bucketName: string, objectKey: string): Promise<void
       Bucket: bucketName,
       Key: finalKey,
       Body: processedBuffer,
-      ContentType: 'image/png',
-      CacheControl: 'public, max-age=31536000' // 1 year
+      ContentType: 'image/png'
     })
 
     await s3Client.send(putCommand)
