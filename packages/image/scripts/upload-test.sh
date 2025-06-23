@@ -4,7 +4,7 @@
 # This script uploads images to the local development server
 
 # Configuration
-DEV_SERVER_URL="http://localhost:5173"
+DEV_SERVER_URL="https://harajune.bibo-note.dev"
 UPLOAD_ENDPOINT="/image/upload"
 IMAGES_DIR="./test-images"
 
@@ -54,10 +54,11 @@ upload_image() {
     print_status "Uploading $image_name..."
     
     # Upload the image using curl
-    response=$(curl -s -X POST \
+    response=$(curl -v -s -X POST \
         -F "image=@$image_path" \
         "$DEV_SERVER_URL$UPLOAD_ENDPOINT" \
-        -H "Content-Type: multipart/form-data")
+        -H "Content-Type: multipart/form-data" \
+        -u harajune:bxE-PPf8iV@-MZb8i@B.)
     
     # Check if upload was successful
     if echo "$response" | grep -q '"success":true'; then

@@ -402,6 +402,10 @@ export class CloudFrontDistributionStack extends cdk.Stack {
         eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
         functionVersion: authorizationEdgeFunctionVersion,
         includeBody: true,
+      }, {
+        eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
+        functionVersion: edgeFunctionVersion,
+        includeBody: true,
       }],
     });
 
