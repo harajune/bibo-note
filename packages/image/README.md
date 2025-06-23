@@ -79,6 +79,27 @@ Users are identified by the subdomain of the request:
 
 ## Development
 
+### Local Development
+For local development, the service automatically uses the FileRepository instead of S3:
+
+- Images are stored in the local file system under `./data/{user}/images/`
+- No AWS credentials required for local development
+- Same API interface as production
+
+### Local File Structure
+When running in development mode, images are stored locally:
+```
+./data/
+├── user1/
+│   └── images/
+│       ├── uuid1.png
+│       └── uuid2.png
+└── user2/
+    └── images/
+        ├── uuid3.png
+        └── uuid4.png
+```
+
 ### Build
 ```bash
 pnpm build

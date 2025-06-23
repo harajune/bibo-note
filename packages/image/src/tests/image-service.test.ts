@@ -17,6 +17,23 @@ vi.mock('../repositories/s3-repository', () => ({
   }))
 }))
 
+// Mock FileRepository
+vi.mock('../repositories/file-repository', () => ({
+  FileRepository: vi.fn().mockImplementation(() => ({
+    uploadImage: vi.fn().mockResolvedValue(undefined),
+    getImage: vi.fn().mockResolvedValue(Buffer.from('fake-image-data'))
+  }))
+}))
+
+// Mock hono context
+vi.mock('hono/context-storage', () => ({
+  getContext: vi.fn(() => ({}))
+}))
+
+vi.mock('hono/adapter', () => ({
+  env: vi.fn(() => ({ MODE: 'development' }))
+}))
+
 describe('ImageService', () => {
   describe('uploadImage', () => {
     it('should process and upload image successfully', async () => {

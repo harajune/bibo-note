@@ -1,6 +1,9 @@
 import sharp from 'sharp'
 import { v7 as uuidv7 } from 'uuid'
 import { S3Repository } from '../repositories/s3-repository'
+import { FileRepository } from '../repositories/file-repository'
+import { getContext } from 'hono/context-storage'
+import { env } from 'hono/adapter'
 
 export interface UploadResult {
   uuid: string
@@ -8,10 +11,18 @@ export interface UploadResult {
 }
 
 export class ImageService {
-  private s3Repository: S3Repository
+  private repository: S3Repository | FileRepository
 
   constructor() {
-    this.s3Repository = new S3Repository()
+    const context = getContext()
+    const envVariables = env<{
+      MODE: string
+    }>(context)
+    
+    const mode = envVariables.MODE || 'development'
+    this.repository = mode === 'production' 
+      ? new S3Repository() 
+      : new FileRepository()
   }
 
   async uploadImage(file: File, user: string): Promise<UploadResult> {
@@ -31,8 +42,8 @@ export class ImageService {
       // Generate UUID for the image
       const uuid = uuidv7()
 
-      // Upload to S3
-      await this.s3Repository.uploadImage(uuid, pngBuffer, user)
+      // Upload to repository (S3 or local file system)
+      await this.repository.uploadImage(uuid, pngBuffer, user)
 
       // Return the result with URL
       return {
@@ -47,7 +58,7 @@ export class ImageService {
 
   async getImage(uuid: string, user: string): Promise<Buffer> {
     try {
-      return await this.s3Repository.getImage(uuid, user)
+      return await this.repository.getImage(uuid, user)
     } catch (error) {
       console.error('Error retrieving image:', error)
       throw new Error('Image not found')
