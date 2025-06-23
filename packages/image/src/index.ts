@@ -22,9 +22,29 @@ const handleError = (error: unknown, context: string): Response => {
   return Response.json({ error: 'Internal server error' }, { status: 500 })
 }
 
-// Upload images endpoint
+// Generate presigned URL endpoint
 app.post('/image/upload', async (c) => {
   try {
+    const user = extractUserFromHost(c)
+    const imageService = new ImageService()
+    const result = await imageService.generatePresignedUpload(user)
+
+    return c.json({
+      success: true,
+      uuid: result.uuid,
+      uploadUrl: result.uploadUrl,
+      fields: result.fields,
+      viewUrl: result.viewUrl
+    })
+  } catch (error) {
+    return handleError(error, 'generating presigned upload URL')
+  }
+})
+
+// Direct upload endpoint for development
+app.post('/image/upload-direct/:uuid', async (c) => {
+  try {
+    const uuid = c.req.param('uuid')
     const user = extractUserFromHost(c)
     const body = await c.req.parseBody()
     const file = body['image']
@@ -42,7 +62,7 @@ app.post('/image/upload', async (c) => {
       url: result.url
     })
   } catch (error) {
-    return handleError(error, 'uploading image')
+    return handleError(error, 'uploading image directly')
   }
 })
 

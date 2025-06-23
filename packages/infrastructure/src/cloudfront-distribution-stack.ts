@@ -5,6 +5,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
@@ -23,6 +24,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
   public readonly ogpFunctionUrl: lambda.FunctionUrl;
   public readonly imageFunction: lambda.Function;
   public readonly imageFunctionUrl: lambda.FunctionUrl;
+  public readonly imageProcessorFunction: lambda.Function;
 
 
 
@@ -329,6 +331,29 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ImageFunctionUrl', {
       value: this.imageFunctionUrl.url,
     });
+
+    // Image processor Lambda function (triggered by S3 events)
+    this.imageProcessorFunction = new lambda.Function(this, 'ImageProcessorFunction', {
+      functionName: `image-processor-${environmentConfig.name}`,
+      runtime: lambda.Runtime.NODEJS_22_X,
+      code: lambda.Code.fromAsset('../image-processor/dist/worker'),
+      handler: 'worker.handler',
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(60),
+      environment: {
+        AWS_REGION: this.region,
+      },
+    });
+
+    // Grant S3 permissions to image processor function
+    this.wikiDataBucket.grantReadWrite(this.imageProcessorFunction);
+
+    // Add S3 bucket notification to trigger image processor
+    this.wikiDataBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(this.imageProcessorFunction),
+      { prefix: '', suffix: '' } // Will be filtered by the function based on path
+    );
 
     const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
       originAccessControlConfig: {

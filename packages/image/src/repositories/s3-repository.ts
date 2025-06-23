@@ -1,6 +1,12 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import { env } from 'hono/adapter'
 import { getContext } from 'hono/context-storage'
+
+export interface PresignedUploadData {
+  uploadUrl: string
+  fields: Record<string, string>
+}
 
 export class S3Repository {
   private s3Client: S3Client
@@ -36,6 +42,39 @@ export class S3Repository {
       return `${user}/images/${uuid}.png`
     }
     return `images/${uuid}.png`
+  }
+
+  private getTempImageKey(uuid: string, user: string): string {
+    const envVariables = env<{ MULTITENANT: string }>(this.context)
+
+    if (envVariables.MULTITENANT === '1' && user) {
+      return `${user}/temp-uploads/${uuid}`
+    }
+    return `temp-uploads/${uuid}`
+  }
+
+  async generatePresignedUpload(uuid: string, user: string): Promise<PresignedUploadData> {
+    const key = this.getTempImageKey(uuid, user)
+    
+    try {
+      const presignedPost = await createPresignedPost(this.s3Client, {
+        Bucket: this.bucketName,
+        Key: key,
+        Conditions: [
+          ['content-length-range', 0, 10485760], // 10MB max
+          ['starts-with', '$Content-Type', 'image/'],
+        ],
+        Expires: 3600, // 1 hour
+      })
+      
+      return {
+        uploadUrl: presignedPost.url,
+        fields: presignedPost.fields
+      }
+    } catch (error) {
+      console.error('Failed to generate presigned URL:', error)
+      throw new Error('Failed to generate presigned upload URL')
+    }
   }
 
   async uploadImage(uuid: string, imageBuffer: Buffer, user: string): Promise<void> {
