@@ -414,7 +414,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     });
 
     // Add behavior for image upload (no caching)
-    distribution.addBehavior('image/upload', imageLambdaOrigin, {
+    distribution.addBehavior('image/uploadurl', imageLambdaOrigin, {
       allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
       cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
       originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,

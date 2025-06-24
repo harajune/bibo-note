@@ -51,13 +51,17 @@ get_presigned_url() {
     local image_path="$1"
     local image_name=$(basename "$image_path")
     
-    print_status "Getting presigned URL for $image_name..."
+    print_status "Getting presigned URL for $image_name..." >&2
     
     # Get presigned URL from the server
     response=$(curl -s -X GET \
         "$DEV_SERVER_URL$PRESIGNED_ENDPOINT" \
-        -H "Content-Type: application/json" \
         -u harajune:bxE-PPf8iV@-MZb8i@B.)
+    
+    # Debug: Print the full response
+    echo "DEBUG: Full response from server:" >&2
+    echo "$response" >&2
+    echo "DEBUG: End of response" >&2
     
     # Check if presigned URL generation was successful
     if echo "$response" | grep -q '"success":true'; then
@@ -66,27 +70,41 @@ get_presigned_url() {
             uuid=$(echo "$response" | jq -r '.uuid')
             upload_url=$(echo "$response" | jq -r '.uploadUrl')
             view_url=$(echo "$response" | jq -r '.viewUrl')
-            fields_json=$(echo "$response" | jq -r '.fields')
+            fields_json=$(echo "$response" | jq -c '.fields')
+            
+            # Debug: Print extracted values
+            echo "DEBUG: Extracted with jq:" >&2
+            echo "  uuid: '$uuid'" >&2
+            echo "  upload_url: '$upload_url'" >&2
+            echo "  view_url: '$view_url'" >&2
+            echo "  fields_json: '$fields_json'" >&2
         else
             # Fallback to grep/sed extraction
             uuid=$(echo "$response" | grep -o '"uuid":"[^"]*"' | cut -d'"' -f4)
             upload_url=$(echo "$response" | grep -o '"uploadUrl":"[^"]*"' | cut -d'"' -f4)
             view_url=$(echo "$response" | grep -o '"viewUrl":"[^"]*"' | cut -d'"' -f4)
             fields_json=$(echo "$response" | sed -n 's/.*"fields":{\([^}]*\)}.*/\1/p')
+            
+            # Debug: Print extracted values
+            echo "DEBUG: Extracted with grep/sed:" >&2
+            echo "  uuid: '$uuid'" >&2
+            echo "  upload_url: '$upload_url'" >&2
+            echo "  view_url: '$view_url'" >&2
+            echo "  fields_json: '$fields_json'" >&2
         fi
         
-        print_success "Presigned URL generated for $image_name"
-        echo "  UUID: $uuid"
-        echo "  Upload URL: $upload_url"
-        echo "  View URL: $view_url"
-        echo "  Fields: $fields_json"
+        print_success "Presigned URL generated for $image_name" >&2
+        echo "  UUID: $uuid" >&2
+        echo "  Upload URL: $upload_url" >&2
+        echo "  View URL: $view_url" >&2
+        echo "  Fields: $fields_json" >&2
         
-        # Return the data
+        # Return the data (only the data, no status messages)
         echo "$uuid|$upload_url|$view_url|$fields_json"
         return 0
     else
-        print_error "Failed to get presigned URL for $image_name"
-        echo "  Response: $response"
+        print_error "Failed to get presigned URL for $image_name" >&2
+        echo "  Response: $response" >&2
         return 1
     fi
 }
@@ -118,35 +136,39 @@ upload_with_presigned_url() {
     local presigned_data="$2"
     local image_name=$(basename "$image_path")
     
+    echo "#######" >&2
+    echo "DEBUG: presigned_data received: '$presigned_data'" >&2
+    echo "#######" >&2
+
     # Parse presigned data
     IFS='|' read -r uuid upload_url view_url fields_json <<< "$presigned_data"
     
+    echo "DEBUG: After parsing:" >&2
+    echo "  uuid: '$uuid'" >&2
+    echo "  upload_url: '$upload_url'" >&2
+    echo "  view_url: '$view_url'" >&2
+    echo "  fields_json: '$fields_json'" >&2
+    
     print_status "Uploading $image_name using presigned URL..."
     
-    # Build the upload command with fields
+    # Build the upload command with POST method and -F for multipart/form-data
     upload_cmd="curl -v -s -X POST"
     
-    # Add the file
-    upload_cmd="$upload_cmd -F 'file=@$image_path'"
-    
-    # Add fields if they exist and are not empty
+    # Add fields as -F options if they exist and are not empty
     if [ -n "$fields_json" ] && [ "$fields_json" != "{}" ]; then
-        # Use jq to parse JSON fields if available, otherwise use sed
         if command -v jq >/dev/null 2>&1; then
-            # Use jq for proper JSON parsing
-            while IFS='=' read -r key value; do
+            # Use jq for proper JSON parsing, add all fields as -F options
+            while IFS='|' read -r key value; do
                 if [ -n "$key" ] && [ -n "$value" ]; then
                     upload_cmd="$upload_cmd -F '$key=$value'"
                 fi
-            done < <(echo "$fields_json" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"')
+            done < <(echo "$fields_json" | jq -r 'to_entries|map("\(.key)|\(.value|tostring)")|.[]')
         else
             # Fallback to sed parsing (simplified)
-            print_warning "jq not found, using simplified field parsing"
-            # Remove quotes and braces, then split by comma
+            print_warning "jq not found, using simplified field parsing" >&2
             clean_fields=$(echo "$fields_json" | sed 's/["{}]//g' | sed 's/,/\n/g')
             echo "$clean_fields" | while IFS=':' read -r key value; do
                 if [ -n "$key" ] && [ -n "$value" ]; then
-                    # Clean up whitespace
                     clean_key=$(echo "$key" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
                     clean_value=$(echo "$value" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
                     if [ -n "$clean_key" ] && [ -n "$clean_value" ]; then
@@ -157,11 +179,26 @@ upload_with_presigned_url() {
         fi
     fi
     
+    # Determine Content-Type based on file extension
+    local content_type="image/png"  # default
+    local file_ext=$(echo "$image_path" | tr '[:upper:]' '[:lower:]' | sed 's/.*\.//')
+    case "$file_ext" in
+        jpg|jpeg) content_type="image/jpeg" ;;
+        png) content_type="image/png" ;;
+        gif) content_type="image/gif" ;;
+        webp) content_type="image/webp" ;;
+        bmp) content_type="image/bmp" ;;
+        svg) content_type="image/svg+xml" ;;
+    esac
+    
+    # Add the file with explicit Content-Type (must be after all fields)
+    upload_cmd="$upload_cmd -F 'file=@$image_path;type=$content_type'"
+    
     # Add the upload URL
     upload_cmd="$upload_cmd '$upload_url'"
     
     print_status "Executing upload command..."
-    echo "  Command: $upload_cmd"
+    echo "  Command: $upload_cmd" >&2
     
     # Execute the upload
     upload_response=$(eval $upload_cmd)
@@ -195,6 +232,7 @@ upload_image() {
     
     # Step 1: Get presigned URL
     presigned_data=$(get_presigned_url "$image_path")
+    echo "presigned_data: $presigned_data" >&2
     if [ $? -ne 0 ]; then
         return 1
     fi

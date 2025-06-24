@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { contextStorage } from 'hono/context-storage'
-import { ImageService } from './services/image-service'
+import { ImageService, PresignedUrlService } from './services/image-service'
 
 const app = new Hono()
 app.use(contextStorage())
@@ -26,8 +26,8 @@ const handleError = (error: unknown, context: string): Response => {
 app.get('/image/uploadurl', async (c) => {
   try {
     const user = extractUserFromHost(c)
-    const imageService = new ImageService()
-    const result = await imageService.generatePresignedUpload(user)
+    const presignedUrlService = new PresignedUrlService()
+    const result = await presignedUrlService.generatePresignedUpload(user)
 
     return c.json({
       success: true,

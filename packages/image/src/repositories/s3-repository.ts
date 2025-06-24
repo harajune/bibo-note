@@ -62,7 +62,6 @@ export class S3Repository {
         Key: key,
         Conditions: [
           ['content-length-range', 0, 10485760], // 10MB max
-          ['starts-with', '$Content-Type', 'image/'],
         ],
         Expires: 3600, // 1 hour
       })

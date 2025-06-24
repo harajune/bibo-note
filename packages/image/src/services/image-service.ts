@@ -16,7 +16,8 @@ export interface UploadResult {
   url: string
 }
 
-export class ImageService {
+// Separate service for presigned URL generation to avoid sharp dependency
+export class PresignedUrlService {
   private repository: S3Repository | FileRepository
 
   constructor() {
@@ -52,6 +53,22 @@ export class ImageService {
         viewUrl: `/image/view/${uuid}`
       }
     }
+  }
+}
+
+export class ImageService {
+  private repository: S3Repository | FileRepository
+
+  constructor() {
+    const context = getContext()
+    const envVariables = env<{
+      MODE: string
+    }>(context)
+    
+    const mode = envVariables.MODE || 'development'
+    this.repository = mode === 'production' 
+      ? new S3Repository() 
+      : new FileRepository()
   }
 
   async uploadImage(file: File, user: string): Promise<UploadResult> {
