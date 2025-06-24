@@ -1,109 +1,132 @@
-# Image Upload Test Scripts
+# Image Upload Test Script
 
-This directory contains scripts for testing the image upload functionality of the bibo-note image service.
+This script tests the presigned URL image upload functionality of the bibo-note image service.
 
-## Files
+## Features
 
-- `upload-test.sh` - Main script for uploading images to the local development server
-- `test-images/` - Directory where you can place test images
+- **Presigned URL Upload**: Uses the secure presigned URL approach instead of direct upload
+- **Multiple Image Support**: Can upload all images in a directory or specific images
+- **Verification**: Automatically verifies uploaded images by accessing the view URL
+- **JSON Parsing**: Uses `jq` for robust JSON parsing when available
+- **Fallback Support**: Works with basic shell tools when `jq` is not available
+- **Test Image Generation**: Can create test images using ImageMagick
 
 ## Prerequisites
 
-1. Make sure the development server is running:
-   ```bash
-   cd packages/image
-   pnpm dev
-   ```
-
-2. The development server should be running on `http://localhost:5173`
+- Development server running at `https://harajune.bibo-note.dev`
+- `curl` for HTTP requests
+- `jq` (optional, for better JSON parsing)
+- `ImageMagick` (optional, for test image generation)
 
 ## Usage
 
-### Upload all images from test-images directory
+### Basic Commands
 
 ```bash
-cd packages/image
-./scripts/upload-test.sh
-# or
-./scripts/upload-test.sh all
+# Upload all images from the test-images directory
+./upload-test.sh
+
+# Upload all images (explicit)
+./upload-test.sh all
+
+# Test presigned URL functionality
+./upload-test.sh test
+
+# Upload a specific image
+./upload-test.sh ./path/to/image.jpg
+
+# Show help
+./upload-test.sh help
 ```
 
-### Upload a specific image
+### Setup
 
-```bash
-cd packages/image
-./scripts/upload-test.sh path/to/your/image.jpg
+1. **Create test images directory**:
+   ```bash
+   mkdir -p ./test-images
+   ```
+
+2. **Add test images** (optional):
+   ```bash
+   # Copy your test images to the directory
+   cp /path/to/your/images/* ./test-images/
+   ```
+
+3. **Install optional dependencies**:
+   ```bash
+   # Install jq for better JSON parsing (macOS)
+   brew install jq
+   
+   # Install ImageMagick for test image generation (macOS)
+   brew install imagemagick
+   ```
+
+## How It Works
+
+1. **Get Presigned URL**: The script first calls the `/image/uploadurl` endpoint to get a presigned URL
+2. **Parse Response**: Extracts UUID, upload URL, view URL, and required fields from the JSON response
+3. **Upload File**: Uses the presigned URL to upload the image file with required fields
+4. **Verify Upload**: Attempts to access the view URL to verify the upload was successful
+
+## API Endpoints Used
+
+- `GET /image/uploadurl` - Generate presigned URL for upload
+- `GET /image/view/:uuid` - View uploaded image (for verification)
+
+## Response Format
+
+The presigned URL endpoint returns:
+```json
+{
+  "success": true,
+  "uuid": "generated-uuid",
+  "uploadUrl": "presigned-upload-url",
+  "fields": {
+    "key": "value",
+    "policy": "...",
+    "signature": "..."
+  },
+  "viewUrl": "/image/view/uuid"
+}
 ```
 
-### Show help
+## Error Handling
 
-```bash
-cd packages/image
-./scripts/upload-test.sh help
-```
-
-## Supported Image Formats
-
-The script supports the following image formats:
-- JPG/JPEG
-- PNG
-- GIF
-- WebP
-
-## How it works
-
-1. The script first checks if the development server is running by making a request to `/ping`
-2. It then uploads images using the `/image/upload` endpoint
-3. For each successful upload, it displays:
-   - The UUID of the uploaded image
-   - The URL where the image can be accessed
-   - The full response from the server
-
-## Configuration
-
-You can modify the following variables in the script:
-- `DEV_SERVER_URL` - The URL of the development server (default: `http://localhost:5173`)
-- `UPLOAD_ENDPOINT` - The upload endpoint (default: `/image/upload`)
-- `IMAGES_DIR` - The directory containing test images (default: `./test-images`)
-
-## Example Output
-
-```
-==========================================
-    Image Upload Test Script
-==========================================
-
-[INFO] Checking if development server is running...
-[SUCCESS] Development server is running at http://localhost:5173
-[INFO] Uploading all images from ./test-images
-[INFO] Found 2 image(s) to upload
-[INFO] Uploading test-image-1.jpg...
-[SUCCESS] Upload successful for test-image-1.jpg
-  UUID: 12345678-1234-1234-1234-123456789abc
-  URL: http://localhost:5173/image/view/12345678-1234-1234-1234-123456789abc
-  Response: {"success":true,"uuid":"12345678-1234-1234-1234-123456789abc","url":"http://localhost:5173/image/view/12345678-1234-1234-1234-123456789abc"}
-
-[INFO] Upload completed: 2/2 successful
-[SUCCESS] All images uploaded successfully!
-```
+The script handles various error scenarios:
+- Development server not running
+- Invalid image files
+- Upload failures
+- Verification failures
+- JSON parsing errors
 
 ## Troubleshooting
 
-### Development server not running
-If you see an error that the development server is not running:
-1. Make sure you're in the `packages/image` directory
-2. Run `pnpm dev` to start the development server
-3. Wait for the server to start (you should see output indicating the server is running)
-4. Try running the upload script again
+### Common Issues
 
-### Permission denied
-If you get a permission denied error:
-```bash
-chmod +x scripts/upload-test.sh
-```
+1. **"Development server is not running"**
+   - Start the development server: `pnpm dev`
 
-### No images found
-If you get a warning that no images were found:
-1. Make sure you have image files in the `test-images` directory
-2. Check that the image files have supported extensions (.jpg, .jpeg, .png, .gif, .webp)
-3. Make sure the image files are readable 
+2. **"jq not found"**
+   - Install jq or the script will use fallback parsing
+
+3. **"ImageMagick not found"**
+   - Install ImageMagick or manually add test images
+
+4. **Upload failures**
+   - Check server logs for detailed error messages
+   - Verify authentication credentials
+   - Ensure image file is valid
+
+### Debug Mode
+
+To see more detailed output, the script uses verbose curl commands (`-v` flag) which will show:
+- HTTP request/response headers
+- Upload progress
+- Detailed error messages
+
+## Security Notes
+
+- The script uses basic authentication with hardcoded credentials
+- Presigned URLs provide secure, time-limited upload access
+- No credentials are sent with the actual file upload
+- All uploads are verified before considering them successful 

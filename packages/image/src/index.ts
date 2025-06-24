@@ -23,7 +23,7 @@ const handleError = (error: unknown, context: string): Response => {
 }
 
 // Generate presigned URL endpoint
-app.post('/image/upload', async (c) => {
+app.get('/image/uploadurl', async (c) => {
   try {
     const user = extractUserFromHost(c)
     const imageService = new ImageService()

@@ -339,10 +339,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       code: lambda.Code.fromAsset('../image-processor/dist/worker'),
       handler: 'worker.handler',
       memorySize: 1024,
-      timeout: cdk.Duration.seconds(60),
-      environment: {
-        AWS_REGION: this.region,
-      },
+      timeout: cdk.Duration.seconds(60)
     });
 
     // Grant S3 permissions to image processor function
@@ -351,8 +348,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // Add S3 bucket notification to trigger image processor
     this.wikiDataBucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
-      new s3n.LambdaDestination(this.imageProcessorFunction),
-      { prefix: '', suffix: '' } // Will be filtered by the function based on path
+      new s3n.LambdaDestination(this.imageProcessorFunction)
     );
 
     const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
