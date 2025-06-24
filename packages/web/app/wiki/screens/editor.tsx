@@ -2,7 +2,6 @@ import { Sidebar } from "../../global/$sidebar";
 import { WikiData } from "../models/wiki_data";
 import { ArticleListItem } from "../models/wiki_model";
 import { MenuSection } from "../../global/$sidebar";
-import { ImageUpload } from "../../components/image-upload";
 
 interface EditorProps {
   wikiData: WikiData;
@@ -58,7 +57,6 @@ export function Editor({ wikiData, articles = [] }: EditorProps) {
         <div class="absolute inset-x-px bottom-0">
           <div class="flex items-center justify-between space-x-3 border-t border-gray-200 px-2 py-2 sm:px-3">
             <div class="flex items-center space-x-3">
-              <ImageUpload />
               <label class="flex items-center">
                 <input
                   type="checkbox"
