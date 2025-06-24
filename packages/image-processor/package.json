@@ -4,8 +4,6 @@
   "scripts": {
     "dev": "MODE=development vite dev",
     "build": "vite build",
-    "deploy": "pnpm run build",
-    "test": "vitest run",
     "preview": "vite preview"
   },
   "private": true,
