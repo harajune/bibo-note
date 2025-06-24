@@ -31,6 +31,7 @@ if (isSecureEntireEnvironment) {
   app.use(basicAuthMiddleware);
 } else { // In production, only secure specific paths
   app.use('/e/*', basicAuthMiddleware);
+  app.get('/image/uploadurl', basicAuthMiddleware);
   app.use('/new', basicAuthMiddleware);
 }
 
