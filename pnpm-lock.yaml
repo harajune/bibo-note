@@ -26,9 +26,6 @@ importers:
       hono:
         specifier: ^4.7.11
         version: 4.7.11
-      sharp:
-        specifier: ^0.33.5
-        version: 0.33.5
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -58,42 +55,16 @@ importers:
         specifier: ^3.2.3
         version: 3.2.3(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
 
-  packages/image-processor:
-    dependencies:
-      '@aws-sdk/client-s3':
-        specifier: ^3.835.0
-        version: 3.835.0
-      sharp:
-        specifier: ^0.33.5
-        version: 0.33.5
-    devDependencies:
-      '@hono/vite-build':
-        specifier: https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge
-        version: https://gitpkg.vercel.app/harajune/vite-plugins/packages/build?feature/lambda-edge(hono@4.7.11)
-      '@rollup/pluginutils':
-        specifier: ^5.1.4
-        version: 5.1.4(rollup@4.44.0)
-      '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.150
-      '@types/node':
-        specifier: ^24.0.1
-        version: 24.0.3
-      tsx:
-        specifier: ^4.19.2
-        version: 4.20.3
-      vite:
-        specifier: ^6.3.5
-        version: 6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
-      vitest:
-        specifier: ^3.2.3
-        version: 3.2.3(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
+  packages/image-processor: {}
 
   packages/infrastructure:
     dependencies:
       aws-lambda:
         specifier: ^1.0.7
         version: 1.0.7
+      cargo-lambda-cdk:
+        specifier: ^0.0.33
+        version: 0.0.33(aws-cdk-lib@2.201.0(constructs@10.4.2))(constructs@10.4.2)
       hono:
         specifier: ^4.7.11
         version: 4.7.11
@@ -118,7 +89,7 @@ importers:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.828.0
-        version: 3.830.0
+        version: 3.835.0
       '@vercel/og':
         specifier: ^0.6.3
         version: 0.6.8
@@ -173,7 +144,7 @@ importers:
         version: 3.830.0
       '@aws-sdk/client-s3':
         specifier: ^3.828.0
-        version: 3.830.0
+        version: 3.835.0
       '@aws-sdk/client-ssm':
         specifier: ^3.830.0
         version: 3.830.0
@@ -264,10 +235,6 @@ packages:
     resolution: {integrity: sha512-/Oy8mwXkpTc+pakh8dMAPvjeataMHVu9paY83HUQ++uFZBqNarXCfv3LtrBp94wKcE6/I69/MpHUno8J1iI90w==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/client-s3@3.830.0':
-    resolution: {integrity: sha512-Cti+zj1lqvQIScXFQv8/t1xo3pvcvk/ObmGIbyLzfgcYpKMHaIWhzhi6aN+z4dYEv1EwrukC9tNoqScyShc5tw==}
-    engines: {node: '>=18.0.0'}
-
   '@aws-sdk/client-s3@3.835.0':
     resolution: {integrity: sha512-htwcnVcCCXswbL/DSeuFIVd3f627On4Y1tSFlMZ9OmSC2+r9OTlUaHP8ugCCdx4Zofx2t4N/H2Cikd+l8vyvJw==}
     engines: {node: '>=18.0.0'}
@@ -356,10 +323,6 @@ packages:
     resolution: {integrity: sha512-zAOoSZKe1njOrtynvK6ZORU57YGv5I7KP4+rwOvUN3ZhJbQ7QPf8gKtFUCYAPRMegaXCKF/ADPtDZBAmM+zZ9g==}
     engines: {node: '>=18.0.0'}
 
-  '@aws-sdk/middleware-flexible-checksums@3.826.0':
-    resolution: {integrity: sha512-Fz9w8CFYPfSlHEB6feSsi06hdS+s+FB8k5pO4L7IV0tUa78mlhxF/VNlAJaVWYyOkZXl4HPH2K48aapACSQOXw==}
-    engines: {node: '>=18.0.0'}
-
   '@aws-sdk/middleware-flexible-checksums@3.835.0':
     resolution: {integrity: sha512-9ezorQYlr5cQY28zWAReFhNKUTaXsi3TMvXIagMRrSeWtQ7R6TCYnt91xzHRCmFR2kp3zLI+dfoeH+wF3iCKUw==}
     engines: {node: '>=18.0.0'}
@@ -378,10 +341,6 @@ packages:
 
   '@aws-sdk/middleware-recursion-detection@3.821.0':
     resolution: {integrity: sha512-efmaifbhBoqKG3bAoEfDdcM8hn1psF+4qa7ykWuYmfmah59JBeqHLfz5W9m9JoTwoKPkFcVLWZxnyZzAnVBOIg==}
-    engines: {node: '>=18.0.0'}
-
-  '@aws-sdk/middleware-sdk-s3@3.826.0':
-    resolution: {integrity: sha512-8F0qWaYKfvD/de1AKccXuigM+gb/IZSncCqxdnFWqd+TFzo9qI9Hh+TpUhWOMYSgxsMsYQ8ipmLzlD/lDhjrmA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/middleware-sdk-s3@3.835.0':
@@ -414,10 +373,6 @@ packages:
 
   '@aws-sdk/s3-presigned-post@3.835.0':
     resolution: {integrity: sha512-LWJCNaVXgWNr/ioocciKD7gHexgJoeFXldTmb8GX1l1TOviCtQO3Py2bPhqY3222ejn/hB4BDJUKsaYMBnblCA==}
-    engines: {node: '>=18.0.0'}
-
-  '@aws-sdk/signature-v4-multi-region@3.826.0':
-    resolution: {integrity: sha512-3fEi/zy6tpMzomYosksGtu7jZqGFcdBXoL7YRsG7OEeQzBbOW9B+fVaQZ4jnsViSjzA/yKydLahMrfPnt+iaxg==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/signature-v4-multi-region@3.835.0':
@@ -1614,9 +1569,6 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6
 
-  '@types/aws-lambda@8.10.150':
-    resolution: {integrity: sha512-AX+AbjH/rH5ezX1fbK8onC/a+HyQHo7QGmvoxAE42n22OsciAxvZoZNEr22tbXs8WfP1nIsBjKDpgPm3HjOZbA==}
-
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
 
@@ -1841,6 +1793,14 @@ packages:
 
   camelize@1.0.1:
     resolution: {integrity: sha512-dU+Tx2fsypxTgtLoE36npi3UqcjSSMNYfkqgmoEhtZrraP5VWq0K7FkWVTYa8eMPtnU/G2txVsfdCJTn9uzpuQ==}
+
+  cargo-lambda-cdk@0.0.33:
+    resolution: {integrity: sha512-1N9BXaHk/jnESY+YduOqMpoJkd/qiAMqpZbgGDIGzIIz2KIxziWeZx4DWEFNGTZbczRrmryMkcef6PjKO6cE3w==}
+    peerDependencies:
+      aws-cdk-lib: ^2.63.0
+      constructs: ^10.0.5
+    bundledDependencies:
+      - js-toml
 
   chai@5.2.0:
     resolution: {integrity: sha512-mCuXncKXk5iCLhfhwTc0izo0gtEmpz5CtG2y8GiOINBlMVS6v8TMRc5TaLWKS6692m9+dVVfzgeVxR5UxWHTYw==}
@@ -2943,67 +2903,6 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-s3@3.830.0':
-    dependencies:
-      '@aws-crypto/sha1-browser': 5.2.0
-      '@aws-crypto/sha256-browser': 5.2.0
-      '@aws-crypto/sha256-js': 5.2.0
-      '@aws-sdk/core': 3.826.0
-      '@aws-sdk/credential-provider-node': 3.830.0
-      '@aws-sdk/middleware-bucket-endpoint': 3.830.0
-      '@aws-sdk/middleware-expect-continue': 3.821.0
-      '@aws-sdk/middleware-flexible-checksums': 3.826.0
-      '@aws-sdk/middleware-host-header': 3.821.0
-      '@aws-sdk/middleware-location-constraint': 3.821.0
-      '@aws-sdk/middleware-logger': 3.821.0
-      '@aws-sdk/middleware-recursion-detection': 3.821.0
-      '@aws-sdk/middleware-sdk-s3': 3.826.0
-      '@aws-sdk/middleware-ssec': 3.821.0
-      '@aws-sdk/middleware-user-agent': 3.828.0
-      '@aws-sdk/region-config-resolver': 3.821.0
-      '@aws-sdk/signature-v4-multi-region': 3.826.0
-      '@aws-sdk/types': 3.821.0
-      '@aws-sdk/util-endpoints': 3.828.0
-      '@aws-sdk/util-user-agent-browser': 3.821.0
-      '@aws-sdk/util-user-agent-node': 3.828.0
-      '@aws-sdk/xml-builder': 3.821.0
-      '@smithy/config-resolver': 4.1.4
-      '@smithy/core': 3.5.3
-      '@smithy/eventstream-serde-browser': 4.0.4
-      '@smithy/eventstream-serde-config-resolver': 4.1.2
-      '@smithy/eventstream-serde-node': 4.0.4
-      '@smithy/fetch-http-handler': 5.0.4
-      '@smithy/hash-blob-browser': 4.0.4
-      '@smithy/hash-node': 4.0.4
-      '@smithy/hash-stream-node': 4.0.4
-      '@smithy/invalid-dependency': 4.0.4
-      '@smithy/md5-js': 4.0.4
-      '@smithy/middleware-content-length': 4.0.4
-      '@smithy/middleware-endpoint': 4.1.11
-      '@smithy/middleware-retry': 4.1.12
-      '@smithy/middleware-serde': 4.0.8
-      '@smithy/middleware-stack': 4.0.4
-      '@smithy/node-config-provider': 4.1.3
-      '@smithy/node-http-handler': 4.0.6
-      '@smithy/protocol-http': 5.1.2
-      '@smithy/smithy-client': 4.4.3
-      '@smithy/types': 4.3.1
-      '@smithy/url-parser': 4.0.4
-      '@smithy/util-base64': 4.0.0
-      '@smithy/util-body-length-browser': 4.0.0
-      '@smithy/util-body-length-node': 4.0.0
-      '@smithy/util-defaults-mode-browser': 4.0.19
-      '@smithy/util-defaults-mode-node': 4.0.19
-      '@smithy/util-endpoints': 3.0.6
-      '@smithy/util-middleware': 4.0.4
-      '@smithy/util-retry': 4.0.5
-      '@smithy/util-stream': 4.2.2
-      '@smithy/util-utf8': 4.0.0
-      '@smithy/util-waiter': 4.0.5
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - aws-crt
-
   '@aws-sdk/client-s3@3.835.0':
     dependencies:
       '@aws-crypto/sha1-browser': 5.2.0
@@ -3431,22 +3330,6 @@ snapshots:
       '@smithy/types': 4.3.1
       tslib: 2.8.1
 
-  '@aws-sdk/middleware-flexible-checksums@3.826.0':
-    dependencies:
-      '@aws-crypto/crc32': 5.2.0
-      '@aws-crypto/crc32c': 5.2.0
-      '@aws-crypto/util': 5.2.0
-      '@aws-sdk/core': 3.826.0
-      '@aws-sdk/types': 3.821.0
-      '@smithy/is-array-buffer': 4.0.0
-      '@smithy/node-config-provider': 4.1.3
-      '@smithy/protocol-http': 5.1.2
-      '@smithy/types': 4.3.1
-      '@smithy/util-middleware': 4.0.4
-      '@smithy/util-stream': 4.2.2
-      '@smithy/util-utf8': 4.0.0
-      tslib: 2.8.1
-
   '@aws-sdk/middleware-flexible-checksums@3.835.0':
     dependencies:
       '@aws-crypto/crc32': 5.2.0
@@ -3487,23 +3370,6 @@ snapshots:
       '@aws-sdk/types': 3.821.0
       '@smithy/protocol-http': 5.1.2
       '@smithy/types': 4.3.1
-      tslib: 2.8.1
-
-  '@aws-sdk/middleware-sdk-s3@3.826.0':
-    dependencies:
-      '@aws-sdk/core': 3.826.0
-      '@aws-sdk/types': 3.821.0
-      '@aws-sdk/util-arn-parser': 3.804.0
-      '@smithy/core': 3.5.3
-      '@smithy/node-config-provider': 4.1.3
-      '@smithy/protocol-http': 5.1.2
-      '@smithy/signature-v4': 5.1.2
-      '@smithy/smithy-client': 4.4.3
-      '@smithy/types': 4.3.1
-      '@smithy/util-config-provider': 4.0.0
-      '@smithy/util-middleware': 4.0.4
-      '@smithy/util-stream': 4.2.2
-      '@smithy/util-utf8': 4.0.0
       tslib: 2.8.1
 
   '@aws-sdk/middleware-sdk-s3@3.835.0':
@@ -3657,15 +3523,6 @@ snapshots:
       tslib: 2.8.1
     transitivePeerDependencies:
       - aws-crt
-
-  '@aws-sdk/signature-v4-multi-region@3.826.0':
-    dependencies:
-      '@aws-sdk/middleware-sdk-s3': 3.826.0
-      '@aws-sdk/types': 3.821.0
-      '@smithy/protocol-http': 5.1.2
-      '@smithy/signature-v4': 5.1.2
-      '@smithy/types': 4.3.1
-      tslib: 2.8.1
 
   '@aws-sdk/signature-v4-multi-region@3.835.0':
     dependencies:
@@ -4749,8 +4606,6 @@ snapshots:
       tailwindcss: 4.1.10
       vite: 6.3.5(@types/node@24.0.3)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)
 
-  '@types/aws-lambda@8.10.150': {}
-
   '@types/chai@5.2.2':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -5011,6 +4866,11 @@ snapshots:
       get-intrinsic: 1.3.0
 
   camelize@1.0.1: {}
+
+  cargo-lambda-cdk@0.0.33(aws-cdk-lib@2.201.0(constructs@10.4.2))(constructs@10.4.2):
+    dependencies:
+      aws-cdk-lib: 2.201.0(constructs@10.4.2)
+      constructs: 10.4.2
 
   chai@5.2.0:
     dependencies:

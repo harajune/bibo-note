@@ -77,21 +77,11 @@ export class ImageService {
       const arrayBuffer = await file.arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
 
-      // Convert image to PNG using Sharp (only for local development)
-      // In production, this will be handled by the image processor lambda
-      const sharp = await import('sharp')
-      const pngBuffer = await sharp.default(buffer)
-        .png({
-          quality: 90,
-          compressionLevel: 6
-        })
-        .toBuffer()
-
       // Generate UUID for the image
       const uuid = uuidv7()
 
-      // Upload to repository (only for local development)
-      await this.repository.uploadImage(uuid, pngBuffer, user)
+      // Upload to repository (file will be processed by image processor lambda in production)
+      await this.repository.uploadImage(uuid, buffer, user)
 
       // Return the result with URL
       return {
@@ -108,7 +98,7 @@ export class ImageService {
     try {
       return await this.repository.getImage(uuid, user)
     } catch (error) {
-      console.error('Error retrieving image:', error)
+      console.error('Error retrieving image:', user, uuid, error)
       throw new Error('Image not found')
     }
   }

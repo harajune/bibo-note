@@ -13,6 +13,7 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { SsmParameterReader } from './ssm-parameter-reader';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { EnvironmentConfig } from './environment-config';
+import { RustFunction } from 'cargo-lambda-cdk';
 
 interface CloudFrontDistributionStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
@@ -20,6 +21,7 @@ interface CloudFrontDistributionStackProps extends cdk.StackProps {
 
 export class CloudFrontDistributionStack extends cdk.Stack {
   public readonly wikiDataBucket: s3.Bucket;
+  public readonly imageBucket: s3.Bucket;
   public readonly ogpFunction: lambda.Function;
   public readonly ogpFunctionUrl: lambda.FunctionUrl;
   public readonly imageFunction: lambda.Function;
@@ -240,6 +242,14 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       autoDeleteObjects: true,
     });
 
+    // 画像専用のS3バケットを作成
+    this.imageBucket = new s3.Bucket(this, 'ImageBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
     // Lambda(workerFunction)からのみアクセスできるようにするためのバケットポリシー設定
     this.wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -316,6 +326,7 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         WIKI_BUCKET_NAME: this.wikiDataBucket.bucketName,
+        IMAGE_BUCKET_NAME: this.imageBucket.bucketName,
         MULTITENANT: '1',
         MODE: environmentConfig.mode,
       },
@@ -327,26 +338,36 @@ export class CloudFrontDistributionStack extends cdk.Stack {
 
     // Grant S3 read/write permissions to image function
     this.wikiDataBucket.grantReadWrite(this.imageFunction);
+    this.imageBucket.grantReadWrite(this.imageFunction);
 
     new cdk.CfnOutput(this, 'ImageFunctionUrl', {
       value: this.imageFunctionUrl.url,
     });
 
     // Image processor Lambda function (triggered by S3 events)
-    this.imageProcessorFunction = new lambda.Function(this, 'ImageProcessorFunction', {
+    this.imageProcessorFunction = new RustFunction(this, 'ImageProcessorFunction', {
       functionName: `image-processor-${environmentConfig.name}`,
-      runtime: lambda.Runtime.NODEJS_22_X,
-      code: lambda.Code.fromAsset('../image-processor/dist/worker'),
-      handler: 'worker.handler',
       memorySize: 1024,
-      timeout: cdk.Duration.seconds(60)
+      manifestPath: '../image-processor/Cargo.toml',
+      timeout: cdk.Duration.seconds(60),
+      // bundling: {
+      //   cargoLambdaFlags: ['--release', '--target', 'x86_64-unknown-linux-gnu'],
+      // },
+      environment: {
+        WIKI_BUCKET_NAME: this.wikiDataBucket.bucketName,
+        IMAGE_BUCKET_NAME: this.imageBucket.bucketName,
+        MULTITENANT: '1',
+        MODE: environmentConfig.mode,
+      },
     });
 
     // Grant S3 permissions to image processor function
     this.wikiDataBucket.grantReadWrite(this.imageProcessorFunction);
+    this.imageBucket.grantReadWrite(this.imageProcessorFunction);
 
     // Add S3 bucket notification to trigger image processor
-    this.wikiDataBucket.addEventNotification(
+    // Trigger for any user's uploads: */uuid
+    this.imageBucket.addEventNotification(
       s3.EventType.OBJECT_CREATED,
       new s3n.LambdaDestination(this.imageProcessorFunction)
     );
@@ -454,6 +475,10 @@ export class CloudFrontDistributionStack extends cdk.Stack {
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {
       value: this.wikiDataBucket.bucketName,
+    });
+
+    new cdk.CfnOutput(this, 'ImageBucketName', {
+      value: this.imageBucket.bucketName,
     });
   }
 }                          

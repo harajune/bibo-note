@@ -5,9 +5,6 @@ import devServer from '@hono/vite-dev-server'
 export default defineConfig({
   build: {
     copyPublicDir: false,
-    rollupOptions: {
-      external: ['sharp'],
-    },
   },
   plugins: [
     devServer({

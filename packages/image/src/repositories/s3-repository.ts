@@ -17,6 +17,7 @@ export class S3Repository {
     this.context = getContext()
     const environmentVariables = env<{
       WIKI_BUCKET_NAME: string,
+      IMAGE_BUCKET_NAME: string,
       AWS_REGION: string,
       AWS_ACCESS_KEY_ID: string,
       AWS_SECRET_ACCESS_KEY: string,
@@ -39,31 +40,37 @@ export class S3Repository {
     const envVariables = env<{ MULTITENANT: string }>(this.context)
 
     if (envVariables.MULTITENANT === '1' && user) {
-      return `${user}/images/${uuid}.png`
+      return `${user}/images/${uuid}`
     }
-    return `images/${uuid}.png`
+    return `images/${uuid}`
   }
 
   private getTempImageKey(uuid: string, user: string): string {
     const envVariables = env<{ MULTITENANT: string }>(this.context)
 
     if (envVariables.MULTITENANT === '1' && user) {
-      return `${user}/temp-uploads/${uuid}`
+      return `${user}/${uuid}`
     }
-    return `temp-uploads/${uuid}`
+    return uuid
+  }
+
+  private getImageBucketName(): string {
+    const envVariables = env<{ IMAGE_BUCKET_NAME: string }>(this.context)
+    return envVariables.IMAGE_BUCKET_NAME
   }
 
   async generatePresignedUpload(uuid: string, user: string): Promise<PresignedUploadData> {
     const key = this.getTempImageKey(uuid, user)
+    const imageBucketName = this.getImageBucketName()
     
     try {
       const presignedPost = await createPresignedPost(this.s3Client, {
-        Bucket: this.bucketName,
+        Bucket: imageBucketName,
         Key: key,
         Conditions: [
           ['content-length-range', 0, 10485760], // 10MB max
         ],
-        Expires: 3600, // 1 hour
+        Expires: 600, // 10 minutes
       })
       
       return {
@@ -76,14 +83,14 @@ export class S3Repository {
     }
   }
 
-  async uploadImage(uuid: string, imageBuffer: Buffer, user: string): Promise<void> {
+  async uploadImage(uuid: string, imageBuffer: Buffer, user: string, contentType?: string): Promise<void> {
     const key = this.getImageKey(uuid, user)
     
     await this.s3Client.send(new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
       Body: imageBuffer,
-      ContentType: 'image/png',
+      ContentType: contentType || 'image/png',
       CacheControl: 'public, max-age=31536000', // 1 year
     }))
   }
@@ -101,14 +108,21 @@ export class S3Repository {
         throw new Error('No body in S3 response')
       }
 
+      // Convert ReadableStream to Buffer
+      const stream = response.Body as ReadableStream
+      const reader = stream.getReader()
       const chunks: Uint8Array[] = []
-      const stream = response.Body as any
 
-      return new Promise((resolve, reject) => {
-        stream.on('data', (chunk: Uint8Array) => chunks.push(chunk))
-        stream.on('error', reject)
-        stream.on('end', () => resolve(Buffer.concat(chunks)))
-      })
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value)
+        }
+        return Buffer.concat(chunks)
+      } finally {
+        reader.releaseLock()
+      }
     } catch (error) {
       console.error(`Failed to get image from S3: ${key}`, error)
       throw new Error('Image not found')
