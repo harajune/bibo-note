@@ -22,8 +22,7 @@ app.get('/ogp/:uuid', async (c) => {
 
     return new Response(imageBuffer, {
       headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=3600',
+        'Content-Type': 'image/png'
       },
     })
   } catch (error) {

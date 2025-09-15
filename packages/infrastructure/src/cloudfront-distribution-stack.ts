@@ -5,6 +5,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3n from 'aws-cdk-lib/aws-s3-notifications';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
@@ -12,6 +13,7 @@ import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { SsmParameterReader } from './ssm-parameter-reader';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { EnvironmentConfig } from './environment-config';
+import { RustFunction } from 'cargo-lambda-cdk';
 
 interface CloudFrontDistributionStackProps extends cdk.StackProps {
   environmentConfig: EnvironmentConfig;
@@ -19,8 +21,12 @@ interface CloudFrontDistributionStackProps extends cdk.StackProps {
 
 export class CloudFrontDistributionStack extends cdk.Stack {
   public readonly wikiDataBucket: s3.Bucket;
+  public readonly imageBucket: s3.Bucket;
   public readonly ogpFunction: lambda.Function;
   public readonly ogpFunctionUrl: lambda.FunctionUrl;
+  public readonly imageFunction: lambda.Function;
+  public readonly imageFunctionUrl: lambda.FunctionUrl;
+  public readonly imageProcessorFunction: lambda.Function;
 
 
 
@@ -236,6 +242,14 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       autoDeleteObjects: true,
     });
 
+    // 画像専用のS3バケットを作成
+    this.imageBucket = new s3.Bucket(this, 'ImageBucket', {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
     // Lambda(workerFunction)からのみアクセスできるようにするためのバケットポリシー設定
     this.wikiDataBucket.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -302,6 +316,62 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       value: this.ogpFunctionUrl.url,
     });
 
+    // Image service Lambda function
+    this.imageFunction = new lambda.Function(this, 'ImageFunction', {
+      functionName: `image-service-${environmentConfig.name}`,
+      runtime: lambda.Runtime.NODEJS_22_X,
+      code: lambda.Code.fromAsset('../image/dist/worker'),
+      handler: 'worker.handler',
+      memorySize: 1024,
+      timeout: cdk.Duration.seconds(30),
+      environment: {
+        WIKI_BUCKET_NAME: this.wikiDataBucket.bucketName,
+        IMAGE_BUCKET_NAME: this.imageBucket.bucketName,
+        MULTITENANT: '1',
+        MODE: environmentConfig.mode,
+      },
+    });
+
+    this.imageFunctionUrl = this.imageFunction.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.AWS_IAM,
+    });
+
+    // Grant S3 read/write permissions to image function
+    this.wikiDataBucket.grantReadWrite(this.imageFunction);
+    this.imageBucket.grantReadWrite(this.imageFunction);
+
+    new cdk.CfnOutput(this, 'ImageFunctionUrl', {
+      value: this.imageFunctionUrl.url,
+    });
+
+    // Image processor Lambda function (triggered by S3 events)
+    this.imageProcessorFunction = new RustFunction(this, 'ImageProcessorFunction', {
+      functionName: `image-processor-${environmentConfig.name}`,
+      memorySize: 1024,
+      manifestPath: '../image-processor/Cargo.toml',
+      timeout: cdk.Duration.seconds(60),
+      // bundling: {
+      //   cargoLambdaFlags: ['--release', '--target', 'x86_64-unknown-linux-gnu'],
+      // },
+      environment: {
+        WIKI_BUCKET_NAME: this.wikiDataBucket.bucketName,
+        IMAGE_BUCKET_NAME: this.imageBucket.bucketName,
+        MULTITENANT: '1',
+        MODE: environmentConfig.mode,
+      },
+    });
+
+    // Grant S3 permissions to image processor function
+    this.wikiDataBucket.grantReadWrite(this.imageProcessorFunction);
+    this.imageBucket.grantReadWrite(this.imageProcessorFunction);
+
+    // Add S3 bucket notification to trigger image processor
+    // Trigger for any user's uploads: */uuid
+    this.imageBucket.addEventNotification(
+      s3.EventType.OBJECT_CREATED,
+      new s3n.LambdaDestination(this.imageProcessorFunction)
+    );
+
     const ogpLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'OGPLambdaOAC', {
       originAccessControlConfig: {
         name: 'OGPLambdaOAC',
@@ -336,9 +406,79 @@ export class CloudFrontDistributionStack extends cdk.Stack {
       sourceArn: distribution.distributionArn,
     });
 
+    // Image service CloudFront configuration
+    const imageLambdaOAC = new cloudfront.CfnOriginAccessControl(this, 'ImageLambdaOAC', {
+      originAccessControlConfig: {
+        name: 'ImageLambdaOAC',
+        description: 'OAC for Image Lambda function URL',
+        originAccessControlOriginType: 'lambda',
+        signingBehavior: 'always',
+        signingProtocol: 'sigv4'
+      }
+    });
+
+    const imageLambdaOrigin = new origins.FunctionUrlOrigin(this.imageFunctionUrl, {
+      originAccessControlId: imageLambdaOAC.ref,
+    });
+
+    // Image cache policy (longer cache for view endpoint)
+    const imageCachePolicy = new cloudfront.CachePolicy(this, 'ImageCachePolicy', {
+      cachePolicyName: 'ImageCachePolicy',
+      comment: 'Cache policy for image service',
+      headerBehavior: cloudfront.CacheHeaderBehavior.allowList(
+        'x-forwarded-host'
+      ),
+      enableAcceptEncodingGzip: true,
+      enableAcceptEncodingBrotli: true,
+      defaultTtl: cdk.Duration.days(365),
+      maxTtl: cdk.Duration.days(365),
+    });
+
+    // Add behavior for image upload (no caching)
+    distribution.addBehavior('image/uploadurl', imageLambdaOrigin, {
+      allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+      cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+      originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      edgeLambdas: [{
+        eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+        functionVersion: authorizationEdgeFunctionVersion,
+        includeBody: true,
+      }, {
+        eventType: cloudfront.LambdaEdgeEventType.ORIGIN_REQUEST,
+        functionVersion: edgeFunctionVersion,
+        includeBody: true,
+      }],
+    });
+
+    // Add behavior for image view (with caching)
+    distribution.addBehavior('image/view/*', imageLambdaOrigin, {
+      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+      cachePolicy: imageCachePolicy,
+      originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+      viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      edgeLambdas: [{
+        eventType: cloudfront.LambdaEdgeEventType.VIEWER_REQUEST,
+        functionVersion: authorizationEdgeFunctionVersion,
+        includeBody: true,
+      }],
+    });
+
+    // CloudFrontからのアクセスのみ許可するため、imageFunctionにリソースポリシーを追加
+    this.imageFunction.addPermission('AllowCloudFrontAccessImage', {
+      principal: new iam.ServicePrincipal('cloudfront.amazonaws.com'),
+      action: 'lambda:InvokeFunctionUrl',
+      functionUrlAuthType: lambda.FunctionUrlAuthType.AWS_IAM,
+      sourceArn: distribution.distributionArn,
+    });
+
     // バケット名の出力
     new cdk.CfnOutput(this, 'WikiDataBucketName', {
       value: this.wikiDataBucket.bucketName,
+    });
+
+    new cdk.CfnOutput(this, 'ImageBucketName', {
+      value: this.imageBucket.bucketName,
     });
   }
 }                          
